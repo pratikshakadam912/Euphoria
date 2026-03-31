@@ -2,7 +2,7 @@ import { useState } from "react";
 import Navbar from "../../components/common/Navbar";
 import Footer from "../../components/common/Footer";
 import { doc, setDoc, getDoc } from "firebase/firestore";
-import { db } from "../../Firebase/firebaseConfig";
+import { db, auth } from "../../firebase/firebaseConfig";
 
 import { FcGoogle } from "react-icons/fc";
 import { Link, useNavigate } from "react-router-dom";
@@ -12,7 +12,8 @@ import {
     GoogleAuthProvider
 } from "firebase/auth";
 
-import { auth } from "../../Firebase/firebaseConfig";
+// ✅ CORRECT
+import { db, auth } from "../../firebase/firebaseConfig";
 import { toast } from "react-toastify";
 
 const Login = () => {
