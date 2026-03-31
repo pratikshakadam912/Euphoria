@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import hero1 from "../../assets/img/hero1.jpg";
 import hero2 from "../../assets/img/hero2.jpg";
 
@@ -8,6 +9,8 @@ const fadeUp = {
 };
 
 const HeroSection = () => {
+    const navigate = useNavigate();
+
     return (
         <section className="min-h-screen pt-36 bg-[#f7f4f1] overflow-hidden">
             <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-24 items-center">
@@ -34,12 +37,18 @@ const HeroSection = () => {
                     </p>
 
                     <div className="mt-10 flex gap-5">
-                        <button className="px-10 py-3 rounded-full bg-black text-white hover:bg-[#8b5e3c] transition-all duration-300">
+                        <button
+                            onClick={() => navigate("/collection")}
+                            className="px-10 py-3 rounded-full bg-black text-white hover:bg-[#8b5e3c] transition-all duration-300"
+                        >
                             Shop Collection
                         </button>
 
-                        <button className="px-10 py-3 rounded-full border border-black hover:bg-black hover:text-white transition-all duration-300">
-                            View Lookbook
+                        <button
+                            onClick={() => navigate("/about")}
+                            className="px-10 py-3 rounded-full border border-black hover:bg-black hover:text-white transition-all duration-300"
+                        >
+                            ABOUT
                         </button>
                     </div>
                 </motion.div>

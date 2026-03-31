@@ -1,23 +1,26 @@
 import { useState } from "react";
 import Navbar from "../../components/common/Navbar";
 import Footer from "../../components/common/Footer";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc } from "firebase/firestore";
 import { db } from "../../Firebase/firebaseConfig";
 
+import { FcGoogle } from "react-icons/fc";
+import { Link, useNavigate } from "react-router-dom";
+import {
+    signInWithEmailAndPassword,
+    signInWithPopup,
+    GoogleAuthProvider
+} from "firebase/auth";
 
-import { FcGoogle } from "react-icons/fc"; // Google icon
-import { Link } from "react-router-dom";
-import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
-import { auth, googleProvider } from "../../Firebase/firebaseConfig";
-import { useNavigate } from "react-router-dom";
+import { auth } from "../../Firebase/firebaseConfig";
 import { toast } from "react-toastify";
-
 
 const Login = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const navigate = useNavigate();
 
+    // ✅ EMAIL LOGIN
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -28,17 +31,64 @@ const Login = () => {
                 password
             );
 
-            toast.success("Login successfull")
+            const user = userCredential.user;
 
-            navigate("/");
+            // 🔥 SAVE TO FIRESTORE
+            const userRef = doc(db, "users", user.uid);
+            const userSnap = await getDoc(userRef);
 
+            if (!userSnap.exists()) {
+                await setDoc(userRef, {
+                    email: user.email,
+                    name: user.displayName || "User",
+                    role: "user"
+                });
+            }
 
-            console.log("User logged in:", userCredential.user);
+            // 🔥 SEND TO BACKEND (MongoDB)
+            await fetch("http://localhost:5000/api/users/save", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    uid: user.uid,
+                    name: user.displayName || "User",
+                    email: user.email
+                })
+            });
+
+            // 🔥 GET USERS FROM BACKEND (IMPORTANT FOR ROLE)
+            const res = await fetch("http://localhost:5000/api/users");
+            const users = await res.json();
+
+            const currentUser = users.find(u => u.uid === user.uid);
+
+            // ✅ SAVE USER WITH ROLE
+            localStorage.setItem(
+                "user",
+                JSON.stringify({
+                    uid: user.uid,
+                    email: user.email,
+                    role: currentUser?.role || "user"
+                })
+            );
+
+            toast.success("Login successful!");
+
+            // 🚀 REDIRECT BASED ON ROLE
+            if (currentUser?.role === "admin") {
+                navigate("/admin");
+            } else {
+                navigate("/");
+            }
+
         } catch (error) {
             toast.error(error.message);
         }
     };
 
+    // ✅ GOOGLE LOGIN
     const handleGoogleLogin = async () => {
         try {
             const provider = new GoogleAuthProvider();
@@ -46,37 +96,72 @@ const Login = () => {
 
             const user = result.user;
 
-            await setDoc(
-                doc(db, "users", user.uid),
-                {
+            const userRef = doc(db, "users", user.uid);
+            const userSnap = await getDoc(userRef);
+
+            if (!userSnap.exists()) {
+                await setDoc(userRef, {
                     name: user.displayName,
                     email: user.email,
                     photoURL: user.photoURL,
+                    role: "user"
+                });
+            }
+
+            // 🔥 SEND TO BACKEND
+            await fetch("http://localhost:5000/api/users/save", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
                 },
-                { merge: true } // IMPORTANT
+                body: JSON.stringify({
+                    uid: user.uid,
+                    name: user.displayName,
+                    email: user.email
+                })
+            });
+
+            // 🔥 GET ROLE FROM BACKEND
+            const res = await fetch("http://localhost:5000/api/users");
+            const users = await res.json();
+
+            const currentUser = users.find(u => u.uid === user.uid);
+
+            // ✅ SAVE USER WITH ROLE
+            localStorage.setItem(
+                "user",
+                JSON.stringify({
+                    uid: user.uid,
+                    email: user.email,
+                    role: currentUser?.role || "user"
+                })
             );
 
             toast.success("Google Login successful!");
-            navigate("/");
+
+            // 🚀 REDIRECT BASED ON ROLE
+            if (currentUser?.role === "admin") {
+                navigate("/admin");
+            } else {
+                navigate("/");
+            }
+
         } catch (error) {
             toast.error(error.message);
         }
     };
 
-
     return (
         <>
             <Navbar />
 
-            {/* MAIN LOGIN SECTION */}
             <section className="min-h-[90vh] flex items-center justify-center bg-[#f7f5f2] py-20">
                 <div className="max-w-md w-full bg-white rounded-3xl shadow-xl p-10">
 
-                    <h2 className="text-3xl font-light text-center text-black mb-6">
+                    <h2 className="text-3xl text-center mb-6">
                         Login to Your Account
                     </h2>
 
-                    {/* FORM */}
                     <form onSubmit={handleSubmit} className="space-y-5">
                         <input
                             type="email"
@@ -84,48 +169,39 @@ const Login = () => {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             required
-                            className="w-full px-5 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#8b5e3c] transition"
+                            className="w-full p-3 border rounded-xl"
                         />
+
                         <input
                             type="password"
                             placeholder="Password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             required
-                            className="w-full px-5 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#8b5e3c] transition"
+                            className="w-full p-3 border rounded-xl"
                         />
 
-                        <button
-                            type="submit"
-                            className="w-full bg-black text-white py-3 rounded-xl hover:bg-[#8b5e3c] transition"
-                        >
+                        <button className="w-full bg-black text-white p-3 rounded-xl">
                             Login
                         </button>
                     </form>
 
-                    {/* OR separator */}
                     <div className="flex items-center my-5">
-                        <hr className="flex-1 border-gray-300" />
-                        <span className="mx-3 text-gray-500 text-sm">OR</span>
-                        <hr className="flex-1 border-gray-300" />
+                        <hr className="flex-1" />
+                        <span className="mx-3 text-sm">OR</span>
+                        <hr className="flex-1" />
                     </div>
 
-                    {/* Google login */}
                     <button
                         onClick={handleGoogleLogin}
-                        className="w-full flex items-center justify-center gap-3 border border-gray-300 py-3 rounded-xl hover:shadow-md transition"
+                        className="w-full flex items-center justify-center gap-3 border p-3 rounded-xl"
                     >
                         <FcGoogle size={24} />
-                        <span className="text-gray-700 font-medium">Login with Google</span>
+                        Login with Google
                     </button>
 
-                    {/* Signup link */}
-                    <p className="text-center text-gray-500 text-sm mt-5">
-                        Don’t have an account?{" "}
-                        <span className="text-black cursor-pointer hover:underline">
-
-                            <Link to="/signup">Sign Up</Link>
-                        </span>
+                    <p className="text-center mt-5">
+                        Don’t have an account? <Link to="/signup">Sign Up</Link>
                     </p>
                 </div>
             </section>

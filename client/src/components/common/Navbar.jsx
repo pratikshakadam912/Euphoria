@@ -7,10 +7,12 @@ import { auth } from "../../Firebase/firebaseConfig";
 
 import { FiUser } from "react-icons/fi";
 import { HiOutlineMenuAlt3, HiX } from "react-icons/hi";
+import { FiShoppingBag } from "react-icons/fi";
+import { useCart } from "../../context/CartContext";
 
 const Navbar = () => {
     const location = useLocation();
-
+    const { cart } = useCart();
     const navLinks = [
         { name: "Home", path: "/" },
         { name: "Collection", path: "/collection" },
@@ -64,7 +66,20 @@ const Navbar = () => {
                     </ul>
 
                     {/* RIGHT SIDE */}
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-5">
+
+                        {/* CART ICON */}
+                        <Link to="/cart" className="relative">
+                            <FiShoppingBag size={22} />
+
+                            {cart.length > 0 && (
+                                <span className="absolute -top-2 -right-2 bg-black text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+                                    {cart.length}
+                                </span>
+                            )}
+                        </Link>
+
+                        {/* PROFILE */}
 
                         {/* MOBILE MENU ICON */}
                         <button

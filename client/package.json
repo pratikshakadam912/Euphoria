@@ -5,20 +5,27 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "start": "vite",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@coreui/icons": "^3.0.1",
+    "@coreui/icons-react": "^2.3.0",
+    "@coreui/react": "^5.10.0",
     "@tailwindcss/vite": "^4.1.18",
     "firebase": "^12.8.0",
     "framer-motion": "^12.29.0",
     "lucide-react": "^0.563.0",
+    "prop-types": "^15.8.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-icons": "^5.5.0",
     "react-router-dom": "^7.12.0",
     "react-toastify": "^11.0.5",
+    "recharts": "^3.8.0",
+    "simplebar-react": "^3.3.2",
     "tailwindcss": "^4.1.18"
   },
   "devDependencies": {
