@@ -3,7 +3,7 @@ import { useState } from "react";
 import useAuth from "../../hooks/useAuth";
 import useUserProfile from "../../hooks/useUserProfile";
 import { signOut } from "firebase/auth";
-import { auth } from "../../Firebase/firebaseConfig";
+import { auth } from "../../firebase/firebaseConfig";
 
 import { FiUser } from "react-icons/fi";
 import { HiOutlineMenuAlt3, HiX } from "react-icons/hi";
