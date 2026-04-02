@@ -46,7 +46,7 @@ const Login = () => {
             }
 
             // 🔥 SEND TO BACKEND
-            const saveRes = await fetch("https://euphoria-ooqv.onrender.com/api/users/save", {
+            const saveRes = await fetch("https://euphoria-ooqv.onrender.com/api/user/save", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"

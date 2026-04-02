@@ -3,21 +3,19 @@ import User from "../models/User.js";
 
 const router = express.Router();
 
-
-// ✅ SAVE USER (called after login/signup)
+// ✅ SAVE USER
 router.post("/save", async (req, res) => {
     try {
         const { uid, name, email } = req.body;
 
         let user = await User.findOne({ uid });
 
-        // 👉 If user doesn't exist → create
         if (!user) {
             user = new User({
                 uid,
                 name,
                 email,
-                role: "user" // default role
+                role: "user" // default
             });
 
             await user.save();
@@ -29,24 +27,14 @@ router.post("/save", async (req, res) => {
     }
 });
 
-
-// ✅ GET ALL USERS (for admin panel)
+// ✅ GET ALL USERS (for admin)
 router.get("/", async (req, res) => {
-    try {
-        const users = await User.find();
-        res.json(users);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
+    const users = await User.find();
+    res.json(users);
 });
-
-
-// ✅ GET USER BY EMAIL (🔥 IMPORTANT - fixes your error)
 router.get("/:email", async (req, res) => {
     try {
-        const email = req.params.email;
-
-        const user = await User.findOne({ email });
+        const user = await User.findOne({ email: req.params.email });
 
         if (!user) {
             return res.status(404).json({ message: "User not found" });
@@ -57,7 +45,4 @@ router.get("/:email", async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
-
-
-// ✅ EXPORT ROUTER
 export default router;
