@@ -45,8 +45,8 @@ const Login = () => {
                 });
             }
 
-            // 🔥 SEND TO BACKEND (MongoDB)
-            await fetch("https://euphoria-ooqv.onrender.com/api/users/save", {
+            // 🔥 SEND TO BACKEND
+            const saveRes = await fetch("https://euphoria-ooqv.onrender.com/api/users/save", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -58,11 +58,21 @@ const Login = () => {
                 })
             });
 
-            // 🔥 GET USERS FROM BACKEND (IMPORTANT FOR ROLE)
-            const res = await fetch("https://euphoria-ooqv.onrender.com/api/users");
-            const users = await res.json();
+            if (!saveRes.ok) {
+                console.log("Error saving user to backend");
+            }
 
-            const currentUser = users.find(u => u.uid === user.uid);
+            // 🔥 GET CURRENT USER (FIXED)
+            const res = await fetch(
+                `https://euphoria-ooqv.onrender.com/api/users/${user.email}`
+            );
+
+            if (!res.ok) {
+                console.log("Error fetching user");
+                return;
+            }
+
+            const currentUser = await res.json();
 
             // ✅ SAVE USER WITH ROLE
             localStorage.setItem(
@@ -96,6 +106,7 @@ const Login = () => {
 
             const user = result.user;
 
+            // 🔥 SAVE TO FIRESTORE
             const userRef = doc(db, "users", user.uid);
             const userSnap = await getDoc(userRef);
 
@@ -109,7 +120,7 @@ const Login = () => {
             }
 
             // 🔥 SEND TO BACKEND
-            await fetch("https://euphoria-ooqv.onrender.com/api/users/save", {
+            const saveRes = await fetch("https://euphoria-ooqv.onrender.com/api/users/save", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -121,11 +132,21 @@ const Login = () => {
                 })
             });
 
-            // 🔥 GET ROLE FROM BACKEND
-            const res = await fetch("https://euphoria-ooqv.onrender.com/api/users");
-            const users = await res.json();
+            if (!saveRes.ok) {
+                console.log("Error saving user to backend");
+            }
 
-            const currentUser = users.find(u => u.uid === user.uid);
+            // 🔥 GET CURRENT USER (FIXED)
+            const res = await fetch(
+                `https://euphoria-ooqv.onrender.com/api/users/${user.email}`
+            );
+
+            if (!res.ok) {
+                console.log("Error fetching user");
+                return;
+            }
+
+            const currentUser = await res.json();
 
             // ✅ SAVE USER WITH ROLE
             localStorage.setItem(
