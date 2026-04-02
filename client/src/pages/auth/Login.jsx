@@ -46,7 +46,7 @@ const Login = () => {
             }
 
             // 🔥 SEND TO BACKEND (MongoDB)
-            await fetch("http://localhost:5000/api/users/save", {
+            await fetch("https://euphoria-ooqv.onrender.com/api/users/save", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -59,7 +59,7 @@ const Login = () => {
             });
 
             // 🔥 GET USERS FROM BACKEND (IMPORTANT FOR ROLE)
-            const res = await fetch("http://localhost:5000/api/users");
+            const res = await fetch("https://euphoria-ooqv.onrender.com/api/users");
             const users = await res.json();
 
             const currentUser = users.find(u => u.uid === user.uid);
@@ -109,7 +109,7 @@ const Login = () => {
             }
 
             // 🔥 SEND TO BACKEND
-            await fetch("http://localhost:5000/api/users/save", {
+            await fetch("https://euphoria-ooqv.onrender.com/api/users/save", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -122,7 +122,7 @@ const Login = () => {
             });
 
             // 🔥 GET ROLE FROM BACKEND
-            const res = await fetch("http://localhost:5000/api/users");
+            const res = await fetch("https://euphoria-ooqv.onrender.com/api/users");
             const users = await res.json();
 
             const currentUser = users.find(u => u.uid === user.uid);

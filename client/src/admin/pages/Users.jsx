@@ -4,7 +4,7 @@ const Users = () => {
     const [users, setUsers] = useState([]);
 
     useEffect(() => {
-        fetch("http://localhost:5000/api/users")
+        fetch("https://euphoria-ooqv.onrender.com/api/users")
             .then(res => res.json())
             .then(data => setUsers(data));
     }, []);

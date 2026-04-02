@@ -4,7 +4,7 @@ const Orders = () => {
     const [orders, setOrders] = useState([]);
 
     const fetchOrders = () => {
-        fetch("http://localhost:5000/api/orders")
+        fetch("https://euphoria-ooqv.onrender.com/api/orders")
             .then(res => res.json())
             .then(data => setOrders(data));
     };
@@ -15,7 +15,7 @@ const Orders = () => {
 
     // 🔥 UPDATE STATUS
     const updateStatus = async (id, newStatus) => {
-        await fetch(`http://localhost:5000/api/orders/${id}`, {
+        await fetch(`https://euphoria-ooqv.onrender.com/api/orders/${id}`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json"

@@ -15,7 +15,7 @@ const Product = () => {
     // 🔄 Fetch Products
     const fetchProducts = async () => {
         try {
-            const res = await fetch("http://localhost:5000/api/products");
+            const res = await fetch("https://euphoria-ooqv.onrender.com/api/products");
             const data = await res.json();
             setProducts(data);
         } catch (error) {
@@ -40,7 +40,7 @@ const Product = () => {
         e.preventDefault();
 
         try {
-            await fetch("http://localhost:5000/api/products", {
+            await fetch("https://euphoria-ooqv.onrender.com/api/products", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -66,7 +66,7 @@ const Product = () => {
     // ❌ Delete Product
     const deleteProduct = async (id) => {
         try {
-            await fetch(`http://localhost:5000/api/products/${id}`, {
+            await fetch(`https://euphoria-ooqv.onrender.com/api/products/${id}`, {
                 method: "DELETE",
             });
             fetchProducts();
