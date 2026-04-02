@@ -32,7 +32,7 @@ const AppRoutes = () => {
             <Route path="/collection" element={<Collection />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/cart" element={<Cart />} />
-           <Route path="/checkout" element={<Checkout/>}/>
+            <Route path="/checkout"element={<Checkout/>} />
 
             <Route path="/admin" element={<AdminLayout />}>
                 <Route index element={<Dashboard />} />
