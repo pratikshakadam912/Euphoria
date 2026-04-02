@@ -9,7 +9,7 @@ import About from "../pages/users/About";
 import Collection from "../pages/users/Collection";
 import Contact from "../pages/users/Contact";
 import Cart from "../pages/users/Cart";
-import Checkout from "../pages/users/checkout";
+import Checkout from "../pages/users/Checkout";
 
 // ADMIN PAGES
 import AdminLayout from "../admin/layout/AdminLayout";
