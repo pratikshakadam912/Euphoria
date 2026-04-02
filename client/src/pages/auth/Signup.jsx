@@ -42,7 +42,7 @@ const Signup = () => {
                 role: "user"
             });
 
-            // 🔥 SEND TO BACKEND (IMPORTANT)
+            // 🔥 SEND TO BACKEND
             await fetch("https://euphoria-ooqv.onrender.com/api/users/save", {
                 method: "POST",
                 headers: {

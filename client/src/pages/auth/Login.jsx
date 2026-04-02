@@ -45,8 +45,8 @@ const Login = () => {
                 });
             }
 
-            // 🔥 SEND TO BACKEND
-            const saveRes = await fetch("https://euphoria-ooqv.onrender.com/api/user/save", {
+            // 🔥 SEND TO BACKEND (FIXED)
+            const saveRes = await fetch("https://euphoria-ooqv.onrender.com/api/users/save", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -119,7 +119,7 @@ const Login = () => {
                 });
             }
 
-            // 🔥 SEND TO BACKEND
+            // 🔥 SEND TO BACKEND (FIXED)
             const saveRes = await fetch("https://euphoria-ooqv.onrender.com/api/users/save", {
                 method: "POST",
                 headers: {
@@ -136,7 +136,7 @@ const Login = () => {
                 console.log("Error saving user to backend");
             }
 
-            // 🔥 GET CURRENT USER (FIXED)
+            // 🔥 GET CURRENT USER (ALREADY CORRECT)
             const res = await fetch(
                 `https://euphoria-ooqv.onrender.com/api/users/${user.email}`
             );

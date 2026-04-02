@@ -8,14 +8,14 @@ router.post("/save", async (req, res) => {
     try {
         const { uid, name, email } = req.body;
 
-        let user = await User.findOne({ uid });
+        let user = await User.findOne({ uid }) || await User.findOne({ email });
 
         if (!user) {
             user = new User({
                 uid,
                 name,
                 email,
-                role: "user" // default
+                role: "user"
             });
 
             await user.save();
@@ -32,6 +32,8 @@ router.get("/", async (req, res) => {
     const users = await User.find();
     res.json(users);
 });
+
+// ✅ GET USER BY EMAIL
 router.get("/:email", async (req, res) => {
     try {
         const user = await User.findOne({ email: req.params.email });
@@ -45,4 +47,5 @@ router.get("/:email", async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
+
 export default router;

@@ -24,7 +24,7 @@ app.use(express.json());
 
 // ✅ ROUTES
 app.use("/api/products", productRoutes);
-app.use("/api/users", userRoutes);
+app.use("/api/users", userRoutes); // ✅ FIXED HERE
 app.use("/api/auth", authRoutes);
 app.use("/api/orders", orderRoutes);
 
