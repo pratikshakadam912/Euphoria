@@ -15,7 +15,7 @@ const app = express();
 
 // ✅ CORS (FIXED for frontend connection)
 app.use(cors({
-  origin: "https://euphoria-nine-sweet.vercel.app",
+  origin: "https://euphoria-nine-swart.vercel.app",
   credentials: true
 }));
 
