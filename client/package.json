@@ -26,6 +26,7 @@
     "react-toastify": "^11.0.5",
     "recharts": "^3.8.0",
     "simplebar-react": "^3.3.2",
+    "swiper": "^12.1.4",
     "tailwindcss": "^4.1.18"
   },
   "devDependencies": {
