@@ -2,7 +2,7 @@ import { useState } from "react";
 import Navbar from "../../components/common/Navbar";
 import Footer from "../../components/common/Footer";
 import { doc, setDoc, getDoc } from "firebase/firestore";
-import { db } from "../../firebase/firebaseConfig";
+import { db } from "../../Firebase/firebaseConfig";
 
 import { FcGoogle } from "react-icons/fc";
 import { Link, useNavigate } from "react-router-dom";
@@ -12,7 +12,7 @@ import {
     GoogleAuthProvider
 } from "firebase/auth";
 
-import { auth } from "../../firebase/firebaseConfig";
+import { auth } from "../../Firebase/firebaseConfig";
 import { toast } from "react-toastify";
 
 const Login = () => {
@@ -45,8 +45,8 @@ const Login = () => {
                 });
             }
 
-            // 🔥 SEND TO BACKEND (FIXED)
-            const saveRes = await fetch("https://euphoria-ooqv.onrender.com/api/users/save", {
+            // 🔥 SEND TO BACKEND (MongoDB)
+            await fetch("http://localhost:5000/api/users/save", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -58,21 +58,11 @@ const Login = () => {
                 })
             });
 
-            if (!saveRes.ok) {
-                console.log("Error saving user to backend");
-            }
+            // 🔥 GET USERS FROM BACKEND (IMPORTANT FOR ROLE)
+            const res = await fetch("http://localhost:5000/api/users");
+            const users = await res.json();
 
-            // 🔥 GET CURRENT USER (FIXED)
-            const res = await fetch(
-                `https://euphoria-ooqv.onrender.com/api/users/${user.email}`
-            );
-
-            if (!res.ok) {
-                console.log("Error fetching user");
-                return;
-            }
-
-            const currentUser = await res.json();
+            const currentUser = users.find(u => u.uid === user.uid);
 
             // ✅ SAVE USER WITH ROLE
             localStorage.setItem(
@@ -106,7 +96,6 @@ const Login = () => {
 
             const user = result.user;
 
-            // 🔥 SAVE TO FIRESTORE
             const userRef = doc(db, "users", user.uid);
             const userSnap = await getDoc(userRef);
 
@@ -119,8 +108,8 @@ const Login = () => {
                 });
             }
 
-            // 🔥 SEND TO BACKEND (FIXED)
-            const saveRes = await fetch("https://euphoria-ooqv.onrender.com/api/users/save", {
+            // 🔥 SEND TO BACKEND
+            await fetch("http://localhost:5000/api/users/save", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -132,21 +121,11 @@ const Login = () => {
                 })
             });
 
-            if (!saveRes.ok) {
-                console.log("Error saving user to backend");
-            }
+            // 🔥 GET ROLE FROM BACKEND
+            const res = await fetch("http://localhost:5000/api/users");
+            const users = await res.json();
 
-            // 🔥 GET CURRENT USER (ALREADY CORRECT)
-            const res = await fetch(
-                `https://euphoria-ooqv.onrender.com/api/users/${user.email}`
-            );
-
-            if (!res.ok) {
-                console.log("Error fetching user");
-                return;
-            }
-
-            const currentUser = await res.json();
+            const currentUser = users.find(u => u.uid === user.uid);
 
             // ✅ SAVE USER WITH ROLE
             localStorage.setItem(

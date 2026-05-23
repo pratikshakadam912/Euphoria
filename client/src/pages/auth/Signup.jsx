@@ -3,9 +3,9 @@ import Navbar from "../../components/common/Navbar";
 import Footer from "../../components/common/Footer";
 import { FcGoogle } from "react-icons/fc";
 import { createUserWithEmailAndPassword, signInWithPopup } from "firebase/auth";
-import { auth, googleProvider } from "../../firebase/firebaseConfig";
+import { auth, googleProvider } from "../../Firebase/firebaseConfig";
 import { doc, setDoc } from "firebase/firestore";
-import { db } from "../../firebase/firebaseConfig";
+import { db } from "../../Firebase/firebaseConfig";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
@@ -42,8 +42,8 @@ const Signup = () => {
                 role: "user"
             });
 
-            // 🔥 SEND TO BACKEND
-            await fetch("https://euphoria-ooqv.onrender.com/api/users/save", {
+            // 🔥 SEND TO BACKEND (IMPORTANT)
+            await fetch("http://localhost:5000/api/users/save", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -91,7 +91,7 @@ const Signup = () => {
             );
 
             // 🔥 SEND TO BACKEND
-            await fetch("https://euphoria-ooqv.onrender.com/api/users/save", {
+            await fetch("http://localhost:5000/api/users/save", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
