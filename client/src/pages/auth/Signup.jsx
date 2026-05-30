@@ -3,9 +3,9 @@ import Navbar from "../../components/common/Navbar";
 import Footer from "../../components/common/Footer";
 import { FcGoogle } from "react-icons/fc";
 import { createUserWithEmailAndPassword, signInWithPopup } from "firebase/auth";
-import { auth, googleProvider } from "../../Firebase/firebaseConfig";
+import { auth, googleProvider } from "../../firebase/firebaseConfig";
 import { doc, setDoc } from "firebase/firestore";
-import { db } from "../../Firebase/firebaseConfig";
+import { db } from "../../firebase/firebaseConfig";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
