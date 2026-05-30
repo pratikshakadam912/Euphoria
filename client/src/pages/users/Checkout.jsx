@@ -32,7 +32,7 @@ const Checkout = () => {
             // 🧾 COD
             if (payment === "cod") {
 
-                const res = await fetch("http://localhost:5000/api/orders/create", {
+                const res = await fetch("https://euphoria-ooqv.onrender.com/api/orders/create", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
@@ -62,7 +62,7 @@ const Checkout = () => {
 
                 setTimeout(async () => {
 
-                    const res = await fetch("http://localhost:5000/api/orders/create", {
+                    const res = await fetch("https://euphoria-ooqv.onrender.com/api/orders/create", {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json"

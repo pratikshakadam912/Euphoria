@@ -43,7 +43,7 @@ const Signup = () => {
             });
 
             // 🔥 SEND TO BACKEND (IMPORTANT)
-            await fetch("http://localhost:5000/api/users/save", {
+            await fetch("https://euphoria-ooqv.onrender.com/api/users/save", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -91,7 +91,7 @@ const Signup = () => {
             );
 
             // 🔥 SEND TO BACKEND
-            await fetch("http://localhost:5000/api/users/save", {
+            await fetch("https://euphoria-ooqv.onrender.com/api/users/save", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
