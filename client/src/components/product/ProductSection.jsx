@@ -20,7 +20,7 @@ const products = [
         price: 3499,
     },
     {
-        id: 2,
+        id: 5,
         name: "Minimal Wrist Watch",
         material: "Stainless Steel & Sapphire Glass",
         description:
@@ -30,7 +30,7 @@ const products = [
         price: 5999,
     },
     {
-        id: 3,
+        id: 6,
         name: "Comfort Sneakers",
         material: "Breathable Mesh & Rubber Sole",
         description:

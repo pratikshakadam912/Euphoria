@@ -47,7 +47,7 @@ const products = [
         images: [ss3, ss1, ss2],
     },
     {
-        id: "2",
+        id: "4",
         name: "Classic Leather Bag",
         price: 3499,
         fabric: "100% Genuine Leather",
@@ -62,7 +62,7 @@ const products = [
     },
 
     {
-        id: "3",
+        id: "5",
         name: "Minimal Wrist Watch",
         price: 5999,
         fabric: "Stainless Steel & Sapphire Glass",
@@ -77,7 +77,7 @@ const products = [
     },
 
     {
-        id: "4",
+        id: "6",
         name: "Comfort Sneakers",
         price: 4299,
         fabric: "Breathable Mesh & Rubber Sole",

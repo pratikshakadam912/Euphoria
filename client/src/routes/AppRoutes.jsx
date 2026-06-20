@@ -10,6 +10,7 @@ import Collection from "../pages/users/Collection";
 import Contact from "../pages/users/Contact";
 import Cart from "../pages/users/Cart";
 import Checkout from "../pages/users/Checkout";
+import ProductDetails from "../pages/users/ProductDetail";
 
 // ADMIN PAGES
 import AdminLayout from "../admin/layout/AdminLayout";
@@ -18,6 +19,7 @@ import Products from "../admin/pages/Products";
 import Homepage from "../admin/pages/Homepage";
 import Orders from "../admin/pages/Orders";
 import Users from "../admin/pages/Users";
+
 
 
 
@@ -33,6 +35,8 @@ const AppRoutes = () => {
             <Route path="/contact" element={<Contact />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/checkout" element={<Checkout />} />
+            <Route path="/product/:id" element={<ProductDetails />} />
+
 
             <Route path="/admin" element={<AdminLayout />}>
                 <Route index element={<Dashboard />} />
