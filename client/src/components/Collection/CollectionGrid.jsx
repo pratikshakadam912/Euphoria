@@ -1,11 +1,8 @@
-import { useState } from "react";
-import { Minus, Plus } from "lucide-react";
 
 import ss1 from "../../assets/img/collections/ss1.jpg";
 import ss2 from "../../assets/img/collections/ss2.jpg";
 import ss3 from "../../assets/img/collections/ss3.jpg";
 
-import { useCart } from "../../context/CartContext";
 
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination } from "swiper/modules";
@@ -19,17 +16,20 @@ const products = [
     {
         id: "p1",
         name: "Ivory Grace Dress",
+
         price: 2499,
         fabric: "Premium Satin",
         description:
             "Elegant satin dress with soft texture and luxurious finish.",
         sizes: ["S", "M", "L"],
         images: [ss1, ss2, ss3],
+        category: "dresses",
     },
 
     {
         id: "p2",
         name: "Noir Silhouette",
+        category: "signature",
         price: 1999,
         fabric: "Cotton Blend",
         description:
@@ -41,6 +41,7 @@ const products = [
     {
         id: "p3",
         name: "Soft Muse Co-ord",
+        category: "co-ords",
         price: 2199,
         fabric: "Linen",
         description:
@@ -50,63 +51,21 @@ const products = [
     },
 ];
 
-const CollectionGrid = () => {
-    const { addToCart } = useCart();
-
-    const [cartItems, setCartItems] = useState({});
-
+const CollectionGrid = ({ selectedCategory = "all" }) => {
     const navigate = useNavigate();
 
-    const handleAddToCart = (e, product) => {
-        e.stopPropagation();
-
-        addToCart({
-            ...product,
-            quantity: 1,
-        });
-
-        setCartItems((prev) => ({
-            ...prev,
-            [product.id]: 1,
-        }));
-    };
-
-    const increaseQty = (e, product) => {
-        e.stopPropagation();
-
-        addToCart({
-            ...product,
-            quantity: 1,
-        });
-
-        setCartItems((prev) => ({
-            ...prev,
-            [product.id]: (prev[product.id] || 0) + 1,
-        }));
-    };
-
-    const decreaseQty = (e, productId) => {
-        e.stopPropagation();
-
-        setCartItems((prev) => {
-            const qty = prev[productId] || 0;
-
-            if (qty <= 1) {
-                const updated = { ...prev };
-                delete updated[productId];
-                return updated;
-            }
-
-            return {
-                ...prev,
-                [productId]: qty - 1,
-            };
-        });
-    };
+    const filteredProducts =
+        selectedCategory === "all"
+            ? products
+            : products.filter(
+                (product) =>
+                    product.category.toLowerCase() ===
+                    selectedCategory.toLowerCase()
+            );
 
     return (
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-10">
-            {products.map((product) => (
+            {filteredProducts.map((product) => (
                 <div
                     key={product.id}
                     className="group cursor-pointer"
@@ -139,7 +98,6 @@ const CollectionGrid = () => {
                                 </SwiperSlide>
                             ))}
                         </Swiper>
-
                     </div>
 
                     {/* PRODUCT INFO */}

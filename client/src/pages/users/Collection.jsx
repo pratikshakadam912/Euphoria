@@ -1,6 +1,6 @@
 
 import Footer from "../../components/common/Footer";
-
+import { useState } from "react";
 
 
 import Navbar from "../../components/common/Navbar";
@@ -9,6 +9,7 @@ import CollectionGrid from "../../components/Collection/CollectionGrid";
 import CollectionSidebar from "../../components/Collection/CollectionSidebar";
 
 const Collection = () => {
+    const [selectedCategory, setSelectedCategory] = useState("all");
     return (
         <>
             <Navbar />
@@ -19,12 +20,17 @@ const Collection = () => {
 
                 {/* SIDEBAR */}
                 <div className="md:col-span-1">
-                    <CollectionSidebar />
+                    <CollectionSidebar
+                        selectedCategory={selectedCategory}
+                        setSelectedCategory={setSelectedCategory}
+                    />
                 </div>
 
                 {/* PRODUCTS */}
                 <div className="md:col-span-3">
-                    <CollectionGrid />
+                    <CollectionGrid
+                        selectedCategory={selectedCategory}
+                    />
                 </div>
             </section>
 

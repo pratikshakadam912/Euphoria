@@ -1,8 +1,19 @@
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 
-const CollectionSidebar = () => {
+const CollectionSidebar = ({
+    selectedCategory,
+    setSelectedCategory,
+}) => {
     const [open, setOpen] = useState(false);
+
+    const categories = [
+        { label: "All", value: "all" },
+        { label: "Signature", value: "signature" },
+        { label: "Dresses", value: "dresses" },
+        { label: "Co-ords", value: "co-ords" },
+        { label: "Limited Edition", value: "limited-edition" },
+    ];
 
     return (
         <>
@@ -54,19 +65,20 @@ const CollectionSidebar = () => {
                         Categories
                     </h3>
 
-                    <ul className="space-y-3 text-gray-700">
-                        {[
-                            "All",
-                            "Signature",
-                            "Dresses",
-                            "Co-ords",
-                            "Limited Edition",
-                        ].map((item) => (
+                    <ul className="space-y-3">
+                        {categories.map((item) => (
                             <li
-                                key={item}
-                                className="cursor-pointer hover:text-black transition"
+                                key={item.value}
+                                onClick={() => {
+                                    setSelectedCategory(item.value);
+                                    setOpen(false);
+                                }}
+                                className={`cursor-pointer transition ${selectedCategory === item.value
+                                        ? "text-black font-semibold"
+                                        : "text-gray-700 hover:text-black"
+                                    }`}
                             >
-                                {item}
+                                {item.label}
                             </li>
                         ))}
                     </ul>
