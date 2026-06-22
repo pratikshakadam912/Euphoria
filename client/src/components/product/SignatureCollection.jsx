@@ -1,9 +1,9 @@
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 
-import ss1 from "../../assets/img/ss1.jpg";
-import ss2 from "../../assets/img/ss2.jpg";
-import ss3 from "../../assets/img/ss3.jpg";
+import ss1 from "../../assets/img/sc1.jpg";
+import ss2 from "../../assets/img/sc2.jpg";
+import ss3 from "../../assets/img/sc3.jpg";
 
 const products = [
   {

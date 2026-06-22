@@ -9,6 +9,9 @@ import { useParams } from "react-router-dom";
 import ss1 from "../../assets/img/collections/ss1.jpg";
 import ss2 from "../../assets/img/collections/ss2.jpg";
 import ss3 from "../../assets/img/collections/ss3.jpg";
+import sc3 from "../../assets/img/sc3.jpg";
+import sc2 from "../../assets/img/sc2.jpg";
+import sc1 from "../../assets/img/sc1.jpg";
 
 import { useCart } from "../../context/CartContext";
 import Navbar from "../../components/common/Navbar";
@@ -89,6 +92,36 @@ const products = [
             "https://images.unsplash.com/photo-1600185365483-26d7a4cc7519",
             "https://images.unsplash.com/photo-1549298916-b41d501d3772",
         ],
+    },
+    {
+        id: "noir-003",
+        name: "Comfort Sneakers",
+        price: 4299,
+        fabric: "Breathable Mesh & Rubber Sole",
+        description:
+            "Ultra-lightweight sneakers made for long-lasting comfort and flexibility.",
+        sizes: ["UK6", "UK7", "UK8", "UK9"],
+        images: [sc3],
+    },
+    {
+        id: "dress-001",
+        name: "Comfort Sneakers",
+        price: 4299,
+        fabric: "Breathable Mesh & Rubber Sole",
+        description:
+            "Ultra-lightweight sneakers made for long-lasting comfort and flexibility.",
+        sizes: ["UK6", "UK7", "UK8", "UK9"],
+        images: [sc1],
+    },
+    {
+        id: "perfect-002",
+        name: "Comfort Sneakers",
+        price: 4299,
+        fabric: "Breathable Mesh & Rubber Sole",
+        description:
+            "Ultra-lightweight sneakers made for long-lasting comfort and flexibility.",
+        sizes: ["UK6", "UK7", "UK8", "UK9"],
+        images: [sc2],
     },
 ];
 
