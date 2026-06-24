@@ -3,6 +3,20 @@ import { useNavigate } from "react-router-dom";
 
 import hero1 from "../../assets/img/hero1.jpg";
 import hero2 from "../../assets/img/hero2.jpg";
+const products = [
+    {
+        id: "hero-1",
+        image: hero1,
+        category: "Dresses",
+    },
+    {
+        id: "hero-2",
+        image: hero2,
+        category: "Signature",
+    },
+
+
+];
 
 const HeroSection = () => {
     const navigate = useNavigate();
@@ -93,7 +107,7 @@ const HeroSection = () => {
                                 y: -8,
                                 transition: { duration: 0.3 }
                             }}
-                            onClick={() => navigate("/product/noir-001")}
+                            onClick={() => navigate("/product/hero-1")}
                             className="cursor-pointer"
                         >
                             <img
@@ -111,7 +125,7 @@ const HeroSection = () => {
                                     y: -6,
                                     scale: 1.02
                                 }}
-                                onClick={() => navigate("/product/noir-002")}
+                                onClick={() => navigate("/product/hero-2")}
                                 className="cursor-pointer"
                             >
                                 <img

@@ -16,6 +16,8 @@ import noir01 from "../../assets/img/noir01.jpg"
 import noir02 from "../../assets/img/noir02.jpg"
 import noir03 from "../../assets/img/noir03.jpg"
 import noir04 from "../../assets/img/noir04.jpg"
+import hero1 from "../../assets/img/hero1.jpg";
+import hero2 from "../../assets/img/hero2.jpg";
 
 import { useCart } from "../../context/CartContext";
 import Navbar from "../../components/common/Navbar";
@@ -166,6 +168,26 @@ const products = [
             "Ultra-lightweight sneakers made for long-lasting comfort and flexibility.",
         sizes: ["UK6", "UK7", "UK8", "UK9"],
         images: [noir04],
+    },
+    {
+        id: "hero-2",
+        name: "Comfort Sneakers",
+        price: 4299,
+        fabric: "Breathable Mesh & Rubber Sole",
+        description:
+            "Ultra-lightweight sneakers made for long-lasting comfort and flexibility.",
+        sizes: ["UK6", "UK7", "UK8", "UK9"],
+        images: [hero2],
+    },
+    {
+        id: "hero-1",
+        name: "Comfort Sneakers",
+        price: 4299,
+        fabric: "Breathable Mesh & Rubber Sole",
+        description:
+            "Ultra-lightweight sneakers made for long-lasting comfort and flexibility.",
+        sizes: ["UK6", "UK7", "UK8", "UK9"],
+        images: [hero1],
     },
 ];
 
@@ -593,7 +615,7 @@ const ProductDetails = () => {
 
                             )}
 
-                           
+
                         </div>
 
                         {/* EXTRA INFO */}
