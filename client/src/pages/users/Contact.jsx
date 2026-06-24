@@ -1,180 +1,177 @@
 import Navbar from "../../components/common/Navbar";
 import Footer from "../../components/common/Footer";
 import { useState } from "react";
-import {
-    FiMail,
-    FiPhone,
-    FiMapPin,
-    FiSend,
-} from "react-icons/fi";
-
-import contactbg from "../../assets/img/contactbg.jpg";
+import axios from "axios";
 
 const Contact = () => {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
+    const [subject, setSubject] = useState("");
     const [message, setMessage] = useState("");
+    const [loading, setLoading] = useState(false);
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
-        console.log({
-            name,
-            email,
-            message,
-        });
+        try {
+            setLoading(true);
 
-        alert("Message sent successfully!");
+            const response = await axios.post(
+                "https://euphoria-backend.onrender.com/api/contact",
+                {
+                    name,
+                    email,
+                    subject,
+                    message,
+                }
+            );
 
-        setName("");
-        setEmail("");
-        setMessage("");
+            if (response.data.success) {
+                alert("Message sent successfully!");
+
+                setName("");
+                setEmail("");
+                setSubject("");
+                setMessage("");
+            }
+        } catch (error) {
+            console.error(error);
+            alert("Failed to send message");
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
         <>
             <Navbar />
 
-            <section
-                className="relative min-h-screen flex items-center justify-center py-20 px-6"
-                style={{
-                    backgroundImage: `url(${contactbg})`,
-                    backgroundSize: "cover",
-                    backgroundPosition: "center",
-                }}
-            >
-                {/* Dark Overlay */}
-                <div className="absolute inset-0 bg-black/60"></div>
+            <section className="bg-[#f8f5f1] min-h-screen py-32 px-6">
+                <div className="max-w-7xl mx-auto">
 
-                {/* Content */}
-                <div className="relative z-10 max-w-6xl w-full">
-                    <div className="grid lg:grid-cols-2 gap-10 items-center">
+                    {/* Heading */}
+                    <div className="text-center mb-24">
+                        <p className="uppercase tracking-[0.4em] text-[#8b5e3c] text-sm mb-4">
+                            Contact Euphoria
+                        </p>
 
-                        {/* LEFT SIDE */}
-                        <div className="text-white">
-                            <p className="uppercase tracking-[4px] text-sm text-gray-300 mb-3">
-                                Contact Us
-                            </p>
+                        <h1 className="text-5xl md:text-7xl font-light text-black leading-tight">
+                            Let's Start a
+                            <span className="block italic">
+                                Conversation
+                            </span>
+                        </h1>
 
-                            <h1 className="text-5xl font-light leading-tight mb-6">
-                                We'd Love To
-                                <span className="block font-semibold">
-                                    Hear From You
-                                </span>
-                            </h1>
+                        <p className="text-gray-500 mt-6 max-w-2xl mx-auto">
+                            Whether it's a question, collaboration,
+                            custom order, or simply saying hello,
+                            we'd love to hear from you.
+                        </p>
+                    </div>
 
-                            <p className="text-gray-300 mb-10 max-w-md">
-                                Have questions about our collections,
-                                orders, or collaborations? Reach out
-                                and our team will get back to you as
-                                soon as possible.
-                            </p>
+                    <div className="grid lg:grid-cols-12 gap-16">
 
-                            <div className="space-y-6">
+                        {/* Left Side */}
+                        <div className="lg:col-span-4 flex flex-col justify-center">
 
-                                <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center backdrop-blur-md">
-                                        <FiMail size={20} />
-                                    </div>
+                            <div className="mb-12">
+                                <p className="uppercase text-xs tracking-[0.3em] text-gray-400 mb-3">
+                                    Email
+                                </p>
 
-                                    <div>
-                                        <p className="text-sm text-gray-400">
-                                            Email
-                                        </p>
+                                <p className="text-xl font-light">
+                                    kadampratiksha869@gmail.com
+                                </p>
+                            </div>
 
-                                        <p>
-                                            support@yourbrand.com
-                                        </p>
-                                    </div>
-                                </div>
+                            <div className="mb-12">
+                                <p className="uppercase text-xs tracking-[0.3em] text-gray-400 mb-3">
+                                    Phone
+                                </p>
 
-                                <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center backdrop-blur-md">
-                                        <FiPhone size={20} />
-                                    </div>
+                                <p className="text-xl font-light">
+                                    +91 XXXXX XXXXX
+                                </p>
+                            </div>
 
-                                    <div>
-                                        <p className="text-sm text-gray-400">
-                                            Phone
-                                        </p>
+                            <div>
+                                <p className="uppercase text-xs tracking-[0.3em] text-gray-400 mb-3">
+                                    Location
+                                </p>
 
-                                        <p>
-                                            +91 98765 43210
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center backdrop-blur-md">
-                                        <FiMapPin size={20} />
-                                    </div>
-
-                                    <div>
-                                        <p className="text-sm text-gray-400">
-                                            Location
-                                        </p>
-
-                                        <p>
-                                            Bangalore, Karnataka
-                                        </p>
-                                    </div>
-                                </div>
+                                <p className="text-xl font-light">
+                                    Pune, Maharashtra
+                                </p>
                             </div>
                         </div>
 
-                        {/* RIGHT SIDE FORM */}
-                        <div className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-3xl p-8 md:p-10 shadow-2xl">
-                            <h2 className="text-3xl text-white font-light mb-8">
-                                Send a Message
-                            </h2>
+                        {/* Right Side Form */}
+                        <div className="lg:col-span-8 bg-white rounded-[40px] p-8 md:p-14 shadow-sm border border-gray-100">
 
                             <form
                                 onSubmit={handleSubmit}
-                                className="space-y-5"
+                                className="space-y-10"
                             >
-                                <input
-                                    type="text"
-                                    placeholder="Your Name"
-                                    value={name}
-                                    onChange={(e) =>
-                                        setName(e.target.value)
-                                    }
-                                    required
-                                    className="
-                                        w-full
-                                        px-5
-                                        py-4
-                                        rounded-xl
-                                        bg-white/10
-                                        border
-                                        border-white/20
-                                        text-white
-                                        placeholder-gray-300
-                                        focus:outline-none
-                                        focus:border-white
-                                    "
-                                />
+
+                                <div className="grid md:grid-cols-2 gap-8">
+                                    <input
+                                        type="text"
+                                        placeholder="Your Name"
+                                        value={name}
+                                        onChange={(e) =>
+                                            setName(e.target.value)
+                                        }
+                                        required
+                                        className="
+                                            w-full
+                                            border-b
+                                            border-gray-300
+                                            py-4
+                                            bg-transparent
+                                            outline-none
+                                            focus:border-black
+                                            transition
+                                        "
+                                    />
+
+                                    <input
+                                        type="email"
+                                        placeholder="Email Address"
+                                        value={email}
+                                        onChange={(e) =>
+                                            setEmail(e.target.value)
+                                        }
+                                        required
+                                        className="
+                                            w-full
+                                            border-b
+                                            border-gray-300
+                                            py-4
+                                            bg-transparent
+                                            outline-none
+                                            focus:border-black
+                                            transition
+                                        "
+                                    />
+                                </div>
 
                                 <input
-                                    type="email"
-                                    placeholder="Email Address"
-                                    value={email}
+                                    type="text"
+                                    placeholder="Subject"
+                                    value={subject}
                                     onChange={(e) =>
-                                        setEmail(e.target.value)
+                                        setSubject(e.target.value)
                                     }
                                     required
                                     className="
                                         w-full
-                                        px-5
+                                        border-b
+                                        border-gray-300
                                         py-4
-                                        rounded-xl
-                                        bg-white/10
-                                        border
-                                        border-white/20
-                                        text-white
-                                        placeholder-gray-300
-                                        focus:outline-none
-                                        focus:border-white
+                                        bg-transparent
+                                        outline-none
+                                        focus:border-black
+                                        transition
                                     "
                                 />
 
@@ -188,43 +185,36 @@ const Contact = () => {
                                     required
                                     className="
                                         w-full
-                                        px-5
+                                        border-b
+                                        border-gray-300
                                         py-4
-                                        rounded-xl
-                                        bg-white/10
-                                        border
-                                        border-white/20
-                                        text-white
-                                        placeholder-gray-300
-                                        focus:outline-none
-                                        focus:border-white
+                                        bg-transparent
+                                        outline-none
                                         resize-none
+                                        focus:border-black
+                                        transition
                                     "
                                 />
 
                                 <button
                                     type="submit"
+                                    disabled={loading}
                                     className="
-                                        w-full
-                                        flex
-                                        items-center
-                                        justify-center
-                                        gap-2
+                                        px-10
                                         py-4
-                                        rounded-xl
-                                        bg-gradient-to-r
-                                        from-[#8b5e3c]
-                                        to-[#c79a74]
+                                        rounded-full
+                                        bg-black
                                         text-white
-                                        font-medium
-                                        hover:scale-[1.02]
+                                        hover:bg-[#8b5e3c]
                                         transition-all
                                         duration-300
                                     "
                                 >
-                                    <FiSend />
-                                    Send Message
+                                    {loading
+                                        ? "Sending..."
+                                        : "Send Message"}
                                 </button>
+
                             </form>
                         </div>
                     </div>

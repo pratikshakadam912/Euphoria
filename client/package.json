@@ -15,6 +15,7 @@
     "@coreui/icons-react": "^2.3.0",
     "@coreui/react": "^5.10.0",
     "@tailwindcss/vite": "^4.1.18",
+    "axios": "^1.18.1",
     "firebase": "^12.8.0",
     "framer-motion": "^12.29.0",
     "lucide-react": "^0.563.0",
