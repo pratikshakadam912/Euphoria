@@ -1,282 +1,161 @@
-import React, { useState } from "react";
-import {
-    Heart,
-    ShoppingCart,
-    Plus,
-    Minus,
-} from "lucide-react";
-
-import { useCart } from "../../context/CartContext";
+import React from "react";
+import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
+import noir01 from "../../assets/img/noir01.jpg"
+import noir02 from "../../assets/img/noir02.jpg"
+import noir03 from "../../assets/img/noir03.jpg"
+import noir04 from "../../assets/img/noir04.jpg"
 
 const products = [
-    {
-        id: 4,
-        name: "Classic Leather Bag",
-        material: "100% Genuine Leather",
-        description:
-            "Handcrafted from premium leather for durability and timeless elegance.",
-        image:
-            "https://images.unsplash.com/photo-1591561954557-26941169b49e",
-        price: 3499,
-    },
-    {
-        id: 5,
-        name: "Minimal Wrist Watch",
-        material: "Stainless Steel & Sapphire Glass",
-        description:
-            "Designed for everyday wear with scratch-resistant glass and precision movement.",
-        image:
-            "https://images.unsplash.com/photo-1522312346375-d1a52e2b99b3",
-        price: 5999,
-    },
-    {
-        id: 6,
-        name: "Comfort Sneakers",
-        material: "Breathable Mesh & Rubber Sole",
-        description:
-            "Ultra-lightweight sneakers made for long-lasting comfort and flexibility.",
-        image:
-            "https://images.unsplash.com/photo-1542291026-7eec264c27ff",
-        price: 4299,
-    },
+  {
+    id: "noir-001",
+    name: "Classic outfit",
+    image:[noir01],
+  },
+  {
+    id: "noir-002",
+    name: " noir dress",
+    image:[noir02],
+  },
+  {
+    id: "noir-003",
+    name: "Comfort Sneakers",
+    image:[noir03],
+  },
+  {
+    id: "noir-004",
+    name: "Luxury Collection",
+    image:[noir04],
+  },
 ];
 
 export default function ProductSection() {
-    const { addToCart } = useCart();
+  const navigate = useNavigate();
 
-    const [cartItems, setCartItems] = useState({});
+  return (
+    <section className="bg-[#faf8f5] py-24 px-6">
+      <div className="max-w-7xl mx-auto">
+        {/* Heading */}
+        <div className="text-center mb-20">
+          <p className="uppercase tracking-[0.35em] text-[#8b5e3c] text-sm">
+            Euphoria Collection
+          </p>
 
-    const handleAdd = (product) => {
-        addToCart({
-            ...product,
-            quantity: 1,
-        });
+          <h2 className="mt-4 text-5xl md:text-6xl font-light text-black">
+            Curated Essentials
+          </h2>
 
-        setCartItems((prev) => ({
-            ...prev,
-            [product.id]: 1,
-        }));
-    };
+          <p className="mt-4 text-gray-500 max-w-xl mx-auto">
+            Discover timeless pieces crafted with elegance and attention to detail.
+          </p>
+        </div>
 
-    const increaseQty = (product) => {
-        addToCart({
-            ...product,
-            quantity: 1,
-        });
+        {/* Premium Editorial Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
 
-        setCartItems((prev) => ({
-            ...prev,
-            [product.id]: (prev[product.id] || 0) + 1,
-        }));
-    };
+          {/* Large Card */}
+          <motion.div
+            whileHover={{ y: -8 }}
+            onClick={() => navigate(`/product/${products[0].id}`)}
+            className="md:col-span-7 cursor-pointer group"
+          >
+            <div className="relative overflow-hidden rounded-[40px]">
+              <img
+                src={products[0].image}
+                alt={products[0].name}
+                className="w-full h-[700px] object-cover transition duration-700 group-hover:scale-105"
+              />
 
-    const decreaseQty = (productId) => {
-        setCartItems((prev) => {
-            const qty = prev[productId] || 0;
+              <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition duration-500" />
 
-            if (qty <= 1) {
-                const updated = { ...prev };
-                delete updated[productId];
-                return updated;
-            }
-
-            return {
-                ...prev,
-                [productId]: qty - 1,
-            };
-        });
-    };
-
-    return (
-        <section className="bg-gradient-to-b from-gray-50 to-white py-20 px-6 md:px-20">
-
-            <div className="mb-14 text-center">
-                <span className="text-sm uppercase tracking-[4px] text-gray-500">
-                    Premium Collection
-                </span>
-
-                <h2 className="mt-3 text-4xl font-bold text-gray-900">
-                    Our Featured Products
-                </h2>
-
-                <p className="mt-4 text-gray-500 max-w-2xl mx-auto">
-                    Discover timeless designs crafted with premium
-                    materials and attention to detail.
-                </p>
+              <div className="absolute bottom-8 left-8">
+                <h3 className="text-white text-3xl font-light">
+                  {products[0].name}
+                </h3>
+              </div>
             </div>
+          </motion.div>
 
-            <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-3">
+          {/* Right Column */}
+          <div className="md:col-span-5 flex flex-col gap-6">
 
-                {products.map((product) => (
-                    <div
-                        key={product.id}
-                        className="
-                            group
-                            relative
-                            overflow-hidden
-                            rounded-3xl
-                            bg-white
-                            shadow-md
-                            transition-all
-                            duration-300
-                            hover:-translate-y-2
-                            hover:shadow-2xl
-                        "
-                    >
-                        {/* Wishlist */}
-                        <button
-                            className="
-                                absolute
-                                right-4
-                                top-4
-                                z-10
-                                rounded-full
-                                bg-white/90
-                                p-2.5
-                                shadow-md
-                                backdrop-blur-sm
-                                transition
-                                hover:scale-110
-                            "
-                        >
-                            <Heart className="h-5 w-5 text-gray-600 hover:text-red-500" />
-                        </button>
+            <motion.div
+              whileHover={{ y: -8 }}
+              onClick={() => navigate(`/product/${products[1].id}`)}
+              className="cursor-pointer group"
+            >
+              <div className="relative overflow-hidden rounded-[32px]">
+                <img
+                  src={products[1].image}
+                  alt={products[1].name}
+                  className="w-full h-[340px] object-cover transition duration-700 group-hover:scale-105"
+                />
 
-                        {/* Product Image */}
-                        <div className="overflow-hidden">
-                            <img
-                                src={product.image}
-                                alt={product.name}
-                                className="
-                                    h-72
-                                    w-full
-                                    object-cover
-                                    transition-transform
-                                    duration-500
-                                    group-hover:scale-110
-                                "
-                            />
-                        </div>
+                <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition" />
 
-                        {/* Product Info */}
-                        <div className="p-6">
-                            <h3 className="text-xl font-semibold text-gray-900">
-                                {product.name}
-                            </h3>
+                <div className="absolute bottom-6 left-6">
+                  <h3 className="text-white text-xl font-light">
+                    {products[1].name}
+                  </h3>
+                </div>
+              </div>
+            </motion.div>
 
-                            <p className="mt-2 text-sm text-gray-500">
-                                <span className="font-medium text-gray-700">
-                                    Material:
-                                </span>{" "}
-                                {product.material}
-                            </p>
+            <motion.div
+              whileHover={{ y: -8 }}
+              onClick={() => navigate(`/product/${products[2].id}`)}
+              className="cursor-pointer group"
+            >
+              <div className="relative overflow-hidden rounded-[32px]">
+                <img
+                  src={products[2].image}
+                  alt={products[2].name}
+                  className="w-full h-[340px] object-cover transition duration-700 group-hover:scale-105"
+                />
 
-                            <p className="mt-3 text-sm leading-relaxed text-gray-600">
-                                {product.description}
-                            </p>
+                <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition" />
 
-                            <div className="mt-6 flex items-center justify-between">
+                <div className="absolute bottom-6 left-6">
+                  <h3 className="text-white text-xl font-light">
+                    {products[2].name}
+                  </h3>
+                </div>
+              </div>
+            </motion.div>
 
-                                <div>
-                                    <p className="text-xs uppercase text-gray-400">
-                                        Price
-                                    </p>
+          </div>
 
-                                    <h4 className="text-2xl font-bold text-black">
-                                        ₹{product.price}
-                                    </h4>
-                                </div>
+          {/* Bottom Banner */}
+          <motion.div
+            whileHover={{ y: -5 }}
+            onClick={() => navigate(`/product/${products[3].id}`)}
+            className="md:col-span-12 cursor-pointer group"
+          >
+            <div className="relative overflow-hidden rounded-[40px]">
+              <img
+                src={products[3].image}
+                alt={products[3].name}
+                className="w-full h-[400px] object-cover transition duration-700 group-hover:scale-105"
+              />
 
-                                {/* Cart Controls */}
-                                {cartItems[product.id] ? (
-                                    <div
-                                        className="
-                                            flex
-                                            items-center
-                                            gap-4
-                                            rounded-2xl
-                                            border
-                                            border-gray-200
-                                            bg-gray-50
-                                            px-4
-                                            py-2
-                                            shadow-sm
-                                        "
-                                    >
-                                        <button
-                                            onClick={() =>
-                                                decreaseQty(product.id)
-                                            }
-                                            className="
-                                                flex
-                                                h-9
-                                                w-9
-                                                items-center
-                                                justify-center
-                                                rounded-full
-                                                bg-black
-                                                text-white
-                                                transition
-                                                hover:scale-110
-                                            "
-                                        >
-                                            <Minus size={16} />
-                                        </button>
+              <div className="absolute inset-0 bg-black/20" />
 
-                                        <span className="font-semibold text-lg">
-                                            {cartItems[product.id]}
-                                        </span>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="text-center text-white">
+                  <p className="uppercase tracking-[0.4em] text-sm mb-4">
+                    New Season
+                  </p>
 
-                                        <button
-                                            onClick={() =>
-                                                increaseQty(product)
-                                            }
-                                            className="
-                                                flex
-                                                h-9
-                                                w-9
-                                                items-center
-                                                justify-center
-                                                rounded-full
-                                                bg-black
-                                                text-white
-                                                transition
-                                                hover:scale-110
-                                            "
-                                        >
-                                            <Plus size={16} />
-                                        </button>
-                                    </div>
-                                ) : (
-                                    <button
-                                        onClick={() =>
-                                            handleAdd(product)
-                                        }
-                                        className="
-                                            flex
-                                            items-center
-                                            gap-2
-                                            rounded-xl
-                                            bg-black
-                                            px-5
-                                            py-3
-                                            text-white
-                                            shadow-lg
-                                            transition-all
-                                            duration-300
-                                            hover:bg-gray-800
-                                            hover:scale-105
-                                        "
-                                    >
-                                        <ShoppingCart className="h-4 w-4" />
-                                        Add to Cart
-                                    </button>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                ))}
+                  <h2 className="text-5xl md:text-6xl font-light">
+                    Luxury Collection
+                  </h2>
+                </div>
+              </div>
             </div>
-        </section>
-    );
+          </motion.div>
+
+        </div>
+      </div>
+    </section>
+  );
 }

@@ -12,6 +12,10 @@ import ss3 from "../../assets/img/collections/ss3.jpg";
 import sc3 from "../../assets/img/sc3.jpg";
 import sc2 from "../../assets/img/sc2.jpg";
 import sc1 from "../../assets/img/sc1.jpg";
+import noir01 from "../../assets/img/noir01.jpg"
+import noir02 from "../../assets/img/noir02.jpg"
+import noir03 from "../../assets/img/noir03.jpg"
+import noir04 from "../../assets/img/noir04.jpg"
 
 import { useCart } from "../../context/CartContext";
 import Navbar from "../../components/common/Navbar";
@@ -94,7 +98,7 @@ const products = [
         ],
     },
     {
-        id: "noir-003",
+        id: "noirr-003",
         name: "Comfort Sneakers",
         price: 4299,
         fabric: "Breathable Mesh & Rubber Sole",
@@ -122,6 +126,46 @@ const products = [
             "Ultra-lightweight sneakers made for long-lasting comfort and flexibility.",
         sizes: ["UK6", "UK7", "UK8", "UK9"],
         images: [sc2],
+    },
+    {
+        id: "noir-001",
+        name: "Comfort Sneakers",
+        price: 4299,
+        fabric: "Breathable Mesh & Rubber Sole",
+        description:
+            "Ultra-lightweight sneakers made for long-lasting comfort and flexibility.",
+        sizes: ["UK6", "UK7", "UK8", "UK9"],
+        images: [noir01],
+    },
+    {
+        id: "noir-002",
+        name: "Comfort Sneakers",
+        price: 4299,
+        fabric: "Breathable Mesh & Rubber Sole",
+        description:
+            "Ultra-lightweight sneakers made for long-lasting comfort and flexibility.",
+        sizes: ["UK6", "UK7", "UK8", "UK9"],
+        images: [noir02],
+    },
+    {
+        id: "noir-003",
+        name: "Comfort Sneakers",
+        price: 4299,
+        fabric: "Breathable Mesh & Rubber Sole",
+        description:
+            "Ultra-lightweight sneakers made for long-lasting comfort and flexibility.",
+        sizes: ["UK6", "UK7", "UK8", "UK9"],
+        images: [noir03],
+    },
+    {
+        id: "noir-004",
+        name: "Comfort Sneakers",
+        price: 4299,
+        fabric: "Breathable Mesh & Rubber Sole",
+        description:
+            "Ultra-lightweight sneakers made for long-lasting comfort and flexibility.",
+        sizes: ["UK6", "UK7", "UK8", "UK9"],
+        images: [noir04],
     },
 ];
 
@@ -549,25 +593,7 @@ const ProductDetails = () => {
 
                             )}
 
-                            <button
-                                className="
-            w-full
-            h-[58px]
-            rounded-full
-            border
-            border-black
-            bg-white
-            font-medium
-            tracking-[2px]
-            hover:bg-black
-            hover:text-white
-            transition-all
-            duration-300
-        "
-                            >
-                                BUY NOW
-                            </button>
-
+                           
                         </div>
 
                         {/* EXTRA INFO */}
