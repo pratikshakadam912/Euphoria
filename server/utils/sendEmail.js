@@ -12,13 +12,8 @@ const sendEmail = async (name, email, subject, message) => {
         },
     });
 
-    transporter.verify((error, success) => {
-        if (error) {
-            console.log("VERIFY ERROR:", error);
-        } else {
-            console.log("Server ready");
-        }
-    });
+    await transporter.verify();
+    console.log("SMTP verified");
 
     return await transporter.sendMail({
         from: process.env.EMAIL_USER,
