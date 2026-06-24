@@ -17,7 +17,7 @@ const Contact = () => {
             setLoading(true);
 
             const response = await axios.post(
-                "https://euphoria-backend.onrender.com/api/contact",
+                "https://euphoria-ooqv.onrender.com/api/contact",
                 {
                     name,
                     email,
