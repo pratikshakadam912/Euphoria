@@ -9,11 +9,13 @@ const productSchema = new mongoose.Schema(
         description: String,
         sizes: [String],
         images: [String],
+
         category: String,
+
+        collection: String,
     },
     {
         timestamps: true,
     }
 );
-
 export default mongoose.model("Product", productSchema);
