@@ -1,132 +1,253 @@
-import { FaShoppingCart, FaBox, FaUsers } from "react-icons/fa";
+import { useEffect, useState } from "react";
+import {
+    FaShoppingCart,
+    FaBox,
+    FaUsers,
+    FaRupeeSign,
+} from "react-icons/fa";
 
 const Dashboard = () => {
+    const [products, setProducts] = useState([]);
+    const [users, setUsers] = useState([]);
+    const [orders, setOrders] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const [productsRes, usersRes, ordersRes] =
+                    await Promise.all([
+                        fetch(
+                            "https://euphoria-ooqv.onrender.com/api/products"
+                        ),
+                        fetch(
+                            "https://euphoria-ooqv.onrender.com/api/users"
+                        ),
+                        fetch(
+                            "https://euphoria-ooqv.onrender.com/api/orders"
+                        ),
+                    ]);
+
+                const productsData = await productsRes.json();
+                const usersData = await usersRes.json();
+                const ordersData = await ordersRes.json();
+
+                setProducts(productsData);
+                setUsers(usersData);
+                setOrders(ordersData);
+            } catch (error) {
+                console.log(error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, []);
+
+    const totalRevenue = orders.reduce(
+        (sum, order) => sum + (order.total || 0),
+        0
+    );
+
+    if (loading) {
+        return (
+            <div className="min-h-screen flex justify-center items-center">
+                <h2 className="text-xl text-gray-500">
+                    Loading Dashboard...
+                </h2>
+            </div>
+        );
+    }
+
     return (
-        <div className="p-6 bg-gray-100 min-h-screen">
+        <div className="min-h-screen bg-[#f8f8f8] p-4 md:p-8">
 
             {/* Header */}
-            <h1 className="text-3xl font-bold mb-6 text-gray-800">
-                Dashboard
-            </h1>
+            <div className="mb-10">
+                <p className="uppercase tracking-[4px] text-gray-500 text-sm">
+                    Euphoria Admin
+                </p>
 
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <h1 className="text-4xl md:text-5xl font-light mt-2">
+                    Dashboard
+                </h1>
+            </div>
 
-                {/* Card 1 */}
-                <div className="bg-white p-6 rounded-xl shadow hover:shadow-lg transition">
+            {/* Stats */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+
+                <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
                     <div className="flex justify-between items-center">
                         <div>
-                            <h2 className="text-gray-500 text-sm">Total Orders</h2>
-                            <p className="text-3xl font-bold text-gray-800">120</p>
+                            <p className="text-gray-500 text-sm">
+                                Orders
+                            </p>
+
+                            <h2 className="text-3xl font-bold mt-2">
+                                {orders.length}
+                            </h2>
                         </div>
-                        <FaShoppingCart className="text-blue-500 text-3xl" />
+
+                        <div className="w-14 h-14 bg-black rounded-2xl flex items-center justify-center text-white">
+                            <FaShoppingCart />
+                        </div>
                     </div>
                 </div>
 
-                {/* Card 2 */}
-                <div className="bg-white p-6 rounded-xl shadow hover:shadow-lg transition">
+                <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
                     <div className="flex justify-between items-center">
                         <div>
-                            <h2 className="text-gray-500 text-sm">Products</h2>
-                            <p className="text-3xl font-bold text-gray-800">45</p>
+                            <p className="text-gray-500 text-sm">
+                                Products
+                            </p>
+
+                            <h2 className="text-3xl font-bold mt-2">
+                                {products.length}
+                            </h2>
                         </div>
-                        <FaBox className="text-green-500 text-3xl" />
+
+                        <div className="w-14 h-14 bg-black rounded-2xl flex items-center justify-center text-white">
+                            <FaBox />
+                        </div>
                     </div>
                 </div>
 
-                {/* Card 3 */}
-                <div className="bg-white p-6 rounded-xl shadow hover:shadow-lg transition">
+                <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
                     <div className="flex justify-between items-center">
                         <div>
-                            <h2 className="text-gray-500 text-sm">Users</h2>
-                            <p className="text-3xl font-bold text-gray-800">300</p>
+                            <p className="text-gray-500 text-sm">
+                                Users
+                            </p>
+
+                            <h2 className="text-3xl font-bold mt-2">
+                                {users.length}
+                            </h2>
                         </div>
-                        <FaUsers className="text-purple-500 text-3xl" />
+
+                        <div className="w-14 h-14 bg-black rounded-2xl flex items-center justify-center text-white">
+                            <FaUsers />
+                        </div>
+                    </div>
+                </div>
+
+                <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
+                    <div className="flex justify-between items-center">
+                        <div>
+                            <p className="text-gray-500 text-sm">
+                                Revenue
+                            </p>
+
+                            <h2 className="text-3xl font-bold mt-2">
+                                ₹{totalRevenue}
+                            </h2>
+                        </div>
+
+                        <div className="w-14 h-14 bg-black rounded-2xl flex items-center justify-center text-white">
+                            <FaRupeeSign />
+                        </div>
                     </div>
                 </div>
 
             </div>
 
-            {/* Charts + Activity */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+            {/* Recent Orders */}
+            <div className="mt-10 bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
 
-                {/* Chart Section (placeholder) */}
-                <div className="lg:col-span-2 bg-white p-6 rounded-xl shadow">
-                    <h2 className="text-lg font-semibold mb-4">Sales Overview</h2>
+                <div className="p-6 border-b">
+                    <h2 className="text-xl font-semibold">
+                        Recent Orders
+                    </h2>
+                </div>
 
-                    <div className="h-64 flex items-center justify-center text-gray-400">
-                        📊 Chart will go here (Recharts)
+                {orders.length === 0 ? (
+                    <div className="p-10 text-center text-gray-500">
+                        No orders found
                     </div>
-                </div>
+                ) : (
+                    <div className="overflow-x-auto">
 
-                {/* Activity */}
-                <div className="bg-white p-6 rounded-xl shadow">
-                    <h2 className="text-lg font-semibold mb-4">Recent Activity</h2>
+                        <table className="w-full">
 
-                    <ul className="space-y-4 text-sm text-gray-600">
-                        <li>✅ New order placed</li>
-                        <li>📦 Product added</li>
-                        <li>👤 New user registered</li>
-                        <li>💰 Payment received</li>
-                    </ul>
-                </div>
+                            <thead className="bg-gray-50">
 
-            </div>
+                                <tr>
+                                    <th className="text-left px-6 py-4">
+                                        Customer
+                                    </th>
 
-            {/* Recent Orders Table */}
-            <div className="mt-8 bg-white p-6 rounded-xl shadow">
-                <h2 className="text-lg font-semibold mb-4">Recent Orders</h2>
+                                    <th className="text-left px-6 py-4">
+                                        Payment
+                                    </th>
 
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
+                                    <th className="text-left px-6 py-4">
+                                        Total
+                                    </th>
 
-                        <thead>
-                            <tr className="border-b text-gray-500 text-sm">
-                                <th className="py-2">Customer</th>
-                                <th>Product</th>
-                                <th>Status</th>
-                                <th>Date</th>
-                            </tr>
-                        </thead>
+                                    <th className="text-left px-6 py-4">
+                                        Status
+                                    </th>
+                                </tr>
 
-                        <tbody className="text-gray-700">
+                            </thead>
 
-                            <tr className="border-b hover:bg-gray-50">
-                                <td className="py-3">Pratiksha</td>
-                                <td>Dress</td>
-                                <td>
-                                    <span className="bg-green-100 text-green-600 px-3 py-1 rounded-full text-sm">
-                                        Delivered
-                                    </span>
-                                </td>
-                                <td>22 Mar 2026</td>
-                            </tr>
+                            <tbody>
 
-                            <tr className="border-b hover:bg-gray-50">
-                                <td className="py-3">Rahul</td>
-                                <td>Shoes</td>
-                                <td>
-                                    <span className="bg-yellow-100 text-yellow-600 px-3 py-1 rounded-full text-sm">
-                                        Pending
-                                    </span>
-                                </td>
-                                <td>21 Mar 2026</td>
-                            </tr>
+                                {orders
+                                    .slice()
+                                    .reverse()
+                                    .slice(0, 8)
+                                    .map((order) => (
+                                        <tr
+                                            key={order._id}
+                                            className="border-t hover:bg-gray-50"
+                                        >
 
-                            <tr className="border-b hover:bg-gray-50">
-                                <td className="py-3">Anjali</td>
-                                <td>Bag</td>
-                                <td>
-                                    <span className="bg-red-100 text-red-600 px-3 py-1 rounded-full text-sm">
-                                        Cancelled
-                                    </span>
-                                </td>
-                                <td>20 Mar 2026</td>
-                            </tr>
+                                            <td className="px-6 py-4">
+                                                {order.userEmail}
+                                            </td>
 
-                        </tbody>
-                    </table>
-                </div>
+                                            <td className="px-6 py-4">
+                                                {order.paymentMethod}
+                                            </td>
+
+                                            <td className="px-6 py-4">
+                                                ₹{order.total}
+                                            </td>
+
+                                            <td className="px-6 py-4">
+
+                                                <span
+                                                    className={`
+                                                        px-3
+                                                        py-1
+                                                        rounded-full
+                                                        text-xs
+                                                        font-medium
+                                                        ${order.status ===
+                                                            "delivered"
+                                                            ? "bg-green-100 text-green-700"
+                                                            : order.status ===
+                                                                "shipped"
+                                                                ? "bg-blue-100 text-blue-700"
+                                                                : "bg-yellow-100 text-yellow-700"
+                                                        }
+                                                    `}
+                                                >
+                                                    {order.status}
+                                                </span>
+
+                                            </td>
+
+                                        </tr>
+                                    ))}
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+                )}
 
             </div>
 
