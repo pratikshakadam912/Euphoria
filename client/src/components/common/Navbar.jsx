@@ -5,9 +5,15 @@ import useUserProfile from "../../hooks/useUserProfile";
 import { signOut } from "firebase/auth";
 import { auth } from "../../firebase/firebaseConfig";
 
-import { FiUser } from "react-icons/fi";
+import {
+    FiUser,
+    FiShoppingBag,
+    FiLogOut,
+    FiChevronRight,
+} from "react-icons/fi";
+
 import { HiOutlineMenuAlt3, HiX } from "react-icons/hi";
-import { FiShoppingBag } from "react-icons/fi";
+
 import { useCart } from "../../context/CartContext";
 
 const Navbar = () => {
@@ -31,7 +37,6 @@ const Navbar = () => {
         setOpen(false);
         setMobileOpen(false);
     };
-
     return (
         <>
             {/* NAVBAR */}
@@ -101,29 +106,119 @@ const Navbar = () => {
                             </div>
 
                             {/* PROFILE DROPDOWN */}
+
                             {open && (
-                                <div className="absolute right-0 mt-4 w-56 bg-white rounded-2xl shadow-xl border p-4 space-y-4">
+                                <div
+                                    className="
+                                 absolute
+                                right-0
+                                  mt-4
+                                   w-72
+                                bg-white
+                            rounded-3xl
+                           shadow-2xl
+                           border
+                       border-gray-100
+                         overflow-hidden
+                                 "
+                                >
                                     {user && profile ? (
                                         <>
-                                            <p className="text-sm text-gray-600">Signed in as</p>
-                                            <p className="font-medium text-black">
-                                                {profile.name}
-                                            </p>
-                                            <button
-                                                onClick={handleLogout}
-                                                className="w-full py-2 text-sm rounded-lg border hover:bg-black hover:text-white transition"
-                                            >
-                                                Logout
-                                            </button>
+                                            {/* USER HEADER */}
+                                            <div className="p-6 bg-[#faf8f6] border-b">
+
+                                                <div className="flex items-center gap-4">
+
+                                                    <div className="w-14 h-14 rounded-full bg-black text-white flex items-center justify-center text-xl font-semibold">
+                                                        {profile.email?.charAt(0).toUpperCase()}
+                                                    </div>
+
+                                                    <div>
+                                                        <h3 className="font-semibold text-black">
+                                                            {profile.name}
+                                                        </h3>
+
+                                                        <p className="text-sm text-gray-500 break-all">
+                                                            {profile.email}
+                                                        </p>
+                                                    </div>
+
+                                                </div>
+
+                                            </div>
+
+                                            {/* MENU */}
+
+                                            <div className="p-3">
+
+                                                <Link
+                                                    to="/profile"
+                                                    onClick={() => setOpen(false)}
+                                                    className="
+                            flex
+                            items-center
+                            justify-between
+                            px-4
+                            py-3
+                            rounded-2xl
+                            hover:bg-gray-100
+                            transition
+                        "
+                                                >
+                                                    <div className="flex items-center gap-3">
+                                                        <FiUser />
+                                                        <span>My Profile</span>
+                                                    </div>
+
+                                                    <FiChevronRight />
+                                                </Link>
+
+                                                <button
+                                                    onClick={handleLogout}
+                                                    className="
+                            mt-2
+                            w-full
+                            flex
+                            items-center
+                            justify-between
+                            px-4
+                            py-3
+                            rounded-2xl
+                            hover:bg-red-50
+                            text-red-500
+                            transition
+                        "
+                                                >
+                                                    <div className="flex items-center gap-3">
+                                                        <FiLogOut />
+                                                        Logout
+                                                    </div>
+
+                                                </button>
+
+                                            </div>
                                         </>
                                     ) : (
-                                        <Link
-                                            to="/login"
-                                            onClick={() => setOpen(false)}
-                                            className="block text-center py-2 text-sm rounded-lg border hover:bg-black hover:text-white transition"
-                                        >
-                                            Login
-                                        </Link>
+                                        <div className="p-5">
+
+                                            <Link
+                                                to="/login"
+                                                onClick={() => setOpen(false)}
+                                                className="
+                        block
+                        text-center
+                        py-3
+                        rounded-2xl
+                        bg-black
+                        text-white
+                        hover:bg-neutral-800
+                        transition
+                    "
+                                            >
+                                                Login
+                                            </Link>
+
+                                        </div>
                                     )}
                                 </div>
                             )}

@@ -4,23 +4,39 @@ const orderSchema = new mongoose.Schema({
   userId: String,
   userEmail: String,
 
-  items: [
+  products: [
     {
+      productId: String,
       name: String,
       price: Number,
+      quantity: Number,
       image: String
     }
   ],
 
   total: Number,
-  paymentMethod: String,
 
   status: {
     type: String,
     default: "pending"
-  }
+    // pending → confirmed → shipped → delivered → cancelled → refunded
+  },
 
-}, { timestamps: true });
+  paymentMethod: String,
+  paymentId: String,
+
+  isPaid: {
+    type: Boolean,
+    default: false
+  },
+
+  refundStatus: {
+    type: String,
+    default: "none"
+    // none | requested | approved | rejected | processed
+  }
+},
+ { timestamps: true });
 
 const Order = mongoose.model("Order", orderSchema);
 
