@@ -3,8 +3,7 @@ import Product from "../models/Product.js";
 
 const router = express.Router();
 
-
-//  Add Product
+// Add Product
 router.post("/", async (req, res) => {
   try {
     const product = new Product(req.body);
@@ -15,8 +14,7 @@ router.post("/", async (req, res) => {
   }
 });
 
-
-//  Get All Products 
+// Get All Products
 router.get("/", async (req, res) => {
   try {
     const products = await Product.find();
@@ -26,8 +24,26 @@ router.get("/", async (req, res) => {
   }
 });
 
+// Get Single Product ✅
+router.get("/:id", async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id);
 
-//  Delete Product
+    if (!product) {
+      return res.status(404).json({
+        message: "Product not found",
+      });
+    }
+
+    res.json(product);
+  } catch (err) {
+    res.status(500).json({
+      error: err.message,
+    });
+  }
+});
+
+// Delete Product
 router.delete("/:id", async (req, res) => {
   try {
     await Product.findByIdAndDelete(req.params.id);

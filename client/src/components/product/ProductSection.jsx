@@ -1,40 +1,42 @@
-import React from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import noir01 from "../../assets/img/noir01.jpg"
-import noir02 from "../../assets/img/noir02.jpg"
-import noir03 from "../../assets/img/noir03.jpg"
-import noir04 from "../../assets/img/noir04.jpg"
-
-const products = [
-  {
-    id: "noir-001",
-    name: "Classic outfit",
-    image:[noir01],
-  },
-  {
-    id: "noir-002",
-    name: " noir dress",
-    image:[noir02],
-  },
-  {
-    id: "noir-003",
-    name: "Comfort Sneakers",
-    image:[noir03],
-  },
-  {
-    id: "noir-004",
-    name: "Luxury Collection",
-    image:[noir04],
-  },
-];
 
 export default function ProductSection() {
   const navigate = useNavigate();
 
+  const [products, setProducts] = useState([]);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const res = await fetch(
+          "https://euphoria-ooqv.onrender.com/api/products"
+        );
+
+        const data = await res.json();
+
+        // Change "editorial" to your collection name if needed
+        const filtered = data.filter(
+          (item) =>
+            item.collection?.toLowerCase() === "editorial"
+        );
+
+        setProducts(filtered);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  if (products.length < 4) return null;
+
   return (
     <section className="bg-[#faf8f5] py-24 px-6">
       <div className="max-w-7xl mx-auto">
+
         {/* Heading */}
         <div className="text-center mb-20">
           <p className="uppercase tracking-[0.35em] text-[#8b5e3c] text-sm">
@@ -50,18 +52,18 @@ export default function ProductSection() {
           </p>
         </div>
 
-        {/* Premium Editorial Grid */}
+        {/* Grid */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
 
           {/* Large Card */}
           <motion.div
             whileHover={{ y: -8 }}
-            onClick={() => navigate(`/product/${products[0].id}`)}
+            onClick={() => navigate(`/product/${products[0]._id}`)}
             className="md:col-span-7 cursor-pointer group"
           >
             <div className="relative overflow-hidden rounded-[40px]">
               <img
-                src={products[0].image}
+                src={products[0].images?.[0]}
                 alt={products[0].name}
                 className="w-full h-[700px] object-cover transition duration-700 group-hover:scale-105"
               />
@@ -81,12 +83,12 @@ export default function ProductSection() {
 
             <motion.div
               whileHover={{ y: -8 }}
-              onClick={() => navigate(`/product/${products[1].id}`)}
+              onClick={() => navigate(`/product/${products[1]._id}`)}
               className="cursor-pointer group"
             >
               <div className="relative overflow-hidden rounded-[32px]">
                 <img
-                  src={products[1].image}
+                  src={products[1].images?.[0]}
                   alt={products[1].name}
                   className="w-full h-[340px] object-cover transition duration-700 group-hover:scale-105"
                 />
@@ -103,12 +105,12 @@ export default function ProductSection() {
 
             <motion.div
               whileHover={{ y: -8 }}
-              onClick={() => navigate(`/product/${products[2].id}`)}
+              onClick={() => navigate(`/product/${products[2]._id}`)}
               className="cursor-pointer group"
             >
               <div className="relative overflow-hidden rounded-[32px]">
                 <img
-                  src={products[2].image}
+                  src={products[2].images?.[0]}
                   alt={products[2].name}
                   className="w-full h-[340px] object-cover transition duration-700 group-hover:scale-105"
                 />
@@ -128,12 +130,12 @@ export default function ProductSection() {
           {/* Bottom Banner */}
           <motion.div
             whileHover={{ y: -5 }}
-            onClick={() => navigate(`/product/${products[3].id}`)}
+            onClick={() => navigate(`/product/${products[3]._id}`)}
             className="md:col-span-12 cursor-pointer group"
           >
             <div className="relative overflow-hidden rounded-[40px]">
               <img
-                src={products[3].image}
+                src={products[3].images?.[0]}
                 alt={products[3].name}
                 className="w-full h-[400px] object-cover transition duration-700 group-hover:scale-105"
               />
@@ -147,7 +149,7 @@ export default function ProductSection() {
                   </p>
 
                   <h2 className="text-5xl md:text-6xl font-light">
-                    Luxury Collection
+                    {products[3].name}
                   </h2>
                 </div>
               </div>

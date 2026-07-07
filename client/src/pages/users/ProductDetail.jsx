@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
     Minus,
     Plus,
@@ -6,190 +6,12 @@ import {
 } from "lucide-react";
 import { useParams } from "react-router-dom";
 
-import ss1 from "../../assets/img/collections/ss1.jpg";
-import ss2 from "../../assets/img/collections/ss2.jpg";
-import ss3 from "../../assets/img/collections/ss3.jpg";
-import sc3 from "../../assets/img/sc3.jpg";
-import sc2 from "../../assets/img/sc2.jpg";
-import sc1 from "../../assets/img/sc1.jpg";
-import noir01 from "../../assets/img/noir01.jpg"
-import noir02 from "../../assets/img/noir02.jpg"
-import noir03 from "../../assets/img/noir03.jpg"
-import noir04 from "../../assets/img/noir04.jpg"
-import hero1 from "../../assets/img/hero1.jpg";
-import hero2 from "../../assets/img/hero2.jpg";
+
+
 
 import { useCart } from "../../context/CartContext";
 import Navbar from "../../components/common/Navbar";
 
-const products = [
-    {
-        id: "p1",
-        name: "Ivory Grace Dress",
-        price: 2499,
-        fabric: "Premium Satin",
-        description:
-            "Elegant satin dress crafted for timeless luxury and refined minimal styling.",
-        sizes: ["S", "M", "L"],
-        images: [ss1, ss2, ss3],
-    },
-
-    {
-        id: "p2",
-        name: "Noir Silhouette",
-        price: 1999,
-        fabric: "Cotton Blend",
-        description:
-            "Modern monochrome outfit designed with effortless elegance and comfort.",
-        sizes: ["M", "L", "XL"],
-        images: [ss2, ss3, ss1],
-    },
-
-    {
-        id: "p3",
-        name: "Soft Muse Co-ord",
-        price: 2199,
-        fabric: "Linen",
-        description:
-            "Relaxed luxury co-ord designed for elevated everyday wear.",
-        sizes: ["S", "M"],
-        images: [ss3, ss1, ss2],
-    },
-    {
-        id: "4",
-        name: "Classic Leather Bag",
-        price: 3499,
-        fabric: "100% Genuine Leather",
-        description:
-            "Handcrafted from premium leather for durability and timeless elegance.",
-        sizes: ["Small", "Medium", "Large"],
-        images: [
-            "https://images.unsplash.com/photo-1591561954557-26941169b49e",
-            "https://images.unsplash.com/photo-1584917865442-de89df76afd3",
-            "https://images.unsplash.com/photo-1548036328-c9fa89d128fa",
-        ],
-    },
-
-    {
-        id: "5",
-        name: "Minimal Wrist Watch",
-        price: 5999,
-        fabric: "Stainless Steel & Sapphire Glass",
-        description:
-            "Designed for everyday wear with scratch-resistant glass and precision movement.",
-        sizes: ["40mm", "42mm", "44mm"],
-        images: [
-            "https://images.unsplash.com/photo-1522312346375-d1a52e2b99b3",
-            "https://images.unsplash.com/photo-1434056886845-dac89ffe9b56",
-            "https://images.unsplash.com/photo-1523170335258-f5ed11844a49",
-        ],
-    },
-
-    {
-        id: "6",
-        name: "Comfort Sneakers",
-        price: 4299,
-        fabric: "Breathable Mesh & Rubber Sole",
-        description:
-            "Ultra-lightweight sneakers made for long-lasting comfort and flexibility.",
-        sizes: ["UK6", "UK7", "UK8", "UK9"],
-        images: [
-            "https://images.unsplash.com/photo-1542291026-7eec264c27ff",
-            "https://images.unsplash.com/photo-1600185365483-26d7a4cc7519",
-            "https://images.unsplash.com/photo-1549298916-b41d501d3772",
-        ],
-    },
-    {
-        id: "noirr-003",
-        name: "Comfort Sneakers",
-        price: 4299,
-        fabric: "Breathable Mesh & Rubber Sole",
-        description:
-            "Ultra-lightweight sneakers made for long-lasting comfort and flexibility.",
-        sizes: ["UK6", "UK7", "UK8", "UK9"],
-        images: [sc3],
-    },
-    {
-        id: "dress-001",
-        name: "Comfort Sneakers",
-        price: 4299,
-        fabric: "Breathable Mesh & Rubber Sole",
-        description:
-            "Ultra-lightweight sneakers made for long-lasting comfort and flexibility.",
-        sizes: ["UK6", "UK7", "UK8", "UK9"],
-        images: [sc1],
-    },
-    {
-        id: "perfect-002",
-        name: "Comfort Sneakers",
-        price: 4299,
-        fabric: "Breathable Mesh & Rubber Sole",
-        description:
-            "Ultra-lightweight sneakers made for long-lasting comfort and flexibility.",
-        sizes: ["UK6", "UK7", "UK8", "UK9"],
-        images: [sc2],
-    },
-    {
-        id: "noir-001",
-        name: "Comfort Sneakers",
-        price: 4299,
-        fabric: "Breathable Mesh & Rubber Sole",
-        description:
-            "Ultra-lightweight sneakers made for long-lasting comfort and flexibility.",
-        sizes: ["UK6", "UK7", "UK8", "UK9"],
-        images: [noir01],
-    },
-    {
-        id: "noir-002",
-        name: "Comfort Sneakers",
-        price: 4299,
-        fabric: "Breathable Mesh & Rubber Sole",
-        description:
-            "Ultra-lightweight sneakers made for long-lasting comfort and flexibility.",
-        sizes: ["UK6", "UK7", "UK8", "UK9"],
-        images: [noir02],
-    },
-    {
-        id: "noir-003",
-        name: "Comfort Sneakers",
-        price: 4299,
-        fabric: "Breathable Mesh & Rubber Sole",
-        description:
-            "Ultra-lightweight sneakers made for long-lasting comfort and flexibility.",
-        sizes: ["UK6", "UK7", "UK8", "UK9"],
-        images: [noir03],
-    },
-    {
-        id: "noir-004",
-        name: "Comfort Sneakers",
-        price: 4299,
-        fabric: "Breathable Mesh & Rubber Sole",
-        description:
-            "Ultra-lightweight sneakers made for long-lasting comfort and flexibility.",
-        sizes: ["UK6", "UK7", "UK8", "UK9"],
-        images: [noir04],
-    },
-    {
-        id: "hero-2",
-        name: "Comfort Sneakers",
-        price: 4299,
-        fabric: "Breathable Mesh & Rubber Sole",
-        description:
-            "Ultra-lightweight sneakers made for long-lasting comfort and flexibility.",
-        sizes: ["UK6", "UK7", "UK8", "UK9"],
-        images: [hero2],
-    },
-    {
-        id: "hero-1",
-        name: "Comfort Sneakers",
-        price: 4299,
-        fabric: "Breathable Mesh & Rubber Sole",
-        description:
-            "Ultra-lightweight sneakers made for long-lasting comfort and flexibility.",
-        sizes: ["UK6", "UK7", "UK8", "UK9"],
-        images: [hero1],
-    },
-];
 
 const ProductDetails = () => {
 
@@ -201,15 +23,38 @@ const ProductDetails = () => {
         decreaseQuantity,
     } = useCart();
 
-    const product = products.find((item) => item.id === id);
+    const [product, setProduct] = useState(null);
+    const [loading, setLoading] = useState(true);
 
-    const [selectedImage, setSelectedImage] = useState(
-        product?.images[0]
-    );
-
+    const [selectedImage, setSelectedImage] = useState("");
     const [selectedSize, setSelectedSize] = useState("");
+
+    useEffect(() => {
+        const fetchProduct = async () => {
+            try {
+                const res = await fetch(
+                    `https://euphoria-ooqv.onrender.com/api/products/${id}`
+                );
+
+                const data = await res.json();
+
+                setProduct(data);
+
+                if (data.images?.length) {
+                    setSelectedImage(data.images[0]);
+                }
+            } catch (err) {
+                console.log(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchProduct();
+    }, [id]);
+
     const cartItem = cart.find(
-        (item) => item.id === product?.id
+        (item) => item._id === product?._id
     );
 
     const quantity = cartItem?.quantity || 0;
@@ -218,6 +63,13 @@ const ProductDetails = () => {
         return (
             <div className="h-screen flex items-center justify-center">
                 Product Not Found
+            </div>
+        );
+    }
+    if (loading) {
+        return (
+            <div className="h-screen flex items-center justify-center">
+                Loading...
             </div>
         );
     }
@@ -264,12 +116,12 @@ const ProductDetails = () => {
                                 alt={product.name}
 
                                 className="
-    w-full
-    h-[340px]
-    sm:h-[500px]
-    lg:h-[720px]
-    object-cover
-"
+                                w-full
+                                 h-[340px]
+                                 sm:h-[500px]
+                                 lg:h-[720px]
+                                  object-cover
+                                    "
                             />
 
                         </div>
@@ -283,7 +135,7 @@ const ProductDetails = () => {
     pb-2
 ">
 
-                            {product.images.map((img, index) => (
+                            {product.images?.map((img, index) => (
 
                                 <button
                                     key={index}
@@ -542,7 +394,7 @@ const ProductDetails = () => {
                                 >
                                     <button
                                         onClick={() =>
-                                            decreaseQuantity(product.id)
+                                            decreaseQuantity(product._id)
                                         }
                                         className="
                     w-10

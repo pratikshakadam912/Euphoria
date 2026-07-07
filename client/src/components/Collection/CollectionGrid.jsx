@@ -1,75 +1,65 @@
-
-import ss1 from "../../assets/img/collections/ss1.jpg";
-import ss2 from "../../assets/img/collections/ss2.jpg";
-import ss3 from "../../assets/img/collections/ss3.jpg";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination } from "swiper/modules";
 
-import { useNavigate } from "react-router-dom";
+
 
 import "swiper/css";
 import "swiper/css/pagination";
 
-const products = [
-    {
-        id: "p1",
-        name: "Ivory Grace Dress",
-
-        price: 2499,
-        fabric: "Premium Satin",
-        description:
-            "Elegant satin dress with soft texture and luxurious finish.",
-        sizes: ["S", "M", "L"],
-        images: [ss1, ss2, ss3],
-        category: "dresses",
-    },
-
-    {
-        id: "p2",
-        name: "Noir Silhouette",
-        category: "signature",
-        price: 1999,
-        fabric: "Cotton Blend",
-        description:
-            "Minimal black outfit designed for comfort and elegance.",
-        sizes: ["M", "L", "XL"],
-        images: [ss2, ss3, ss1],
-    },
-
-    {
-        id: "p3",
-        name: "Soft Muse Co-ord",
-        category: "co-ords",
-        price: 2199,
-        fabric: "Linen",
-        description:
-            "Relaxed co-ord set perfect for modern casual styling.",
-        sizes: ["S", "M"],
-        images: [ss3, ss1, ss2],
-    },
-];
-
 const CollectionGrid = ({ selectedCategory = "all" }) => {
     const navigate = useNavigate();
+
+    const [products, setProducts] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchProducts = async () => {
+            try {
+                const res = await fetch(
+                    "https://euphoria-ooqv.onrender.com/api/products"
+                );
+
+                const data = await res.json();
+
+                setProducts(data);
+            } catch (err) {
+                console.log(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchProducts();
+    }, []);
 
     const filteredProducts =
         selectedCategory === "all"
             ? products
             : products.filter(
-                (product) =>
-                    product.category.toLowerCase() ===
-                    selectedCategory.toLowerCase()
-            );
+                  (product) =>
+                      product.category?.toLowerCase() ===
+                      selectedCategory.toLowerCase()
+              );
+
+    if (loading) {
+        return (
+            <div className="flex justify-center py-20">
+                Loading Products...
+            </div>
+        );
+    }
 
     return (
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-10">
             {filteredProducts.map((product) => (
                 <div
-                    key={product.id}
+                    key={product._id}
                     className="group cursor-pointer"
-                    onClick={() => navigate(`/product/${product.id}`)}
+                    onClick={() => navigate(`/product/${product._id}`)}
                 >
                     {/* PRODUCT IMAGE SLIDER */}
                     <div className="relative overflow-hidden rounded-2xl shadow-md hover:shadow-xl transition-all duration-300">
@@ -79,7 +69,7 @@ const CollectionGrid = ({ selectedCategory = "all" }) => {
                             slidesPerView={1}
                             className="productSwiper"
                         >
-                            {product.images.map((img, index) => (
+                            {product.images?.map((img, index) => (
                                 <SwiperSlide key={index}>
                                     <img
                                         src={img}

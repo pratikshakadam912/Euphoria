@@ -6,10 +6,12 @@ const Product = () => {
     const [formData, setFormData] = useState({
         name: "",
         price: "",
+        fabric: "",
         description: "",
         category: "",
-        stock: "",
-        image: "",
+        collection: "",
+        sizes: "",
+        images: "",
     });
 
     // 🔄 Fetch Products
@@ -45,16 +47,27 @@ const Product = () => {
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify(formData),
+                body: JSON.stringify({
+                    ...formData,
+                    price: Number(formData.price),
+                    sizes: formData.sizes
+                        .split(",")
+                        .map((size) => size.trim()),
+                    images: formData.images
+                        .split(",")
+                        .map((img) => img.trim()),
+                }),
             });
 
             setFormData({
                 name: "",
                 price: "",
+                fabric: "",
                 description: "",
                 category: "",
-                stock: "",
-                image: "",
+                collection: "",
+                sizes: "",
+                images: "",
             });
 
             fetchProducts();
@@ -119,14 +132,7 @@ const Product = () => {
                             className="border p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
                         />
 
-                        <input
-                            type="number"
-                            name="stock"
-                            placeholder="Stock"
-                            value={formData.stock}
-                            onChange={handleChange}
-                            className="border p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
-                        />
+
 
                         <textarea
                             name="description"
@@ -135,14 +141,39 @@ const Product = () => {
                             onChange={handleChange}
                             className="border p-2 rounded col-span-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
                         />
+                        <textarea
+                            name="images"
+                            placeholder="Image URLs separated by commas"
+                            value={formData.images}
+                            onChange={handleChange}
+                            className="border p-2 rounded col-span-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        />
+
 
                         <input
                             type="text"
-                            name="image"
-                            placeholder="Image URL"
-                            value={formData.image}
+                            name="fabric"
+                            placeholder="Fabric"
+                            value={formData.fabric}
                             onChange={handleChange}
-                            className="border p-2 rounded col-span-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                            className="border p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        />
+
+                        <input
+                            type="text"
+                            name="collection"
+                            placeholder="Collection"
+                            value={formData.collection}
+                            onChange={handleChange}
+                            className="border p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        />
+                        <input
+                            type="text"
+                            name="sizes"
+                            placeholder="S,M,L,XL"
+                            value={formData.sizes}
+                            onChange={handleChange}
+                            className="border p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
                         />
 
                         <button
@@ -159,9 +190,9 @@ const Product = () => {
                 <div className="bg-white p-6 rounded-xl shadow flex flex-col items-center justify-center">
                     <h2 className="text-lg font-semibold mb-4">Preview</h2>
 
-                    {formData.image ? (
+                    {formData.images ? (
                         <img
-                            src={formData.image}
+                            src={formData.images.split(",")[0]}
                             alt="preview"
                             className="h-40 object-contain rounded"
                         />
@@ -185,8 +216,9 @@ const Product = () => {
                                 <th>Name</th>
                                 <th>Price</th>
                                 <th>Category</th>
-                                <th>Stock</th>
+                                <th>Fabric</th>
                                 <th>Action</th>
+                                <th>Collection</th>
                             </tr>
                         </thead>
 
@@ -203,9 +235,9 @@ const Product = () => {
                                     <tr key={p._id} className="border-b hover:bg-gray-50">
 
                                         <td className="py-3">
-                                            {p.image && (
+                                            {p.images?.length > 0 && (
                                                 <img
-                                                    src={p.image}
+                                                    src={p.images[0]}
                                                     alt=""
                                                     className="h-12 w-12 object-cover rounded"
                                                 />
@@ -215,14 +247,9 @@ const Product = () => {
                                         <td>{p.name}</td>
                                         <td>₹{p.price}</td>
                                         <td>{p.category}</td>
-                                        <td>
-                                            <span className={`px-2 py-1 rounded text-sm ${p.stock > 0
-                                                    ? "bg-green-100 text-green-600"
-                                                    : "bg-red-100 text-red-600"
-                                                }`}>
-                                                {p.stock}
-                                            </span>
-                                        </td>
+                                        <td>{p.fabric}</td>
+                                        <td>{p.collection}</td>
+
 
                                         <td>
                                             <button
