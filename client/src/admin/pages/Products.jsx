@@ -89,19 +89,31 @@ const Product = () => {
     };
 
     return (
-        <div className="p-6 bg-gray-100 min-h-screen">
-
+        <div className="min-h-screen bg-[#f7f5f2] p-8">
             {/* Header */}
-            <h1 className="text-3xl font-bold mb-6 text-gray-800">
-                Product Management
-            </h1>
+            <div className="mb-10">
+                <p className="uppercase tracking-[0.35em] text-sm text-gray-500">
+                    Admin Dashboard
+                </p>
+
+                <h1 className="text-5xl font-light mt-2">
+                    Product Management
+                </h1>
+
+                <p className="text-gray-500 mt-3">
+                    Add, organize and manage your luxury collections.
+                </p>
+            </div>
 
             {/* Form + Preview */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="grid lg:grid-cols-4 gap-8">
 
                 {/* Form */}
-                <div className="lg:col-span-2 bg-white p-6 rounded-xl shadow">
-                    <h2 className="text-lg font-semibold mb-4">Add Product</h2>
+
+                <div className="lg:col-span-3 bg-white rounded-3xl p-8 shadow-lg border border-gray-100">
+                    <h2 className="text-2xl font-medium mb-8">
+                        Add New Product
+                    </h2>
 
                     <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
@@ -111,7 +123,7 @@ const Product = () => {
                             placeholder="Product Name"
                             value={formData.name}
                             onChange={handleChange}
-                            className="border p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+                            className="border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-black"
                         />
 
                         <input
@@ -120,7 +132,7 @@ const Product = () => {
                             placeholder="Price"
                             value={formData.price}
                             onChange={handleChange}
-                            className="border p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+                            className="border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-black"
                         />
 
                         <input
@@ -129,7 +141,7 @@ const Product = () => {
                             placeholder="Category"
                             value={formData.category}
                             onChange={handleChange}
-                            className="border p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+                            className="border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-black"
                         />
 
 
@@ -156,7 +168,7 @@ const Product = () => {
                             placeholder="Fabric"
                             value={formData.fabric}
                             onChange={handleChange}
-                            className="border p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+                            className="border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-black"
                         />
 
                         <input
@@ -165,7 +177,7 @@ const Product = () => {
                             placeholder="Collection"
                             value={formData.collection}
                             onChange={handleChange}
-                            className="border p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+                            className="border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-black"
                         />
                         <input
                             type="text"
@@ -173,7 +185,7 @@ const Product = () => {
                             placeholder="S,M,L,XL"
                             value={formData.sizes}
                             onChange={handleChange}
-                            className="border p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+                            className="border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-black"
                         />
 
                         <button
