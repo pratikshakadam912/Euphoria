@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   FaImages,
@@ -11,7 +11,7 @@ import {
 
 const sections = [
   {
-    id: 1,
+    id: "hero",
     title: "Hero Section",
     description: "Manage hero products, headings, buttons and homepage banner.",
     icon: <FaImages />,
@@ -19,7 +19,7 @@ const sections = [
     items: "2 Featured Products",
   },
   {
-    id: 2,
+    id: "curated",
     title: "Curated Essentials",
     description: "Choose products displayed in the luxury product showcase.",
     icon: <FaMagic />,
@@ -27,7 +27,7 @@ const sections = [
     items: "4 Featured Products",
   },
   {
-    id: 3,
+    id: "signature",
     title: "Signature Collection",
     description: "Update signature banner and featured collection products.",
     icon: <FaGem />,
@@ -35,12 +35,12 @@ const sections = [
     items: "Banner + 3 Products",
   },
   {
-    id: 4,
+    id: "edit",
     title: "Euphoria Edit",
-    description: "Manage editorial images, luxury campaign and homepage story.",
+    description: "Manage editorial images and luxury campaign.",
     icon: <FaPalette />,
     color: "from-pink-500 to-rose-500",
-    items: "Editorial Content",
+    items: "3 Editorial Images",
   },
 ];
 
