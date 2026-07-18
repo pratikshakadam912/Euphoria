@@ -1,56 +1,23 @@
 import express from "express";
-import Product from "../models/Product.js";
+
+import {
+  createProduct,
+  getProducts,
+  getProduct,
+  updateProduct,
+  deleteProduct,
+} from "../controllers/productController.js";
 
 const router = express.Router();
 
-// Add Product
-router.post("/", async (req, res) => {
-  try {
-    const product = new Product(req.body);
-    await product.save();
-    res.json(product);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
+router.post("/", createProduct);
 
-// Get All Products
-router.get("/", async (req, res) => {
-  try {
-    const products = await Product.find();
-    res.json(products);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
+router.get("/", getProducts);
 
-// Get Single Product ✅
-router.get("/:id", async (req, res) => {
-  try {
-    const product = await Product.findById(req.params.id);
+router.get("/:id", getProduct);
 
-    if (!product) {
-      return res.status(404).json({
-        message: "Product not found",
-      });
-    }
+router.put("/:id", updateProduct);
 
-    res.json(product);
-  } catch (err) {
-    res.status(500).json({
-      error: err.message,
-    });
-  }
-});
-
-// Delete Product
-router.delete("/:id", async (req, res) => {
-  try {
-    await Product.findByIdAndDelete(req.params.id);
-    res.json({ message: "Deleted" });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
+router.delete("/:id", deleteProduct);
 
 export default router;
