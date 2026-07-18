@@ -46,6 +46,30 @@ const sections = [
 
 const Website = () => {
   const [selectedSection, setSelectedSection] = useState(null);
+
+  const [products, setProducts] = useState([]);
+
+  const [formData, setFormData] = useState({
+    title: "",
+    subtitle: "",
+    description: "",
+
+    buttonOne: {
+      text: "",
+      link: "",
+    },
+
+    buttonTwo: {
+      text: "",
+      link: "",
+    },
+
+    banner: "",
+
+    images: [],
+
+    products: [],
+  });
   return (
     <div className="min-h-screen">
       {/* Header */}
