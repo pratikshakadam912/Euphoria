@@ -269,16 +269,131 @@ const Website = () => {
 
               {/* Body */}
 
-              <div className="p-8">
-                <div className="bg-gray-50 rounded-2xl p-10 text-center">
-                  <h3 className="text-2xl font-semibold">
-                    {selectedSection.title}
-                  </h3>
+              <div className="p-8 space-y-6">
+                {/* Title */}
 
-                  <p className="text-gray-500 mt-3">
-                    Section editor will be added in the next step.
-                  </p>
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    Section Title
+                  </label>
+
+                  <input
+                    type="text"
+                    value={formData.title}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        title: e.target.value,
+                      })
+                    }
+                    className="w-full border rounded-xl px-4 py-3"
+                    placeholder="Enter title"
+                  />
                 </div>
+
+                {/* Subtitle */}
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    Subtitle
+                  </label>
+
+                  <textarea
+                    rows="3"
+                    value={formData.subtitle}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        subtitle: e.target.value,
+                      })
+                    }
+                    className="w-full border rounded-xl px-4 py-3"
+                    placeholder="Enter subtitle"
+                  />
+                </div>
+
+                {/* Hero Only */}
+
+                {selectedSection.id === "hero" && (
+                  <>
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        Button One
+                      </label>
+
+                      <input
+                        type="text"
+                        value={formData.buttonOne.text}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            buttonOne: {
+                              ...formData.buttonOne,
+                              text: e.target.value,
+                            },
+                          })
+                        }
+                        className="w-full border rounded-xl px-4 py-3"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        Button Two
+                      </label>
+
+                      <input
+                        type="text"
+                        value={formData.buttonTwo.text}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            buttonTwo: {
+                              ...formData.buttonTwo,
+                              text: e.target.value,
+                            },
+                          })
+                        }
+                        className="w-full border rounded-xl px-4 py-3"
+                      />
+                    </div>
+                  </>
+                )}
+
+                {/* Product Selection */}
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    Select Products
+                  </label>
+
+                  <select
+                    multiple
+                    className="w-full border rounded-xl p-3 h-56"
+                    onChange={(e) => {
+                      const values = [...e.target.selectedOptions].map(
+                        (option) => option.value,
+                      );
+
+                      setFormData({
+                        ...formData,
+                        products: values,
+                      });
+                    }}
+                  >
+                    {products.map((product) => (
+                      <option key={product._id} value={product._id}>
+                        {product.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Save Button */}
+
+                <button className="w-full bg-black text-white py-4 rounded-xl hover:bg-gray-800">
+                  Save Changes
+                </button>
               </div>
             </motion.div>
           </motion.div>
