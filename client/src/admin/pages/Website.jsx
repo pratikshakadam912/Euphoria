@@ -126,18 +126,19 @@ const Website = () => {
                 </span>
 
                 <button
+                  onClick={() => setSelectedSection(section)}
                   className="
-                                    flex
-                                    items-center
-                                    gap-3
-                                    bg-black
-                                    text-white
-                                    px-6
-                                    py-3
-                                    rounded-xl
-                                    hover:bg-gray-900
-                                    transition
-                                "
+        flex
+        items-center
+        gap-3
+        bg-black
+        text-white
+        px-6
+        py-3
+        rounded-xl
+        hover:bg-gray-900
+        transition
+    "
                 >
                   Edit Section
                   <FaArrowRight />
@@ -147,6 +148,99 @@ const Website = () => {
           </motion.div>
         ))}
       </div>
+      <AnimatePresence>
+        {selectedSection && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="
+                fixed
+                inset-0
+                bg-black/60
+                z-50
+                flex
+                items-center
+                justify-center
+                p-4
+            "
+          >
+            <motion.div
+              initial={{
+                opacity: 0,
+                scale: 0.9,
+                y: 40,
+              }}
+              animate={{
+                opacity: 1,
+                scale: 1,
+                y: 0,
+              }}
+              exit={{
+                opacity: 0,
+                scale: 0.9,
+              }}
+              transition={{
+                duration: 0.3,
+              }}
+              className="
+                    bg-white
+                    rounded-3xl
+                    w-full
+                    max-w-3xl
+                    shadow-2xl
+                    overflow-hidden
+                "
+            >
+              {/* Header */}
+
+              <div className="flex justify-between items-center p-8 border-b">
+                <div>
+                  <h2 className="text-3xl font-semibold">
+                    {selectedSection.title}
+                  </h2>
+
+                  <p className="text-gray-500 mt-2">
+                    {selectedSection.description}
+                  </p>
+                </div>
+
+                <button
+                  onClick={() => setSelectedSection(null)}
+                  className="
+                            w-12
+                            h-12
+                            rounded-full
+                            bg-gray-100
+                            hover:bg-red-500
+                            hover:text-white
+                            transition
+                            flex
+                            items-center
+                            justify-center
+                        "
+                >
+                  <FaTimes />
+                </button>
+              </div>
+
+              {/* Body */}
+
+              <div className="p-8">
+                <div className="bg-gray-50 rounded-2xl p-10 text-center">
+                  <h3 className="text-2xl font-semibold">
+                    {selectedSection.title}
+                  </h3>
+
+                  <p className="text-gray-500 mt-3">
+                    Section editor will be added in the next step.
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
