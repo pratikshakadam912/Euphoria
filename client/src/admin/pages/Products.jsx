@@ -121,14 +121,18 @@ const Product = () => {
               className="border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-black"
             />
 
-            <input
-              type="number"
-              name="price"
-              placeholder="Price"
-              value={formData.price}
+            <select
+              name="category"
+              value={formData.category}
               onChange={handleChange}
               className="border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-black"
-            />
+            >
+              <option value="">Select Category</option>
+              <option value="signature">Signature</option>
+              <option value="dresses">Dresses</option>
+              <option value="co-ords">Co-ords</option>
+              <option value="limited-edition">Limited Edition</option>
+            </select>
 
             <input
               type="text"
