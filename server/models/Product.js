@@ -18,13 +18,18 @@ const productSchema = new mongoose.Schema(
 
     sizes: [String],
 
-    images: [String],
+    images: [
+      {
+        url: String,
+        alt: String,
+      },
+    ],
 
     category: {
       type: String,
       required: true,
+      enum: ["signature", "dresses", "co-ords", "limited-edition"],
     },
-
     collection: {
       type: String,
       required: true,
@@ -38,6 +43,7 @@ const productSchema = new mongoose.Schema(
     stock: {
       type: Number,
       default: 0,
+      min: 0,
     },
   },
   {
