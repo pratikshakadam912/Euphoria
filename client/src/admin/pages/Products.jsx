@@ -171,14 +171,17 @@ const Product = () => {
               className="border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-black"
             />
 
-            <input
-              type="text"
+            <select
               name="collection"
-              placeholder="Collection"
               value={formData.collection}
               onChange={handleChange}
-              className="border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-black"
-            />
+              className="border border-gray-200 rounded-xl px-4 py-3"
+            >
+              <option value="">Select Collection</option>
+              <option value="summer">Summer Collection</option>
+              <option value="winter">Winter Collection</option>
+              <option value="new-arrival">New Arrival</option>
+            </select>
             <input
               type="text"
               name="sizes"
