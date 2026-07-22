@@ -1,4 +1,6 @@
 import Product from "../models/Product.js";
+import cloudinary from "../utils/cloudinary.js";
+import streamifier from "streamifier";
 
 // Create Product
 export const createProduct = async (req, res) => {
