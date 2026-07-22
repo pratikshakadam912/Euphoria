@@ -5,10 +5,46 @@ import streamifier from "streamifier";
 // Create Product
 export const createProduct = async (req, res) => {
   try {
-    const product = await Product.create(req.body);
+    const imageUrls = [];
+
+    // Upload each image to Cloudinary
+    if (req.files && req.files.length > 0) {
+      for (const file of req.files) {
+        const result = await new Promise((resolve, reject) => {
+          const stream = cloudinary.uploader.upload_stream(
+            {
+              folder: "euphoria-products",
+            },
+            (error, result) => {
+              if (error) return reject(error);
+              resolve(result);
+            },
+          );
+
+          streamifier.createReadStream(file.buffer).pipe(stream);
+        });
+
+        imageUrls.push(result.secure_url);
+      }
+    }
+
+    const product = await Product.create({
+      name: req.body.name,
+      price: Number(req.body.price),
+      fabric: req.body.fabric,
+      description: req.body.description,
+      category: req.body.category,
+      collection: req.body.collection,
+      stock: Number(req.body.stock || 0),
+      featured: req.body.featured === "true",
+      sizes: JSON.parse(req.body.sizes || "[]"),
+      images: imageUrls,
+    });
 
     res.status(201).json(product);
   } catch (error) {
+    console.log(error);
+
     res.status(500).json({
       message: error.message,
     });
