@@ -5,35 +5,48 @@ const productSchema = new mongoose.Schema(
     name: {
       type: String,
       required: true,
+      trim: true,
     },
 
     price: {
       type: Number,
       required: true,
+      min: 0,
     },
 
-    fabric: String,
+    fabric: {
+      type: String,
+      default: "",
+    },
 
-    description: String,
-
-    sizes: [String],
-
-    images: [
-      {
-        url: String,
-        alt: String,
-      },
-    ],
+    description: {
+      type: String,
+      default: "",
+    },
 
     category: {
       type: String,
       required: true,
       enum: ["signature", "dresses", "co-ords", "limited-edition"],
     },
+
     collection: {
       type: String,
       required: true,
     },
+
+    sizes: [
+      {
+        type: String,
+      },
+    ],
+
+    // ✅ Multiple Cloudinary Image URLs
+    images: [
+      {
+        type: String,
+      },
+    ],
 
     featured: {
       type: Boolean,
