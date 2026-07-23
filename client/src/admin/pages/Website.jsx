@@ -392,14 +392,15 @@ const Website = () => {
                 opacity: 0,
               }}
               className="
-                bg-white
-                rounded-3xl
-                shadow-2xl
-                w-full
-                max-w-5xl
-                max-h-[92vh]
-                overflow-y-auto
-              "
+bg-white
+rounded-3xl
+shadow-2xl
+w-full
+max-w-6xl
+h-[90vh]
+flex
+flex-col
+"
             >
               {/* ================= MODAL HEADER ================= */}
 
@@ -435,7 +436,10 @@ const Website = () => {
 
               {/* ================= MODAL BODY ================= */}
 
-              <div className="p-8 grid lg:grid-cols-2 gap-8">
+              <div
+                className="flex-1 overflow-y-auto p-8 grid lg:grid-cols-2gap-8
+                   "
+              >
                 {/* ================= LEFT SIDE ================= */}
 
                 <div className="space-y-6">
