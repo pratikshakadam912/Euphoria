@@ -60,8 +60,11 @@ export default function ProductSection() {
           >
             <div className="relative overflow-hidden rounded-[40px]">
               <img
-                src={products[0]?.images?.[0]?.url}
-                alt={products[0]?.images?.[0]?.alt || products[0]?.name}
+                src={
+                  typeof products[0]?.images?.[0] === "string"
+                    ? products[0].images[0]
+                    : products[0]?.images?.[0]?.url
+                }
                 className="w-full h-[700px] object-cover transition duration-700 group-hover:scale-105"
               />
 
@@ -87,8 +90,11 @@ export default function ProductSection() {
             >
               <div className="relative overflow-hidden rounded-[32px]">
                 <img
-                  src={products[1]?.images?.[0]?.url}
-                  alt={products[1]?.images?.[0]?.alt || products[1]?.name}
+                  src={
+                    typeof products[1]?.images?.[0] === "string"
+                      ? products[1].images[0]
+                      : products[1]?.images?.[0]?.url
+                  }
                   className="w-full h-[340px] object-cover transition duration-700 group-hover:scale-105"
                 />
 
@@ -111,8 +117,11 @@ export default function ProductSection() {
             >
               <div className="relative overflow-hidden rounded-[32px]">
                 <img
-                  src={products[2]?.images?.[0]?.url}
-                  alt={products[2]?.images?.[0]?.alt || products[2]?.name}
+                  src={
+                    typeof products[2]?.images?.[0] === "string"
+                      ? products[2].images[0]
+                      : products[2]?.images?.[0]?.url
+                  }
                   className="w-full h-[340px] object-cover transition duration-700 group-hover:scale-105"
                 />
 
@@ -136,8 +145,11 @@ export default function ProductSection() {
           >
             <div className="relative overflow-hidden rounded-[40px]">
               <img
-                src={products[3]?.images?.[0]?.url}
-                alt={products[3]?.images?.[0]?.alt || products[3]?.name}
+                src={
+                  typeof products[3]?.images?.[0] === "string"
+                    ? products[3].images[0]
+                    : products[3]?.images?.[0]?.url
+                }
                 className="w-full h-[400px] object-cover transition duration-700 group-hover:scale-105"
               />
 
