@@ -22,6 +22,7 @@ export default function Website() {
     banner: "",
     products: [],
   });
+  const [signatureBannerFile, setSignatureBannerFile] = useState(null);
 
   useEffect(() => {
     fetchProducts();
@@ -210,19 +211,22 @@ export default function Website() {
     try {
       setSaving(true);
 
-      const body = {
-        banner: signatureData.banner,
-        products: signatureData.products.map((p) => p._id),
-      };
+      const formData = new FormData();
+
+      formData.append(
+        "products",
+        JSON.stringify(signatureData.products.map((p) => p._id)),
+      );
+
+      if (signatureBannerFile) {
+        formData.append("images", signatureBannerFile);
+      }
 
       const res = await fetch(
         "https://euphoria-ooqv.onrender.com/api/website/signature",
         {
           method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(body),
+          body: formData,
         },
       );
 
@@ -558,21 +562,19 @@ export default function Website() {
             <label className="block mb-3 font-medium">Banner Image URL</label>
 
             <input
-              type="text"
-              value={signatureData.banner}
-              onChange={(e) =>
-                setSignatureData({
-                  ...signatureData,
-                  banner: e.target.value,
-                })
-              }
-              className="w-full border rounded-xl px-4 py-3"
-              placeholder="Paste banner image URL"
+              type="file"
+              accept="image/*"
+              onChange={(e) => setSignatureBannerFile(e.target.files[0])}
+              className="w-full border rounded-xl p-3"
             />
 
             {signatureData.banner && (
               <img
-                src={signatureData.banner}
+                src={
+                  signatureBannerFile
+                    ? URL.createObjectURL(signatureBannerFile)
+                    : signatureData.banner
+                }
                 alt=""
                 className="mt-4 w-full h-64 object-cover rounded-2xl"
               />
