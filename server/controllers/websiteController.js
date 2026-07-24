@@ -1,4 +1,6 @@
 import Website from "../models/Website.js";
+import cloudinary from "../utils/cloudinary.js";
+import streamifier from "streamifier";
 
 // Get all website sections
 export const getWebsite = async (req, res) => {
@@ -31,11 +33,48 @@ export const getSection = async (req, res) => {
 // Create or Update
 export const saveSection = async (req, res) => {
   try {
+    let imageUrls = [];
+
+    // Upload images to Cloudinary
+    if (req.files && req.files.length > 0) {
+      for (const file of req.files) {
+        const result = await new Promise((resolve, reject) => {
+          const stream = cloudinary.uploader.upload_stream(
+            {
+              folder: "euphoria-homepage",
+            },
+            (error, result) => {
+              if (error) return reject(error);
+              resolve(result);
+            },
+          );
+
+          streamifier.createReadStream(file.buffer).pipe(stream);
+        });
+
+        imageUrls.push(result.secure_url);
+      }
+    }
+
     const section = await Website.findOneAndUpdate(
       {
         section: req.params.section,
       },
-      req.body,
+      {
+        title: req.body.title,
+        subtitle: req.body.subtitle,
+        description: req.body.description,
+
+        buttonOne: req.body.buttonOne ? JSON.parse(req.body.buttonOne) : {},
+
+        buttonTwo: req.body.buttonTwo ? JSON.parse(req.body.buttonTwo) : {},
+
+        products: req.body.products ? JSON.parse(req.body.products) : [],
+
+        images: imageUrls,
+
+        banner: imageUrls.length > 0 ? imageUrls[0] : "",
+      },
       {
         new: true,
         upsert: true,
@@ -44,6 +83,8 @@ export const saveSection = async (req, res) => {
 
     res.json(section);
   } catch (error) {
+    console.log(error);
+
     res.status(500).json({
       message: error.message,
     });

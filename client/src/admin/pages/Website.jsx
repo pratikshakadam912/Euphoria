@@ -402,7 +402,7 @@ flex
 flex-col
 "
             >
-              {/* ================= MODAL HEADER ================= */}
+              {/*  MODAL HEADER */}
 
               <div className="flex justify-between items-center border-b p-8">
                 <div>
@@ -434,13 +434,13 @@ flex-col
                 </button>
               </div>
 
-              {/* ================= MODAL BODY ================= */}
+              {/*  MODAL BODY  */}
 
               <div
                 className="flex-1 overflow-y-auto p-8 grid lg:grid-cols-2gap-8
                    "
               >
-                {/* ================= LEFT SIDE ================= */}
+                {/* LEFT SIDE  */}
 
                 <div className="space-y-6">
                   {/* Title */}
