@@ -23,6 +23,12 @@ const websiteSchema = new mongoose.Schema(
       default: "",
     },
 
+    // Banner Image
+    banner: {
+      type: String,
+      default: "",
+    },
+
     buttonOne: {
       text: {
         type: String,

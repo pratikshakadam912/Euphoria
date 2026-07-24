@@ -1,4 +1,6 @@
 import Website from "../models/Website.js";
+import cloudinary from "../utils/cloudinary.js";
+import streamifier from "streamifier";
 
 // Get all website sections
 export const getWebsite = async (req, res) => {
@@ -31,6 +33,27 @@ export const getSection = async (req, res) => {
 // Create / Update Section
 export const saveSection = async (req, res) => {
   try {
+    let banner = req.body.banner || "";
+
+    // Upload banner image if provided
+    if (req.files && req.files.length > 0) {
+      const result = await new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          {
+            folder: "euphoria-website",
+          },
+          (error, result) => {
+            if (error) return reject(error);
+            resolve(result);
+          },
+        );
+
+        streamifier.createReadStream(req.files[0].buffer).pipe(stream);
+      });
+
+      banner = result.secure_url;
+    }
+
     const section = await Website.findOneAndUpdate(
       {
         section: req.params.section,
@@ -40,11 +63,13 @@ export const saveSection = async (req, res) => {
         subtitle: req.body.subtitle,
         description: req.body.description,
 
-        buttonOne: req.body.buttonOne || {},
+        buttonOne: req.body.buttonOne ? JSON.parse(req.body.buttonOne) : {},
 
-        buttonTwo: req.body.buttonTwo || {},
+        buttonTwo: req.body.buttonTwo ? JSON.parse(req.body.buttonTwo) : {},
 
-        products: req.body.products || [],
+        products: req.body.products ? JSON.parse(req.body.products) : [],
+
+        banner,
       },
       {
         new: true,
