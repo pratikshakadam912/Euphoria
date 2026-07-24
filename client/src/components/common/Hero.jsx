@@ -145,7 +145,7 @@ const Hero = () => {
               className="cursor-pointer"
             >
               <img
-                src={mainProduct?.images?.[0]?.url}
+                src={mainProduct?.images?.[0]}
                 alt={mainProduct?.name}
                 className="w-full h-[620px] object-cover rounded-[40px] shadow-2xl"
               />
@@ -167,7 +167,7 @@ const Hero = () => {
                 className="cursor-pointer"
               >
                 <img
-                  src={secondProduct?.images?.[0]?.url}
+                  src={secondProduct?.images?.[0]}
                   alt={secondProduct?.name}
                   className="h-60 w-full object-cover rounded-[28px] shadow-lg"
                 />
