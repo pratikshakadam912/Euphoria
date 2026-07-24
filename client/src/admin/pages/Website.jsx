@@ -60,12 +60,9 @@ export default function Website() {
   };
 
   // Select Hero Product
-  const selectProduct = (index, productId) => {
-    const product = products.find((p) => p._id === productId);
-
-    if (!product) return;
-
+  const selectProduct = (index, product) => {
     const updated = [...heroData.products];
+
     updated[index] = product;
 
     setHeroData({
@@ -73,7 +70,6 @@ export default function Website() {
       products: updated,
     });
   };
-
   // Save Hero
   const saveHero = async () => {
     try {
@@ -217,8 +213,6 @@ export default function Website() {
 
         {/* RIGHT */}
 
-        {/* RIGHT SIDE */}
-
         <motion.div
           initial={{ opacity: 0, x: 30 }}
           animate={{ opacity: 1, x: 0 }}
@@ -329,10 +323,24 @@ export default function Website() {
 
             <button
               onClick={saveHero}
-              className="w-full bg-black text-white py-4 rounded-xl hover:bg-gray-800 transition flex items-center justify-center gap-3"
+              disabled={saving}
+              className="
+    w-full
+    bg-black
+    text-white
+    py-4
+    rounded-xl
+    hover:bg-gray-800
+    transition
+    flex
+    items-center
+    justify-center
+    gap-3
+    disabled:opacity-50
+  "
             >
               <FaSave />
-              Save Hero Section
+              {saving ? "Saving..." : "Save Hero Section"}
             </button>
           </div>
         </motion.div>
