@@ -25,10 +25,7 @@ export const createProduct = async (req, res) => {
         });
 
         // Store as object instead of string
-        imageUrls.push({
-          url: result.secure_url,
-          alt: req.body.name,
-        });
+        imageUrls.push(result.secure_url);
       }
     }
 
