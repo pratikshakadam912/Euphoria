@@ -63,11 +63,20 @@ export const saveSection = async (req, res) => {
         subtitle: req.body.subtitle,
         description: req.body.description,
 
-        buttonOne: req.body.buttonOne ? JSON.parse(req.body.buttonOne) : {},
+        buttonOne:
+          typeof req.body.buttonOne === "string"
+            ? JSON.parse(req.body.buttonOne)
+            : req.body.buttonOne || {},
 
-        buttonTwo: req.body.buttonTwo ? JSON.parse(req.body.buttonTwo) : {},
+        buttonTwo:
+          typeof req.body.buttonTwo === "string"
+            ? JSON.parse(req.body.buttonTwo)
+            : req.body.buttonTwo || {},
 
-        products: req.body.products ? JSON.parse(req.body.products) : [],
+        products:
+          typeof req.body.products === "string"
+            ? JSON.parse(req.body.products)
+            : req.body.products || [],
 
         banner,
       },
