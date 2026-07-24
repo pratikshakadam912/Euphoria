@@ -85,15 +85,13 @@ const Product = () => {
 
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
-    console.log(files);
+
     console.log("Selected:", files.length);
 
-    setFormData({
-      ...formData,
+    setFormData((prev) => ({
+      ...prev,
       images: files,
-    });
-
-    const previews = files.map((file) => URL.createObjectURL(file));
+    }));
 
     setImagePreview(files.map((file) => URL.createObjectURL(file)));
   };
@@ -392,11 +390,8 @@ const Product = () => {
                   type="file"
                   multiple
                   accept="image/*"
-                  onChange={(e) => {
-                    console.log("Multiple:", e.target.multiple);
-                    console.log("Files:", e.target.files);
-                    console.log("Count:", e.target.files.length);
-                  }}
+                  className="hidden"
+                  onChange={handleImageChange}
                 />
               </label>
             </div>
