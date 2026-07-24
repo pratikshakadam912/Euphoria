@@ -94,19 +94,16 @@ export default function Website() {
   };
 
   //product section
-  const selectCuratedProduct = (index, productId) => {
-    const product = products.find((p) => p._id === productId);
-
-    if (!product) return;
-
+  const selectCuratedProduct = (index, product) => {
     const updated = [...curatedData.products];
+
     updated[index] = product;
 
     setCuratedData({
       products: updated,
     });
   };
-  // Save Hero
+
   const saveHero = async () => {
     try {
       setSaving(true);
@@ -116,38 +113,6 @@ export default function Website() {
         subtitle: heroData.subtitle,
         description: heroData.description,
         products: heroData.products.map((p) => p._id),
-      };
-
-      const saveCurated = async () => {
-        try {
-          setSaving(true);
-
-          const body = {
-            products: curatedData.products.map((p) => p._id),
-          };
-
-          const res = await fetch(
-            "https://euphoria-ooqv.onrender.com/api/website/curated",
-            {
-              method: "PUT",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify(body),
-            },
-          );
-
-          if (!res.ok) {
-            throw new Error("Failed");
-          }
-
-          alert("Curated section updated successfully.");
-        } catch (err) {
-          console.log(err);
-          alert("Failed to update Curated section.");
-        } finally {
-          setSaving(false);
-        }
       };
 
       const res = await fetch(
@@ -169,6 +134,38 @@ export default function Website() {
     } catch (err) {
       console.log(err);
       alert("Failed to update Hero.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const saveCurated = async () => {
+    try {
+      setSaving(true);
+
+      const body = {
+        products: curatedData.products.map((p) => p._id),
+      };
+
+      const res = await fetch(
+        "https://euphoria-ooqv.onrender.com/api/website/curated",
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(body),
+        },
+      );
+
+      if (!res.ok) {
+        throw new Error("Failed");
+      }
+
+      alert("Curated section updated successfully.");
+    } catch (err) {
+      console.log(err);
+      alert("Failed to update Curated section.");
     } finally {
       setSaving(false);
     }
@@ -412,6 +409,77 @@ export default function Website() {
             </button>
           </div>
         </motion.div>
+      </div>
+      <div className="mt-16 bg-white rounded-3xl shadow-sm border border-gray-200 p-8">
+        <div className="mb-8">
+          <p className="uppercase tracking-[5px] text-sm text-gray-500">
+            Homepage
+          </p>
+
+          <h2 className="text-3xl font-light mt-2">Curated Products</h2>
+
+          <p className="text-gray-500 mt-2">
+            Choose four products for the Curated Essentials section.
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-8">
+          {[0, 1, 2, 3].map((index) => (
+            <div key={index}>
+              <label className="block mb-3 font-medium">
+                Product {index + 1}
+              </label>
+
+              <select
+                className="w-full border rounded-xl px-4 py-3"
+                value={curatedData.products?.[index]?._id || ""}
+                onChange={(e) => {
+                  const product = products.find(
+                    (item) => item._id === e.target.value,
+                  );
+
+                  selectCuratedProduct(index, product);
+                }}
+              >
+                <option value="">Select Product</option>
+
+                {products.map((product) => (
+                  <option key={product._id} value={product._id}>
+                    {product.name}
+                  </option>
+                ))}
+              </select>
+
+              {curatedData.products?.[index] && (
+                <div className="mt-4 flex items-center gap-4 border rounded-xl p-3">
+                  <img
+                    src={curatedData.products[index].images?.[0]}
+                    alt={curatedData.products[index].name}
+                    className="w-20 h-20 rounded-xl object-cover"
+                  />
+
+                  <div>
+                    <h3 className="font-semibold">
+                      {curatedData.products[index].name}
+                    </h3>
+
+                    <p className="text-gray-500">
+                      ₹{curatedData.products[index].price}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        <button
+          onClick={saveCurated}
+          disabled={saving}
+          className="mt-8 w-full bg-black text-white py-4 rounded-xl hover:bg-gray-800 transition disabled:opacity-50"
+        >
+          {saving ? "Saving..." : "Save Curated Section"}
+        </button>
       </div>
     </div>
   );
