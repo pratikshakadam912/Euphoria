@@ -81,9 +81,7 @@ const Product = () => {
     }
   };
 
-  // ===========================
   // Image Upload
-  // ===========================
 
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
@@ -119,9 +117,7 @@ const Product = () => {
     setImagePreview(newPreview);
   };
 
-  // ===========================
   // Submit Product
-  // ===========================
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -396,8 +392,11 @@ const Product = () => {
                   type="file"
                   multiple
                   accept="image/*"
-                  className="hidden"
-                  onChange={handleImageChange}
+                  onChange={(e) => {
+                    console.log("Multiple:", e.target.multiple);
+                    console.log("Files:", e.target.files);
+                    console.log("Count:", e.target.files.length);
+                  }}
                 />
               </label>
             </div>
