@@ -52,7 +52,10 @@ export const saveSection = async (req, res) => {
           streamifier.createReadStream(file.buffer).pipe(stream);
         });
 
-        imageUrls.push(result.secure_url);
+        imageUrls.push({
+          url: result.secure_url,
+          alt: req.body.name,
+        });
       }
     }
 
