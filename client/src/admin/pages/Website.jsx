@@ -14,10 +14,14 @@ export default function Website() {
     description: "",
     products: [],
   });
+  const [curatedData, setCuratedData] = useState({
+    products: [],
+  });
 
   useEffect(() => {
     fetchProducts();
     fetchHero();
+    fetchCurated();
   }, []);
 
   // Fetch Products
@@ -59,6 +63,24 @@ export default function Website() {
     }
   };
 
+  const fetchCurated = async () => {
+    try {
+      const res = await fetch(
+        "https://euphoria-ooqv.onrender.com/api/website/curated",
+      );
+
+      const data = await res.json();
+
+      if (data) {
+        setCuratedData({
+          products: data.products || [],
+        });
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   // Select Hero Product
   const selectProduct = (index, product) => {
     const updated = [...heroData.products];
@@ -67,6 +89,20 @@ export default function Website() {
 
     setHeroData({
       ...heroData,
+      products: updated,
+    });
+  };
+
+  //product section
+  const selectCuratedProduct = (index, productId) => {
+    const product = products.find((p) => p._id === productId);
+
+    if (!product) return;
+
+    const updated = [...curatedData.products];
+    updated[index] = product;
+
+    setCuratedData({
       products: updated,
     });
   };
@@ -80,6 +116,38 @@ export default function Website() {
         subtitle: heroData.subtitle,
         description: heroData.description,
         products: heroData.products.map((p) => p._id),
+      };
+
+      const saveCurated = async () => {
+        try {
+          setSaving(true);
+
+          const body = {
+            products: curatedData.products.map((p) => p._id),
+          };
+
+          const res = await fetch(
+            "https://euphoria-ooqv.onrender.com/api/website/curated",
+            {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(body),
+            },
+          );
+
+          if (!res.ok) {
+            throw new Error("Failed");
+          }
+
+          alert("Curated section updated successfully.");
+        } catch (err) {
+          console.log(err);
+          alert("Failed to update Curated section.");
+        } finally {
+          setSaving(false);
+        }
       };
 
       const res = await fetch(
