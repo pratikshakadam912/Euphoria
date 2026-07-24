@@ -71,9 +71,14 @@ export const saveSection = async (req, res) => {
 
         products: req.body.products ? JSON.parse(req.body.products) : [],
 
-        images: imageUrls,
+        images:
+          imageUrls.length > 0
+            ? imageUrls
+            : req.body.images
+              ? JSON.parse(req.body.images)
+              : [],
 
-        banner: imageUrls.length > 0 ? imageUrls[0] : "",
+        banner: imageUrls.length > 0 ? imageUrls[0] : req.body.banner || "",
       },
       {
         new: true,
