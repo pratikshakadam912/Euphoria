@@ -18,10 +18,16 @@ export default function Website() {
     products: [],
   });
 
+  const [signatureData, setSignatureData] = useState({
+    banner: "",
+    products: [],
+  });
+
   useEffect(() => {
     fetchProducts();
     fetchHero();
     fetchCurated();
+    fetchSignature();
   }, []);
 
   // Fetch Products
@@ -81,6 +87,24 @@ export default function Website() {
     }
   };
 
+  const fetchSignature = async () => {
+    try {
+      const res = await fetch(
+        "https://euphoria-ooqv.onrender.com/api/website/signature",
+      );
+
+      const data = await res.json();
+
+      if (data) {
+        setSignatureData({
+          banner: data.banner || "",
+          products: data.products || [],
+        });
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
   // Select Hero Product
   const selectProduct = (index, product) => {
     const updated = [...heroData.products];
@@ -100,6 +124,17 @@ export default function Website() {
     updated[index] = product;
 
     setCuratedData({
+      products: updated,
+    });
+  };
+
+  const selectSignatureProduct = (index, product) => {
+    const updated = [...signatureData.products];
+
+    updated[index] = product;
+
+    setSignatureData({
+      ...signatureData,
       products: updated,
     });
   };
@@ -166,6 +201,39 @@ export default function Website() {
     } catch (err) {
       console.log(err);
       alert("Failed to update Curated section.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const saveSignature = async () => {
+    try {
+      setSaving(true);
+
+      const body = {
+        banner: signatureData.banner,
+        products: signatureData.products.map((p) => p._id),
+      };
+
+      const res = await fetch(
+        "https://euphoria-ooqv.onrender.com/api/website/signature",
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(body),
+        },
+      );
+
+      if (!res.ok) {
+        throw new Error("Failed");
+      }
+
+      alert("Signature section updated successfully.");
+    } catch (err) {
+      console.log(err);
+      alert("Failed to update Signature section.");
     } finally {
       setSaving(false);
     }
@@ -480,6 +548,94 @@ export default function Website() {
         >
           {saving ? "Saving..." : "Save Curated Section"}
         </button>
+
+        <div className="mt-16 bg-white rounded-3xl shadow-sm border border-gray-200 p-8">
+          <h2 className="text-3xl font-semibold mb-8">Signature Collection</h2>
+
+          {/* Banner */}
+
+          <div className="mb-8">
+            <label className="block mb-3 font-medium">Banner Image URL</label>
+
+            <input
+              type="text"
+              value={signatureData.banner}
+              onChange={(e) =>
+                setSignatureData({
+                  ...signatureData,
+                  banner: e.target.value,
+                })
+              }
+              className="w-full border rounded-xl px-4 py-3"
+              placeholder="Paste banner image URL"
+            />
+
+            {signatureData.banner && (
+              <img
+                src={signatureData.banner}
+                alt=""
+                className="mt-4 w-full h-64 object-cover rounded-2xl"
+              />
+            )}
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {[0, 1, 2].map((index) => (
+              <div key={index}>
+                <label className="block mb-3 font-medium">
+                  Product {index + 1}
+                </label>
+
+                <select
+                  className="w-full border rounded-xl px-4 py-3"
+                  value={signatureData.products?.[index]?._id || ""}
+                  onChange={(e) => {
+                    const product = products.find(
+                      (item) => item._id === e.target.value,
+                    );
+
+                    selectSignatureProduct(index, product);
+                  }}
+                >
+                  <option value="">Select Product</option>
+
+                  {products.map((product) => (
+                    <option key={product._id} value={product._id}>
+                      {product.name}
+                    </option>
+                  ))}
+                </select>
+
+                {signatureData.products?.[index] && (
+                  <div className="mt-4 flex items-center gap-4 border rounded-xl p-3">
+                    <img
+                      src={signatureData.products[index].images?.[0]}
+                      className="w-20 h-20 rounded-xl object-cover"
+                    />
+
+                    <div>
+                      <h3 className="font-semibold">
+                        {signatureData.products[index].name}
+                      </h3>
+
+                      <p className="text-gray-500">
+                        ₹{signatureData.products[index].price}
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          <button
+            onClick={saveSignature}
+            disabled={saving}
+            className="mt-8 w-full bg-black text-white py-4 rounded-xl hover:bg-gray-800 transition disabled:opacity-50"
+          >
+            {saving ? "Saving..." : "Save Signature Section"}
+          </button>
+        </div>
       </div>
     </div>
   );
