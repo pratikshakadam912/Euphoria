@@ -24,11 +24,18 @@ export default function Website() {
   });
   const [signatureBannerFile, setSignatureBannerFile] = useState(null);
 
+  const [editData, setEditData] = useState({
+    title: "",
+    subtitle: "",
+    products: [],
+  });
+
   useEffect(() => {
     fetchProducts();
     fetchHero();
     fetchCurated();
     fetchSignature();
+    fetchEdit();
   }, []);
 
   // Fetch Products
@@ -106,6 +113,26 @@ export default function Website() {
       console.log(err);
     }
   };
+
+  const fetchEdit = async () => {
+    try {
+      const res = await fetch(
+        "https://euphoria-ooqv.onrender.com/api/website/edit",
+      );
+
+      const data = await res.json();
+
+      if (data) {
+        setEditData({
+          title: data.title || "",
+          subtitle: data.subtitle || "",
+          products: data.products || [],
+        });
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
   // Select Hero Product
   const selectProduct = (index, product) => {
     const updated = [...heroData.products];
@@ -136,6 +163,17 @@ export default function Website() {
 
     setSignatureData({
       ...signatureData,
+      products: updated,
+    });
+  };
+
+  const selectEditProduct = (index, product) => {
+    const updated = [...editData.products];
+
+    updated[index] = product;
+
+    setEditData({
+      ...editData,
       products: updated,
     });
   };
@@ -238,6 +276,40 @@ export default function Website() {
     } catch (err) {
       console.log(err);
       alert("Failed to update Signature section.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const saveEdit = async () => {
+    try {
+      setSaving(true);
+
+      const body = {
+        title: editData.title,
+        subtitle: editData.subtitle,
+        products: editData.products.map((p) => p._id),
+      };
+
+      const res = await fetch(
+        "https://euphoria-ooqv.onrender.com/api/website/edit",
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(body),
+        },
+      );
+
+      if (!res.ok) {
+        throw new Error("Failed");
+      }
+
+      alert("Euphoria Edit updated successfully.");
+    } catch (err) {
+      console.log(err);
+      alert("Failed to update Euphoria Edit.");
     } finally {
       setSaving(false);
     }
@@ -637,6 +709,103 @@ export default function Website() {
           >
             {saving ? "Saving..." : "Save Signature Section"}
           </button>
+
+          <div className="mt-16 bg-white rounded-3xl shadow-sm border border-gray-200 p-8">
+            <h2 className="text-3xl font-semibold mb-8">Euphoria Edit</h2>
+
+            {/* Subtitle */}
+
+            <div className="mb-6">
+              <label className="block mb-2 font-medium">Subtitle</label>
+
+              <input
+                type="text"
+                value={editData.subtitle}
+                onChange={(e) =>
+                  setEditData({
+                    ...editData,
+                    subtitle: e.target.value,
+                  })
+                }
+                className="w-full border rounded-xl px-4 py-3"
+              />
+            </div>
+
+            {/* Title */}
+
+            <div className="mb-8">
+              <label className="block mb-2 font-medium">Title</label>
+
+              <textarea
+                rows={3}
+                value={editData.title}
+                onChange={(e) =>
+                  setEditData({
+                    ...editData,
+                    title: e.target.value,
+                  })
+                }
+                className="w-full border rounded-xl px-4 py-3 resize-none"
+              />
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-8">
+              {[0, 1, 2].map((index) => (
+                <div key={index}>
+                  <label className="block mb-3 font-medium">
+                    Product {index + 1}
+                  </label>
+
+                  <select
+                    className="w-full border rounded-xl px-4 py-3"
+                    value={editData.products?.[index]?._id || ""}
+                    onChange={(e) => {
+                      const product = products.find(
+                        (item) => item._id === e.target.value,
+                      );
+
+                      selectEditProduct(index, product);
+                    }}
+                  >
+                    <option value="">Select Product</option>
+
+                    {products.map((product) => (
+                      <option key={product._id} value={product._id}>
+                        {product.name}
+                      </option>
+                    ))}
+                  </select>
+
+                  {editData.products?.[index] && (
+                    <div className="mt-4 flex items-center gap-4 border rounded-xl p-3">
+                      <img
+                        src={editData.products[index].images?.[0]}
+                        className="w-20 h-20 rounded-xl object-cover"
+                      />
+
+                      <div>
+                        <h3 className="font-semibold">
+                          {editData.products[index].name}
+                        </h3>
+
+                        <p className="text-gray-500">
+                          ₹{editData.products[index].price}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <button
+              onClick={saveEdit}
+              disabled={saving}
+              className="mt-8 w-full bg-black text-white py-4 rounded-xl hover:bg-gray-800 transition disabled:opacity-50"
+            >
+              {saving ? "Saving..." : "Save Euphoria Edit"}
+            </button>
+          </div>
         </div>
       </div>
     </div>
