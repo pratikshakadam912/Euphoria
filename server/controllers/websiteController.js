@@ -1,6 +1,4 @@
 import Website from "../models/Website.js";
-import cloudinary from "../utils/cloudinary.js";
-import streamifier from "streamifier";
 
 // Get all website sections
 export const getWebsite = async (req, res) => {
@@ -30,35 +28,9 @@ export const getSection = async (req, res) => {
   }
 };
 
-// Create or Update
+// Create / Update Section
 export const saveSection = async (req, res) => {
   try {
-    let imageUrls = [];
-
-    // Upload images to Cloudinary
-    if (req.files && req.files.length > 0) {
-      for (const file of req.files) {
-        const result = await new Promise((resolve, reject) => {
-          const stream = cloudinary.uploader.upload_stream(
-            {
-              folder: "euphoria-homepage",
-            },
-            (error, result) => {
-              if (error) return reject(error);
-              resolve(result);
-            },
-          );
-
-          streamifier.createReadStream(file.buffer).pipe(stream);
-        });
-
-        imageUrls.push({
-          url: result.secure_url,
-          alt: req.body.name,
-        });
-      }
-    }
-
     const section = await Website.findOneAndUpdate(
       {
         section: req.params.section,
@@ -68,26 +40,17 @@ export const saveSection = async (req, res) => {
         subtitle: req.body.subtitle,
         description: req.body.description,
 
-        buttonOne: req.body.buttonOne ? JSON.parse(req.body.buttonOne) : {},
+        buttonOne: req.body.buttonOne || {},
 
-        buttonTwo: req.body.buttonTwo ? JSON.parse(req.body.buttonTwo) : {},
+        buttonTwo: req.body.buttonTwo || {},
 
-        products: req.body.products ? JSON.parse(req.body.products) : [],
-
-        images:
-          imageUrls.length > 0
-            ? imageUrls
-            : req.body.images
-              ? JSON.parse(req.body.images)
-              : [],
-
-        banner: imageUrls.length > 0 ? imageUrls[0] : req.body.banner || "",
+        products: req.body.products || [],
       },
       {
         new: true,
         upsert: true,
       },
-    );
+    ).populate("products");
 
     res.json(section);
   } catch (error) {

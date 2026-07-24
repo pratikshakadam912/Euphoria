@@ -23,11 +23,6 @@ const websiteSchema = new mongoose.Schema(
       default: "",
     },
 
-    banner: {
-      type: String,
-      default: "",
-    },
-
     buttonOne: {
       text: {
         type: String,
@@ -54,12 +49,6 @@ const websiteSchema = new mongoose.Schema(
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Product",
-      },
-    ],
-
-    images: [
-      {
-        type: String,
       },
     ],
   },
