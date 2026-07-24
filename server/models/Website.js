@@ -29,6 +29,12 @@ const websiteSchema = new mongoose.Schema(
       default: "",
     },
 
+    images: [
+      {
+        type: String,
+      },
+    ],
+
     buttonOne: {
       text: {
         type: String,
