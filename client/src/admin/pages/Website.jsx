@@ -31,11 +31,7 @@ export default function Website() {
   });
 
   useEffect(() => {
-    fetchProducts();
-    fetchHero();
-    fetchCurated();
-    fetchSignature();
-    fetchEdit();
+    fetchWebsite();
   }, []);
 
   // Fetch Products

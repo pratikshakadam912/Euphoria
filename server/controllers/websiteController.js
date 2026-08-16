@@ -3,12 +3,20 @@ import cloudinary from "../utils/cloudinary.js";
 import streamifier from "streamifier";
 
 // Get all website sections
+// Get all website sections
 export const getWebsite = async (req, res) => {
   try {
-    const sections = await Website.find().populate("products");
+    const sections = await Website.find()
+      .populate(
+        "products",
+        "name price images fabric description category collection stock featured",
+      )
+      .lean();
 
     res.json(sections);
   } catch (error) {
+    console.error("Get website error:", error);
+
     res.status(500).json({
       message: error.message,
     });
