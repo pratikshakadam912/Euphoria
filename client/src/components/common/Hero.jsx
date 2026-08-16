@@ -1,47 +1,8 @@
-import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 
-const Hero = () => {
+const Hero = ({ heroData }) => {
   const navigate = useNavigate();
-
-  const [heroData, setHeroData] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchHero = async () => {
-      try {
-        const res = await fetch(
-          "https://euphoria-ooqv.onrender.com/api/website/hero",
-        );
-
-        const data = await res.json();
-
-        setHeroData(data);
-      } catch (err) {
-        console.log(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchHero();
-  }, []);
-
-  if (loading) {
-    return (
-      <section className="min-h-screen flex items-center justify-center bg-[#f8f5f1]">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-gray-300 border-t-black rounded-full animate-spin mx-auto"></div>
-
-          <p className="mt-5 uppercase tracking-[4px] text-xs text-gray-500">
-            Loading Hero...
-          </p>
-        </div>
-      </section>
-    );
-  }
-
   const heroProducts = heroData?.products || [];
 
   const mainProduct = heroProducts[0];

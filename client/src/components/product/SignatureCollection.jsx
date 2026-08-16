@@ -1,33 +1,12 @@
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
 
-const SignatureCollection = () => {
+const SignatureCollection = ({ signatureData }) => {
   const navigate = useNavigate();
 
-  const [section, setSection] = useState(null);
-  const [products, setProducts] = useState([]);
+  const products = signatureData?.products || [];
 
-  useEffect(() => {
-    const fetchSection = async () => {
-      try {
-        const res = await fetch(
-          "https://euphoria-ooqv.onrender.com/api/website/signature",
-        );
-
-        const data = await res.json();
-
-        setSection(data);
-        setProducts(data?.products || []);
-      } catch (err) {
-        console.log(err);
-      }
-    };
-
-    fetchSection();
-  }, []);
-
-  if (!section || products.length === 0) {
+  if (!signatureData || products.length === 0) {
     return <section className="py-32 flex justify-center">Loading...</section>;
   }
 
@@ -44,11 +23,11 @@ const SignatureCollection = () => {
           className="text-center mb-20"
         >
           <p className="uppercase tracking-[0.45em] text-[#8b5e3c] text-sm mb-5">
-            {section.subtitle || "Signature Collection"}
+            {signatureData.subtitle || "Signature Collection"}
           </p>
 
           <h2 className="text-6xl md:text-7xl font-light leading-none text-black">
-            {section.title || "Fashion With"}
+            {signatureData.title || "Fashion With"}
 
             <span className="block italic font-medium">Character</span>
           </h2>
@@ -64,20 +43,21 @@ const SignatureCollection = () => {
           className="relative overflow-hidden rounded-[3rem] mb-14"
         >
           <img
-            src={section.banner}
+            src={signatureData.banner}
             alt="Signature Collection"
             className="w-full h-[650px] object-cover"
+            loading="lazy"
           />
 
           <div className="absolute inset-0 bg-black/20" />
 
           <div className="absolute bottom-12 left-12 text-white">
             <p className="uppercase tracking-[0.4em] text-sm mb-4">
-              {section.subtitle || "Signature Collection"}
+              {signatureData.subtitle || "Signature Collection"}
             </p>
 
             <h3 className="text-5xl md:text-7xl font-light leading-none">
-              {section.title || "Signature"}
+              {signatureData.title || "Signature"}
 
               <span className="block italic">Collection</span>
             </h3>
@@ -104,6 +84,7 @@ const SignatureCollection = () => {
                 <img
                   src={product.images?.[0]}
                   alt={product.name}
+                  loading="lazy"
                   className="w-full h-[500px] object-cover transition duration-700 group-hover:scale-105"
                 />
 
@@ -115,6 +96,8 @@ const SignatureCollection = () => {
                   </span>
 
                   <h3 className="text-2xl font-light mt-2">{product.name}</h3>
+
+                  <p className="mt-2">₹{product.price}</p>
                 </div>
               </div>
             </motion.div>
