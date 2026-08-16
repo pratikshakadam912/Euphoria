@@ -1,65 +1,82 @@
-// Cart.jsx
-
 import { useCart } from "../../context/CartContext";
 import { Link } from "react-router-dom";
 import Navbar from "../../components/common/Navbar";
 
 const Cart = () => {
-  const { cart, increaseQuantity, decreaseQuantity, removeFromCart } =
-    useCart();
-
-  // ==========================================
-  // TOTAL ITEMS
-  // ==========================================
-
-  const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-
-  // ==========================================
-  // TOTAL PRICE
-  // ==========================================
-
-  const totalPrice = cart.reduce(
-    (sum, item) => sum + Number(item.price || 0) * item.quantity,
-    0,
-  );
+  const {
+    cart,
+    increaseQuantity,
+    decreaseQuantity,
+    removeFromCart,
+    totalItems,
+    subtotal,
+  } = useCart();
 
   return (
     <div className="min-h-screen bg-[#f7f4f1]">
-      {/* ==========================================
-                NAVBAR
-            ========================================== */}
-
       <Navbar />
 
-      <main className="pt-32 px-4 sm:px-6 md:px-10 lg:px-16 pb-20">
-        {/* ==========================================
-                    PAGE HEADER
-                ========================================== */}
+      {/* ==================================================
+                MAIN
+            ================================================== */}
 
-        <div className="max-w-7xl mx-auto mb-10">
-          <h1 className="text-3xl md:text-5xl font-light tracking-wide text-black">
-            Your Cart
-          </h1>
+      <main className="pt-32 pb-20 px-4 sm:px-6 lg:px-10">
+        <div className="max-w-7xl mx-auto">
+          {/* ==================================================
+                        HEADER
+                    ================================================== */}
 
-          <p className="text-gray-500 mt-3 text-sm">
-            {totalItems} item{totalItems !== 1 ? "s" : ""} in your cart
-          </p>
-        </div>
+          <div className="mb-12">
+            <p
+              className="
+                            uppercase
+                            tracking-[0.35em]
+                            text-xs
+                            text-[#8b5e3c]
+                            mb-4
+                        "
+            >
+              Euphoria
+            </p>
 
-        {/* ==========================================
-                    EMPTY CART
-                ========================================== */}
+            <h1
+              className="
+                            text-4xl
+                            md:text-6xl
+                            font-light
+                            text-black
+                        "
+            >
+              Your Cart
+            </h1>
 
-        {cart.length === 0 ? (
-          <div className="max-w-7xl mx-auto">
+            <p
+              className="
+                            mt-4
+                            text-gray-500
+                            text-sm
+                        "
+            >
+              {totalItems} {totalItems === 1 ? "item" : "items"} selected
+            </p>
+          </div>
+
+          {/* ==================================================
+                        EMPTY CART
+                    ================================================== */}
+
+          {cart.length === 0 ? (
             <div
               className="
                             min-h-[50vh]
+                            bg-white
+                            rounded-[2rem]
                             flex
                             flex-col
                             items-center
                             justify-center
                             text-center
+                            px-6
                         "
             >
               <div
@@ -67,23 +84,37 @@ const Cart = () => {
                                 w-20
                                 h-20
                                 rounded-full
-                                bg-white
+                                bg-[#f7f4f1]
                                 flex
                                 items-center
                                 justify-center
                                 mb-6
-                                shadow-sm
                             "
               >
-                <span className="text-3xl">🛍</span>
+                <span className="text-3xl">♡</span>
               </div>
 
-              <h2 className="text-2xl font-light text-black">
+              <h2
+                className="
+                                text-2xl
+                                font-light
+                                text-black
+                            "
+              >
                 Your cart is empty
               </h2>
 
-              <p className="text-gray-500 mt-3 max-w-md">
-                Looks like you haven't added anything to your cart yet.
+              <p
+                className="
+                                text-gray-500
+                                mt-3
+                                max-w-md
+                                text-sm
+                                leading-relaxed
+                            "
+              >
+                Discover pieces designed for effortless elegance and timeless
+                style.
               </p>
 
               <Link
@@ -91,384 +122,435 @@ const Cart = () => {
                 className="
                                     mt-8
                                     px-8
-                                    py-3
+                                    py-4
+                                    rounded-full
                                     bg-black
                                     text-white
-                                    rounded-full
-                                    text-sm
-                                    tracking-widest
+                                    text-xs
                                     uppercase
+                                    tracking-[0.2em]
                                     hover:bg-[#8b5e3c]
                                     transition
                                 "
               >
-                Continue Shopping
+                Explore Collection
               </Link>
             </div>
-          </div>
-        ) : (
-          /* ==========================================
-                       CART CONTENT
-                    ========================================== */
-
-          <div
-            className="
-                        max-w-7xl
-                        mx-auto
-                        grid
-                        grid-cols-1
-                        lg:grid-cols-3
-                        gap-10
-                    "
-          >
-            {/* ==========================================
-                            CART ITEMS
-                        ========================================== */}
-
+          ) : (
             <div
               className="
-                            lg:col-span-2
-                            space-y-5
+                            grid
+                            grid-cols-1
+                            lg:grid-cols-[1fr_380px]
+                            gap-10
+                            items-start
                         "
             >
-              {cart.map((item, index) => (
-                <div
-                  key={`
-                                        ${item.id}-
-                                        ${item.size || "no-size"}-
-                                        ${item.color || "no-color"}-
-                                        ${index}
-                                    `}
-                  className="
-                                        bg-white
-                                        rounded-3xl
-                                        p-4
-                                        sm:p-6
-                                        shadow-sm
-                                    "
-                >
-                  <div
+              {/* ==================================================
+                                CART ITEMS
+                            ================================================== */}
+
+              <div className="space-y-5">
+                {cart.map((item) => (
+                  <article
+                    key={item.cartItemId}
                     className="
-                                        flex
-                                        gap-4
-                                        sm:gap-6
-                                    "
+                                            bg-white
+                                            rounded-[2rem]
+                                            p-4
+                                            sm:p-6
+                                        "
                   >
-                    {/* ==================================
-                                            PRODUCT IMAGE
-                                        ================================== */}
-
-                    <Link to={`/product/${item.id}`} className="shrink-0">
-                      <img
-                        src={item.image}
-                        alt={item.name}
-                        className="
-                                                    w-24
-                                                    h-32
-                                                    sm:w-32
-                                                    sm:h-40
-                                                    object-cover
-                                                    rounded-2xl
-                                                "
-                      />
-                    </Link>
-
-                    {/* ==================================
-                                            PRODUCT DETAILS
-                                        ================================== */}
-
                     <div
                       className="
-                                            flex-1
-                                            min-w-0
+                                            flex
+                                            gap-4
+                                            sm:gap-6
                                         "
                     >
-                      {/* PRODUCT NAME */}
+                      {/* ==================================
+                                                IMAGE
+                                            ================================== */}
 
-                      <Link to={`/product/${item.id}`}>
-                        <h3
-                          className="
-                                                    text-base
-                                                    sm:text-xl
-                                                    font-light
-                                                    text-black
-                                                    hover:underline
+                      <Link
+                        to={`/product/${item.id}`}
+                        className="
+                                                    shrink-0
                                                 "
-                        >
-                          {item.name}
-                        </h3>
+                      >
+                        <img
+                          src={item.image}
+                          alt={item.name}
+                          className="
+                                                        w-28
+                                                        h-36
+                                                        sm:w-36
+                                                        sm:h-44
+                                                        object-cover
+                                                        rounded-[1.5rem]
+                                                    "
+                        />
                       </Link>
 
-                      {/* PRICE */}
-
-                      <p
-                        className="
-                                                text-gray-600
-                                                text-sm
-                                                mt-2
-                                            "
-                      >
-                        ₹{item.price}
-                      </p>
-
                       {/* ==================================
-                                                SELECTED SIZE
-                                            ================================== */}
-
-                      {item.size && (
-                        <div
-                          className="
-                                                    flex
-                                                    items-center
-                                                    gap-2
-                                                    mt-3
-                                                "
-                        >
-                          <span
-                            className="
-                                                        text-xs
-                                                        uppercase
-                                                        tracking-wider
-                                                        text-gray-400
-                                                    "
-                          >
-                            Size
-                          </span>
-
-                          <span
-                            className="
-                                                        text-sm
-                                                        font-medium
-                                                        text-black
-                                                    "
-                          >
-                            {item.size}
-                          </span>
-                        </div>
-                      )}
-
-                      {/* ==================================
-                                                SELECTED COLOR
-                                            ================================== */}
-
-                      {item.color && (
-                        <div
-                          className="
-                                                    flex
-                                                    items-center
-                                                    gap-2
-                                                    mt-1
-                                                "
-                        >
-                          <span
-                            className="
-                                                        text-xs
-                                                        uppercase
-                                                        tracking-wider
-                                                        text-gray-400
-                                                    "
-                          >
-                            Color
-                          </span>
-
-                          <span
-                            className="
-                                                        text-sm
-                                                        font-medium
-                                                        text-black
-                                                    "
-                          >
-                            {item.color}
-                          </span>
-                        </div>
-                      )}
-
-                      {/* ==================================
-                                                VARIANT
-                                            ================================== */}
-
-                      {item.variant && (
-                        <div
-                          className="
-                                                    flex
-                                                    items-center
-                                                    gap-2
-                                                    mt-1
-                                                "
-                        >
-                          <span
-                            className="
-                                                        text-xs
-                                                        uppercase
-                                                        tracking-wider
-                                                        text-gray-400
-                                                    "
-                          >
-                            Variant
-                          </span>
-
-                          <span
-                            className="
-                                                        text-sm
-                                                        font-medium
-                                                        text-black
-                                                    "
-                          >
-                            {item.variant}
-                          </span>
-                        </div>
-                      )}
-
-                      {/* ==================================
-                                                QUANTITY + REMOVE
+                                                DETAILS
                                             ================================== */}
 
                       <div
                         className="
+                                                flex-1
+                                                min-w-0
                                                 flex
-                                                items-center
-                                                gap-4
-                                                mt-5
-                                                flex-wrap
+                                                flex-col
                                             "
                       >
-                        {/* QUANTITY BOX */}
+                        {/* PRODUCT NAME */}
+
+                        <Link to={`/product/${item.id}`}>
+                          <h2
+                            className="
+                                                        text-lg
+                                                        sm:text-xl
+                                                        font-light
+                                                        text-black
+                                                        hover:underline
+                                                    "
+                          >
+                            {item.name}
+                          </h2>
+                        </Link>
+
+                        {/* PRICE */}
+
+                        <p
+                          className="
+                                                    mt-2
+                                                    text-sm
+                                                    text-gray-500
+                                                "
+                        >
+                          ₹{Number(item.price).toLocaleString("en-IN")}
+                        </p>
+
+                        {/* ==================================
+                                                    VARIANT DETAILS
+                                                ================================== */}
 
                         <div
                           className="
                                                     flex
-                                                    items-center
-                                                    border
-                                                    border-gray-200
-                                                    rounded-full
-                                                    overflow-hidden
+                                                    flex-wrap
+                                                    gap-x-6
+                                                    gap-y-2
+                                                    mt-4
                                                 "
                         >
-                          {/* MINUS */}
+                          {item.size && (
+                            <div>
+                              <p
+                                className="
+                                                                text-[10px]
+                                                                uppercase
+                                                                tracking-[0.2em]
+                                                                text-gray-400
+                                                            "
+                              >
+                                Size
+                              </p>
 
-                          <button
-                            onClick={() => decreaseQuantity(item)}
-                            className="
-                                                            w-9
-                                                            h-9
-                                                            flex
-                                                            items-center
-                                                            justify-center
-                                                            text-lg
-                                                            hover:bg-black
-                                                            hover:text-white
-                                                            transition
-                                                        "
-                          >
-                            −
-                          </button>
+                              <p
+                                className="
+                                                                text-sm
+                                                                mt-1
+                                                            "
+                              >
+                                {item.size}
+                              </p>
+                            </div>
+                          )}
 
-                          {/* QUANTITY */}
+                          {item.color && (
+                            <div>
+                              <p
+                                className="
+                                                                text-[10px]
+                                                                uppercase
+                                                                tracking-[0.2em]
+                                                                text-gray-400
+                                                            "
+                              >
+                                Color
+                              </p>
 
-                          <span
-                            className="
-                                                        w-8
-                                                        text-center
-                                                        text-sm
-                                                        font-medium
-                                                    "
-                          >
-                            {item.quantity}
-                          </span>
+                              <p
+                                className="
+                                                                text-sm
+                                                                mt-1
+                                                            "
+                              >
+                                {item.color}
+                              </p>
+                            </div>
+                          )}
 
-                          {/* PLUS */}
+                          {item.variant && (
+                            <div>
+                              <p
+                                className="
+                                                                text-[10px]
+                                                                uppercase
+                                                                tracking-[0.2em]
+                                                                text-gray-400
+                                                            "
+                              >
+                                Variant
+                              </p>
 
-                          <button
-                            onClick={() => increaseQuantity(item)}
-                            className="
-                                                            w-9
-                                                            h-9
-                                                            flex
-                                                            items-center
-                                                            justify-center
-                                                            text-lg
-                                                            hover:bg-black
-                                                            hover:text-white
-                                                            transition
-                                                        "
-                          >
-                            +
-                          </button>
+                              <p
+                                className="
+                                                                text-sm
+                                                                mt-1
+                                                            "
+                              >
+                                {item.variant}
+                              </p>
+                            </div>
+                          )}
                         </div>
 
-                        {/* REMOVE */}
+                        {/* ==================================
+                                                    BOTTOM CONTROLS
+                                                ================================== */}
 
-                        <button
-                          onClick={() => removeFromCart(item)}
+                        <div
                           className="
-                                                        text-xs
-                                                        uppercase
-                                                        tracking-widest
-                                                        text-gray-400
-                                                        hover:text-black
-                                                        transition
-                                                    "
+                                                    mt-auto
+                                                    pt-5
+                                                    flex
+                                                    items-center
+                                                    gap-4
+                                                    flex-wrap
+                                                "
                         >
-                          Remove
-                        </button>
+                          {/* QUANTITY */}
+
+                          <div
+                            className="
+                                                        flex
+                                                        items-center
+                                                        border
+                                                        border-gray-200
+                                                        rounded-full
+                                                        h-10
+                                                    "
+                          >
+                            <button
+                              type="button"
+                              onClick={() => decreaseQuantity(item.cartItemId)}
+                              className="
+                                                                w-10
+                                                                h-full
+                                                                flex
+                                                                items-center
+                                                                justify-center
+                                                                text-lg
+                                                                hover:bg-black
+                                                                hover:text-white
+                                                                rounded-full
+                                                                transition
+                                                            "
+                            >
+                              −
+                            </button>
+
+                            <span
+                              className="
+                                                            w-8
+                                                            text-center
+                                                            text-sm
+                                                        "
+                            >
+                              {item.quantity}
+                            </span>
+
+                            <button
+                              type="button"
+                              onClick={() => increaseQuantity(item.cartItemId)}
+                              className="
+                                                                w-10
+                                                                h-full
+                                                                flex
+                                                                items-center
+                                                                justify-center
+                                                                text-lg
+                                                                hover:bg-black
+                                                                hover:text-white
+                                                                rounded-full
+                                                                transition
+                                                            "
+                            >
+                              +
+                            </button>
+                          </div>
+
+                          {/* REMOVE */}
+
+                          <button
+                            type="button"
+                            onClick={() => removeFromCart(item.cartItemId)}
+                            className="
+                                                            text-xs
+                                                            uppercase
+                                                            tracking-[0.15em]
+                                                            text-gray-400
+                                                            hover:text-black
+                                                            transition
+                                                        "
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* ==================================
+                                                ITEM TOTAL
+                                            ================================== */}
+
+                      <div
+                        className="
+                                                hidden
+                                                sm:block
+                                                text-right
+                                                shrink-0
+                                            "
+                      >
+                        <p
+                          className="
+                                                    text-lg
+                                                    font-medium
+                                                "
+                        >
+                          ₹
+                          {(Number(item.price) * item.quantity).toLocaleString(
+                            "en-IN",
+                          )}
+                        </p>
                       </div>
                     </div>
 
-                    {/* ==================================
-                                            ITEM TOTAL
-                                        ================================== */}
+                    {/* MOBILE TOTAL */}
 
                     <div
                       className="
-                                            text-right
-                                            shrink-0
+                                            sm:hidden
+                                            border-t
+                                            border-gray-100
+                                            mt-5
+                                            pt-4
+                                            flex
+                                            justify-between
+                                            text-sm
                                         "
                     >
-                      <p
-                        className="
-                                                text-sm
-                                                sm:text-lg
-                                                font-medium
-                                                text-black
-                                            "
-                      >
+                      <span className="text-gray-400">Item Total</span>
+
+                      <span className="font-medium">
                         ₹
-                        {(
-                          Number(item.price || 0) * item.quantity
-                        ).toLocaleString("en-IN")}
-                      </p>
+                        {(Number(item.price) * item.quantity).toLocaleString(
+                          "en-IN",
+                        )}
+                      </span>
                     </div>
+                  </article>
+                ))}
+
+                {/* ==================================================
+                                    SHIPPING MESSAGE
+                                ================================================== */}
+
+                <div
+                  className="
+                                    bg-white
+                                    rounded-[1.5rem]
+                                    px-6
+                                    py-5
+                                    flex
+                                    items-center
+                                    gap-4
+                                "
+                >
+                  <div
+                    className="
+                                        w-10
+                                        h-10
+                                        rounded-full
+                                        bg-[#f7f4f1]
+                                        flex
+                                        items-center
+                                        justify-center
+                                        shrink-0
+                                    "
+                  >
+                    ✓
+                  </div>
+
+                  <div>
+                    <p
+                      className="
+                                            text-sm
+                                            font-medium
+                                        "
+                    >
+                      Complimentary shipping
+                    </p>
+
+                    <p
+                      className="
+                                            text-xs
+                                            text-gray-500
+                                            mt-1
+                                        "
+                    >
+                      Your order qualifies for free shipping.
+                    </p>
                   </div>
                 </div>
-              ))}
-            </div>
+              </div>
 
-            {/* ==========================================
-                            ORDER SUMMARY
-                        ========================================== */}
+              {/* ==================================================
+                                ORDER SUMMARY
+                            ================================================== */}
 
-            <div className="lg:col-span-1">
-              <div
+              <aside
                 className="
-                                bg-white
-                                rounded-3xl
-                                p-6
-                                sm:p-8
-                                shadow-sm
                                 lg:sticky
                                 lg:top-28
+                                bg-white
+                                rounded-[2rem]
+                                p-7
+                                sm:p-8
                             "
               >
+                <p
+                  className="
+                                    uppercase
+                                    tracking-[0.3em]
+                                    text-xs
+                                    text-[#8b5e3c]
+                                "
+                >
+                  Summary
+                </p>
+
                 <h2
                   className="
-                                    text-xl
-                                    sm:text-2xl
+                                    text-2xl
                                     font-light
-                                    tracking-wide
+                                    mt-3
                                     mb-8
                                 "
                 >
-                  Order Summary
+                  Order Details
                 </h2>
 
                 {/* ITEMS */}
@@ -478,11 +560,10 @@ const Cart = () => {
                                     flex
                                     justify-between
                                     text-sm
-                                    text-gray-500
                                     mb-4
                                 "
                 >
-                  <span>Items</span>
+                  <span className="text-gray-500">Items</span>
 
                   <span>{totalItems}</span>
                 </div>
@@ -494,13 +575,12 @@ const Cart = () => {
                                     flex
                                     justify-between
                                     text-sm
-                                    text-gray-500
                                     mb-4
                                 "
                 >
-                  <span>Subtotal</span>
+                  <span className="text-gray-500">Subtotal</span>
 
-                  <span>₹{totalPrice.toLocaleString("en-IN")}</span>
+                  <span>₹{subtotal.toLocaleString("en-IN")}</span>
                 </div>
 
                 {/* SHIPPING */}
@@ -510,13 +590,12 @@ const Cart = () => {
                                     flex
                                     justify-between
                                     text-sm
-                                    text-gray-500
-                                    mb-6
+                                    mb-7
                                 "
                 >
-                  <span>Shipping</span>
+                  <span className="text-gray-500">Shipping</span>
 
-                  <span className="text-green-600">Free</span>
+                  <span>Free</span>
                 </div>
 
                 {/* DIVIDER */}
@@ -532,13 +611,13 @@ const Cart = () => {
                     className="
                                         flex
                                         justify-between
-                                        items-center
+                                        items-end
                                     "
                   >
                     <span
                       className="
-                                            text-lg
-                                            font-medium
+                                            text-base
+                                            text-gray-500
                                         "
                     >
                       Total
@@ -546,13 +625,23 @@ const Cart = () => {
 
                     <span
                       className="
-                                            text-xl
+                                            text-2xl
                                             font-medium
                                         "
                     >
-                      ₹{totalPrice.toLocaleString("en-IN")}
+                      ₹{subtotal.toLocaleString("en-IN")}
                     </span>
                   </div>
+
+                  <p
+                    className="
+                                        text-[11px]
+                                        text-gray-400
+                                        mt-2
+                                    "
+                  >
+                    Inclusive of all applicable taxes
+                  </p>
                 </div>
 
                 {/* CHECKOUT */}
@@ -560,17 +649,18 @@ const Cart = () => {
                 <Link
                   to="/checkout"
                   className="
-                                        block
-                                        w-full
                                         mt-8
-                                        py-4
+                                        w-full
+                                        h-14
+                                        rounded-full
                                         bg-black
                                         text-white
-                                        text-center
-                                        text-sm
-                                        tracking-widest
+                                        flex
+                                        items-center
+                                        justify-center
+                                        text-xs
                                         uppercase
-                                        rounded-full
+                                        tracking-[0.2em]
                                         hover:bg-[#8b5e3c]
                                         transition
                                     "
@@ -583,9 +673,9 @@ const Cart = () => {
                 <Link
                   to="/collection"
                   className="
+                                        mt-5
                                         block
                                         text-center
-                                        mt-5
                                         text-sm
                                         text-gray-500
                                         hover:text-black
@@ -594,10 +684,43 @@ const Cart = () => {
                 >
                   Continue Shopping
                 </Link>
-              </div>
+
+                {/* TRUST */}
+
+                <div
+                  className="
+                                    mt-8
+                                    pt-6
+                                    border-t
+                                    border-gray-100
+                                    text-center
+                                "
+                >
+                  <p
+                    className="
+                                        text-[10px]
+                                        uppercase
+                                        tracking-[0.2em]
+                                        text-gray-400
+                                    "
+                  >
+                    Secure Checkout
+                  </p>
+
+                  <p
+                    className="
+                                        text-xs
+                                        text-gray-400
+                                        mt-2
+                                    "
+                  >
+                    Your order is safely protected.
+                  </p>
+                </div>
+              </aside>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </main>
     </div>
   );
