@@ -24,12 +24,6 @@ export default function ProductSection({ curatedData }) {
           <h2 className="mt-4 text-5xl md:text-6xl font-light text-black">
             {curatedData?.title || "Curated Essentials"}
           </h2>
-
-          {curatedData?.description && (
-            <p className="mt-4 text-gray-500 max-w-xl mx-auto">
-              {curatedData.description}
-            </p>
-          )}
         </div>
 
         {/* ================= PRODUCT GRID ================= */}
