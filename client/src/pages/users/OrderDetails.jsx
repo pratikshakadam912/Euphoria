@@ -32,6 +32,9 @@ const OrderDetails = () => {
   useEffect(() => {
     const fetchOrder = async () => {
       try {
+        setLoading(true);
+        setError("");
+
         const savedUser = localStorage.getItem("user");
 
         if (!savedUser) {
@@ -39,23 +42,46 @@ const OrderDetails = () => {
           return;
         }
 
-        const user = JSON.parse(savedUser);
+        let user;
+
+        try {
+          user = JSON.parse(savedUser);
+        } catch {
+          localStorage.removeItem("user");
+          navigate("/login");
+          return;
+        }
 
         if (!user?.uid) {
           navigate("/login");
           return;
         }
 
-        const response = await fetch(`${API_URL}/api/orders/${id}`);
+        if (!id) {
+          throw new Error("Order ID is missing.");
+        }
+
+        const response = await fetch(
+          `${API_URL}/api/orders/${id}?userId=${encodeURIComponent(user.uid)}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          },
+        );
 
         const data = await response.json();
 
         if (!response.ok) {
-          throw new Error(data.message || "Failed to load order");
+          throw new Error(data.message || "Failed to load order.");
         }
 
-        // Security check on frontend
-        if (data.userId && data.userId !== user.uid) {
+        // ==================================================
+        // FRONTEND OWNERSHIP CHECK
+        // ==================================================
+
+        if (data.userId && String(data.userId) !== String(user.uid)) {
           throw new Error("You are not authorized to view this order.");
         }
 
@@ -63,7 +89,7 @@ const OrderDetails = () => {
       } catch (err) {
         console.error("Order details error:", err);
 
-        setError(err.message || "Unable to load order details");
+        setError(err.message || "Unable to load order details.");
       } finally {
         setLoading(false);
       }
@@ -79,7 +105,13 @@ const OrderDetails = () => {
   const formatDate = (date) => {
     if (!date) return "—";
 
-    return new Date(date).toLocaleDateString("en-IN", {
+    const parsedDate = new Date(date);
+
+    if (Number.isNaN(parsedDate.getTime())) {
+      return "—";
+    }
+
+    return parsedDate.toLocaleDateString("en-IN", {
       day: "numeric",
       month: "long",
       year: "numeric",
@@ -93,7 +125,13 @@ const OrderDetails = () => {
   const formatDateTime = (date) => {
     if (!date) return "—";
 
-    return new Date(date).toLocaleString("en-IN", {
+    const parsedDate = new Date(date);
+
+    if (Number.isNaN(parsedDate.getTime())) {
+      return "—";
+    }
+
+    return parsedDate.toLocaleString("en-IN", {
       day: "numeric",
       month: "short",
       year: "numeric",
@@ -108,6 +146,42 @@ const OrderDetails = () => {
 
   const getStatus = () => {
     return order?.status?.toLowerCase() || "pending";
+  };
+
+  // ======================================================
+  // STATUS LABEL
+  // ======================================================
+
+  const getStatusLabel = (status) => {
+    if (!status) return "Pending";
+
+    return status.charAt(0).toUpperCase() + status.slice(1);
+  };
+
+  // ======================================================
+  // STATUS STYLE
+  // ======================================================
+
+  const getStatusStyle = (status) => {
+    switch (status) {
+      case "delivered":
+        return "bg-green-100 text-green-700";
+
+      case "shipped":
+        return "bg-purple-100 text-purple-700";
+
+      case "confirmed":
+        return "bg-blue-100 text-blue-700";
+
+      case "cancelled":
+        return "bg-red-100 text-red-700";
+
+      case "refunded":
+        return "bg-gray-200 text-gray-700";
+
+      default:
+        return "bg-yellow-100 text-yellow-700";
+    }
   };
 
   // ======================================================
@@ -141,17 +215,24 @@ const OrderDetails = () => {
     },
   ];
 
+  // ======================================================
+  // TRACKING STATE
+  // ======================================================
+
   const getStepState = (stepKey) => {
     const currentStatus = getStatus();
 
     const orderSequence = ["pending", "confirmed", "shipped", "delivered"];
 
     const currentIndex = orderSequence.indexOf(currentStatus);
-
     const stepIndex = orderSequence.indexOf(stepKey);
 
-    if (currentStatus === "cancelled") {
+    if (currentStatus === "cancelled" || currentStatus === "refunded") {
       return "cancelled";
+    }
+
+    if (currentIndex === -1) {
+      return "upcoming";
     }
 
     if (stepIndex < currentIndex) {
@@ -163,6 +244,21 @@ const OrderDetails = () => {
     }
 
     return "upcoming";
+  };
+
+  // ======================================================
+  // TOTAL ITEMS
+  // ======================================================
+
+  const getTotalItems = () => {
+    if (!Array.isArray(order?.products)) {
+      return 0;
+    }
+
+    return order.products.reduce(
+      (total, item) => total + Number(item.quantity || 0),
+      0,
+    );
   };
 
   // ======================================================
@@ -183,6 +279,8 @@ const OrderDetails = () => {
             <div className="h-4 bg-gray-200 rounded w-96 mt-5" />
 
             <div className="mt-12 h-64 bg-white rounded-[30px]" />
+
+            <div className="mt-8 h-80 bg-white rounded-[30px]" />
           </div>
         </main>
 
@@ -218,7 +316,7 @@ const OrderDetails = () => {
 
             <Link
               to="/orders"
-              className="inline-flex mt-7 px-7 py-3 bg-black text-white rounded-full text-sm"
+              className="inline-flex mt-7 px-7 py-3 bg-black text-white rounded-full text-sm hover:opacity-90 transition"
             >
               Back to Orders
             </Link>
@@ -230,11 +328,18 @@ const OrderDetails = () => {
     );
   }
 
+  // ======================================================
+  // CURRENT STATUS
+  // ======================================================
+
   const status = getStatus();
 
   const isCancelled = status === "cancelled";
-
   const isRefunded = status === "refunded";
+
+  // ======================================================
+  // RENDER
+  // ======================================================
 
   return (
     <div className="min-h-screen bg-[#f8f7f5] text-black">
@@ -264,7 +369,7 @@ const OrderDetails = () => {
 
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-5">
             <div>
-              <h1 className="mt-4 text-4xl md:text-5xl font-light">
+              <h1 className="mt-4 text-4xl md:text-5xl font-light tracking-tight">
                 Order #{order._id.slice(-8).toUpperCase()}
               </h1>
 
@@ -274,31 +379,23 @@ const OrderDetails = () => {
             </div>
 
             <div
-              className={`inline-flex w-fit px-4 py-2 rounded-full text-sm font-medium ${
-                status === "delivered"
-                  ? "bg-green-100 text-green-700"
-                  : status === "shipped"
-                    ? "bg-purple-100 text-purple-700"
-                    : status === "confirmed"
-                      ? "bg-blue-100 text-blue-700"
-                      : status === "cancelled"
-                        ? "bg-red-100 text-red-700"
-                        : "bg-yellow-100 text-yellow-700"
-              }`}
+              className={`inline-flex w-fit px-4 py-2 rounded-full text-sm font-medium ${getStatusStyle(
+                status,
+              )}`}
             >
-              {status.charAt(0).toUpperCase() + status.slice(1)}
+              {getStatusLabel(status)}
             </div>
           </div>
         </div>
 
         {/* ================================================= */}
-        {/* CANCELLED / REFUNDED */}
+        {/* CANCELLED */}
         {/* ================================================= */}
 
         {isCancelled && (
           <div className="bg-red-50 border border-red-100 rounded-[28px] p-6 mb-8">
             <div className="flex items-start gap-4">
-              <FiXCircle className="text-red-500 text-xl mt-1" />
+              <FiXCircle className="text-red-500 text-xl mt-1 shrink-0" />
 
               <div>
                 <h3 className="font-medium text-red-700">Order Cancelled</h3>
@@ -306,21 +403,34 @@ const OrderDetails = () => {
                 <p className="text-sm text-red-600 mt-1">
                   This order has been cancelled.
                 </p>
+
+                {order.refundStatus && order.refundStatus !== "none" && (
+                  <p className="text-sm text-red-600 mt-2">
+                    Refund status:{" "}
+                    <span className="font-medium capitalize">
+                      {order.refundStatus}
+                    </span>
+                  </p>
+                )}
               </div>
             </div>
           </div>
         )}
 
+        {/* ================================================= */}
+        {/* REFUNDED */}
+        {/* ================================================= */}
+
         {isRefunded && (
           <div className="bg-gray-100 border border-gray-200 rounded-[28px] p-6 mb-8">
             <div className="flex items-start gap-4">
-              <FiCheck className="text-gray-700 text-xl mt-1" />
+              <FiCheck className="text-gray-700 text-xl mt-1 shrink-0" />
 
               <div>
                 <h3 className="font-medium">Refund Processed</h3>
 
                 <p className="text-sm text-gray-500 mt-1">
-                  Your refund has been processed.
+                  Your refund has been processed successfully.
                 </p>
               </div>
             </div>
@@ -331,7 +441,7 @@ const OrderDetails = () => {
         {/* TRACKING */}
         {/* ================================================= */}
 
-        {!isCancelled && (
+        {!isCancelled && !isRefunded && (
           <section className="bg-white border border-gray-100 rounded-[32px] p-7 md:p-10 shadow-[0_10px_40px_rgba(0,0,0,0.03)]">
             <div className="flex items-center gap-3 mb-10">
               <FiTruck className="text-xl" />
@@ -419,72 +529,102 @@ const OrderDetails = () => {
 
         <section className="mt-8 bg-white border border-gray-100 rounded-[32px] overflow-hidden">
           <div className="px-7 md:px-10 py-6 border-b border-gray-100">
-            <h2 className="text-2xl font-light">Items</h2>
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <h2 className="text-2xl font-light">Items</h2>
+
+                <p className="text-sm text-gray-500 mt-1">
+                  {getTotalItems()} {getTotalItems() === 1 ? "item" : "items"}
+                </p>
+              </div>
+
+              <FiPackage className="text-xl text-gray-400" />
+            </div>
           </div>
 
           <div className="divide-y divide-gray-100">
-            {order.products?.map((product, index) => (
-              <div
-                key={`${product.productId}-${index}`}
-                className="px-7 md:px-10 py-6 flex gap-5"
-              >
-                <div className="w-24 h-28 rounded-2xl overflow-hidden bg-[#f8f7f5] shrink-0">
-                  {product.image ? (
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-300">
-                      <FiPackage size={24} />
-                    </div>
-                  )}
-                </div>
+            {order.products?.map((product, index) => {
+              const quantity = Math.max(1, Number(product.quantity) || 1);
 
-                <div className="flex-1 flex flex-col sm:flex-row sm:justify-between gap-4">
-                  <div>
-                    <h3 className="font-medium">{product.name}</h3>
+              const price = Number(product.price) || 0;
 
-                    {product.size && (
+              return (
+                <div
+                  key={`${product.productId || "product"}-${index}`}
+                  className="px-7 md:px-10 py-6 flex gap-5"
+                >
+                  {/* IMAGE */}
+
+                  <div className="w-24 h-28 rounded-2xl overflow-hidden bg-[#f8f7f5] shrink-0">
+                    {product.image ? (
+                      <img
+                        src={product.image}
+                        alt={product.name || "Product"}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-gray-300">
+                        <FiPackage size={24} />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* PRODUCT INFO */}
+
+                  <div className="flex-1 flex flex-col sm:flex-row sm:justify-between gap-4">
+                    <div>
+                      <h3 className="font-medium">
+                        {product.name || "Product"}
+                      </h3>
+
+                      {product.size && (
+                        <p className="text-sm text-gray-500 mt-2">
+                          Size: {product.size}
+                        </p>
+                      )}
+
+                      {product.color && (
+                        <p className="text-sm text-gray-500">
+                          Color: {product.color}
+                        </p>
+                      )}
+
+                      {product.variant && (
+                        <p className="text-sm text-gray-500">
+                          Variant: {product.variant}
+                        </p>
+                      )}
+
                       <p className="text-sm text-gray-500 mt-2">
-                        Size: {product.size}
+                        Quantity: {quantity}
                       </p>
-                    )}
+                    </div>
 
-                    {product.color && (
-                      <p className="text-sm text-gray-500">
-                        Color: {product.color}
+                    {/* PRICE */}
+
+                    <div className="text-left sm:text-right">
+                      <p className="font-medium">
+                        ₹{(price * quantity).toFixed(2)}
                       </p>
-                    )}
 
-                    {product.variant && (
-                      <p className="text-sm text-gray-500">
-                        Variant: {product.variant}
+                      <p className="text-xs text-gray-400 mt-1">
+                        ₹{price.toFixed(2)} each
                       </p>
-                    )}
-
-                    <p className="text-sm text-gray-500 mt-2">
-                      Quantity: {product.quantity}
-                    </p>
-                  </div>
-
-                  <div className="text-left sm:text-right">
-                    <p className="font-medium">
-                      ₹
-                      {(
-                        Number(product.price || 0) *
-                        Number(product.quantity || 1)
-                      ).toFixed(2)}
-                    </p>
-
-                    <p className="text-xs text-gray-400 mt-1">
-                      ₹{Number(product.price || 0).toFixed(2)} each
-                    </p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
+          </div>
+
+          {/* ORDER TOTAL */}
+
+          <div className="border-t border-gray-100 px-7 md:px-10 py-6 flex justify-between items-center">
+            <span className="text-gray-500">Order Total</span>
+
+            <span className="text-xl font-medium">
+              ₹{Number(order.total || 0).toFixed(2)}
+            </span>
           </div>
         </section>
 
@@ -518,6 +658,10 @@ const OrderDetails = () => {
                 <p>{order.shippingAddress.country || "India"}</p>
 
                 <p className="mt-2">{order.shippingAddress.phone}</p>
+
+                {order.shippingAddress.email && (
+                  <p>{order.shippingAddress.email}</p>
+                )}
               </div>
             ) : (
               <p className="text-gray-400 text-sm">
@@ -554,7 +698,11 @@ const OrderDetails = () => {
                       : "text-gray-600 font-medium"
                   }
                 >
-                  {order.isPaid ? "Paid" : "Cash on Delivery"}
+                  {order.isPaid
+                    ? "Paid"
+                    : order.paymentMethod === "cod"
+                      ? "Cash on Delivery"
+                      : "Payment Pending"}
                 </span>
               </div>
 
@@ -564,6 +712,16 @@ const OrderDetails = () => {
 
                   <span className="font-medium text-right break-all">
                     {order.paymentId}
+                  </span>
+                </div>
+              )}
+
+              {order.refundStatus && order.refundStatus !== "none" && (
+                <div className="flex justify-between gap-5">
+                  <span className="text-gray-500">Refund Status</span>
+
+                  <span className="font-medium capitalize">
+                    {order.refundStatus}
                   </span>
                 </div>
               )}
@@ -619,6 +777,22 @@ const OrderDetails = () => {
               </p>
 
               <p className="mt-2 break-all">{order.userEmail || "—"}</p>
+            </div>
+
+            <div>
+              <p className="text-gray-400 uppercase tracking-[0.15em] text-xs">
+                Payment Method
+              </p>
+
+              <p className="mt-2 uppercase">{order.paymentMethod || "—"}</p>
+            </div>
+
+            <div>
+              <p className="text-gray-400 uppercase tracking-[0.15em] text-xs">
+                Order Status
+              </p>
+
+              <p className="mt-2 capitalize">{status}</p>
             </div>
           </div>
         </section>

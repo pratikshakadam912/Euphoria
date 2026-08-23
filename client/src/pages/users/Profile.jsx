@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { signOut } from "firebase/auth";
 import { auth } from "../../firebase/firebaseConfig";
 
@@ -20,16 +20,31 @@ import {
 } from "react-icons/fi";
 
 const Profile = () => {
+  const navigate = useNavigate();
+
   const { user } = useAuth();
   const profile = useUserProfile(user);
+
+  // ======================================================
+  // LOGOUT
+  // ======================================================
 
   const handleLogout = async () => {
     try {
       await signOut(auth);
+
+      // Clear locally stored user data if present
+      localStorage.removeItem("user");
+
+      navigate("/login");
     } catch (error) {
       console.error("Logout error:", error);
     }
   };
+
+  // ======================================================
+  // ACCOUNT MENU
+  // ======================================================
 
   const menuItems = [
     {
@@ -58,12 +73,30 @@ const Profile = () => {
     },
   ];
 
+  // ======================================================
+  // DISPLAY DATA
+  // ======================================================
+
+  const displayName = profile?.name || user?.displayName || "Guest User";
+
+  const displayEmail = profile?.email || user?.email || "Not available";
+
+  const avatarLetter = displayEmail
+    ? displayEmail.charAt(0).toUpperCase()
+    : null;
+
+  // ======================================================
+  // UI
+  // ======================================================
+
   return (
     <div className="min-h-screen bg-[#f8f7f5] text-black">
       <Navbar />
 
       <main className="max-w-6xl mx-auto px-6 lg:px-10 pt-32 pb-20">
-        {/* ================= BACK ================= */}
+        {/* ================================================= */}
+        {/* BACK */}
+        {/* ================================================= */}
 
         <Link
           to="/"
@@ -81,7 +114,9 @@ const Profile = () => {
           Back to Euphoria
         </Link>
 
-        {/* ================= PAGE INTRO ================= */}
+        {/* ================================================= */}
+        {/* PAGE INTRO */}
+        {/* ================================================= */}
 
         <div className="mt-14 mb-12">
           <p
@@ -113,7 +148,9 @@ const Profile = () => {
           </p>
         </div>
 
-        {/* ================= PROFILE CARD ================= */}
+        {/* ================================================= */}
+        {/* PROFILE CARD */}
+        {/* ================================================= */}
 
         <section
           className="
@@ -138,7 +175,7 @@ const Profile = () => {
           >
             {/* PROFILE INFORMATION */}
 
-            <div className="flex items-center gap-6">
+            <div className="flex items-center gap-6 min-w-0">
               {/* AVATAR */}
 
               <div
@@ -158,16 +195,12 @@ const Profile = () => {
                   shrink-0
                 "
               >
-                {profile?.email ? (
-                  profile.email.charAt(0).toUpperCase()
-                ) : (
-                  <FiUser />
-                )}
+                {avatarLetter || <FiUser />}
               </div>
 
               {/* DETAILS */}
 
-              <div>
+              <div className="min-w-0">
                 <p
                   className="
                     text-xs
@@ -179,19 +212,18 @@ const Profile = () => {
                   Euphoria Member
                 </p>
 
-                <h2 className="text-2xl md:text-3xl font-light mt-2">
-                  {profile?.name || "Guest User"}
+                <h2 className="text-2xl md:text-3xl font-light mt-2 truncate">
+                  {displayName}
                 </h2>
 
-                <p className="text-gray-500 mt-2">
-                  {profile?.email || user?.email}
-                </p>
+                <p className="text-gray-500 mt-2 truncate">{displayEmail}</p>
               </div>
             </div>
 
-            {/* EDIT BUTTON */}
+            {/* EDIT PROFILE */}
 
-            <button
+            <Link
+              to="/settings"
               className="
                 inline-flex
                 items-center
@@ -207,15 +239,18 @@ const Profile = () => {
                 hover:text-white
                 hover:border-black
                 transition
+                shrink-0
               "
             >
               <FiEdit3 />
               Edit Profile
-            </button>
+            </Link>
           </div>
         </section>
 
-        {/* ================= ACCOUNT NAVIGATION ================= */}
+        {/* ================================================= */}
+        {/* ACCOUNT NAVIGATION */}
+        {/* ================================================= */}
 
         <section className="mt-10">
           <div className="mb-6">
@@ -260,7 +295,7 @@ const Profile = () => {
                     duration-300
                   "
                 >
-                  <div className="flex items-center gap-5">
+                  <div className="flex items-center gap-5 min-w-0">
                     {/* ICON */}
 
                     <div
@@ -276,6 +311,7 @@ const Profile = () => {
                         group-hover:bg-black
                         group-hover:text-white
                         transition
+                        shrink-0
                       "
                     >
                       <Icon />
@@ -283,7 +319,7 @@ const Profile = () => {
 
                     {/* TEXT */}
 
-                    <div>
+                    <div className="min-w-0">
                       <h3 className="text-lg font-medium">{item.title}</h3>
 
                       <p className="text-sm text-gray-500 mt-1">
@@ -307,7 +343,9 @@ const Profile = () => {
           </div>
         </section>
 
-        {/* ================= ACCOUNT DETAILS ================= */}
+        {/* ================================================= */}
+        {/* ACCOUNT DETAILS */}
+        {/* ================================================= */}
 
         <section className="mt-12">
           <div className="mb-6">
@@ -339,38 +377,38 @@ const Profile = () => {
             {/* NAME */}
 
             <div className="px-7 py-6 flex justify-between gap-6">
-              <div>
+              <div className="min-w-0">
                 <p className="text-xs uppercase tracking-[0.2em] text-gray-400">
                   Name
                 </p>
 
-                <p className="mt-2 text-gray-800">
-                  {profile?.name || "Not added"}
-                </p>
+                <p className="mt-2 text-gray-800 truncate">{displayName}</p>
               </div>
 
-              <FiUser className="text-gray-400 mt-1" />
+              <FiUser className="text-gray-400 mt-1 shrink-0" />
             </div>
 
             {/* EMAIL */}
 
             <div className="px-7 py-6 flex justify-between gap-6">
-              <div>
+              <div className="min-w-0">
                 <p className="text-xs uppercase tracking-[0.2em] text-gray-400">
                   Email
                 </p>
 
-                <p className="mt-2 text-gray-800">
-                  {profile?.email || user?.email || "Not available"}
-                </p>
+                <p className="mt-2 text-gray-800 break-all">{displayEmail}</p>
               </div>
 
-              <span className="text-xs text-gray-400 mt-1">Verified</span>
+              <span className="text-xs text-gray-400 mt-1 shrink-0">
+                Verified
+              </span>
             </div>
           </div>
         </section>
 
-        {/* ================= LOGOUT ================= */}
+        {/* ================================================= */}
+        {/* LOGOUT */}
+        {/* ================================================= */}
 
         <section className="mt-10">
           <button
@@ -408,7 +446,9 @@ const Profile = () => {
           </button>
         </section>
 
-        {/* ================= FOOTER NOTE ================= */}
+        {/* ================================================= */}
+        {/* FOOTER NOTE */}
+        {/* ================================================= */}
 
         <div className="text-center mt-16">
           <p className="text-xs tracking-[0.25em] uppercase text-gray-300">
