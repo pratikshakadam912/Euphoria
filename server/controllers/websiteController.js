@@ -2,8 +2,10 @@ import Website from "../models/Website.js";
 import cloudinary from "../utils/cloudinary.js";
 import streamifier from "streamifier";
 
-// Get all website sections
-// Get all website sections
+// ======================================================
+// GET ALL WEBSITE SECTIONS
+// ======================================================
+
 export const getWebsite = async (req, res) => {
   try {
     const sections = await Website.find()
@@ -13,110 +15,216 @@ export const getWebsite = async (req, res) => {
       )
       .lean();
 
-    res.json(sections);
+    res.status(200).json(sections);
   } catch (error) {
     console.error("Get website error:", error);
 
     res.status(500).json({
-      message: error.message,
+      message: "Failed to fetch website sections",
+      error: error.message,
     });
   }
 };
 
-// Get one section
+// ======================================================
+// GET SINGLE WEBSITE SECTION
+// ======================================================
+
 export const getSection = async (req, res) => {
   try {
     const section = await Website.findOne({
       section: req.params.section,
-    }).populate("products");
+    }).populate(
+      "products",
+      "name price images fabric description category collection stock featured",
+    );
 
-    res.json(section);
+    if (!section) {
+      return res.status(404).json({
+        message: "Website section not found",
+      });
+    }
+
+    res.status(200).json(section);
   } catch (error) {
+    console.error("Get section error:", error);
+
     res.status(500).json({
-      message: error.message,
+      message: "Failed to fetch website section",
+      error: error.message,
     });
   }
 };
 
-// Create / Update Section
+// ======================================================
+// CREATE / UPDATE WEBSITE SECTION
+// ======================================================
+
 export const saveSection = async (req, res) => {
   try {
+    const { section } = req.params;
+
+    // --------------------------------------------
+    // Existing banner
+    // --------------------------------------------
+
     let banner = req.body.banner || "";
 
-    // Upload banner image if provided
+    // --------------------------------------------
+    // Upload new banner to Cloudinary
+    // --------------------------------------------
+
     if (req.files && req.files.length > 0) {
       const result = await new Promise((resolve, reject) => {
-        const stream = cloudinary.uploader.upload_stream(
+        const uploadStream = cloudinary.uploader.upload_stream(
           {
             folder: "euphoria-website",
+            resource_type: "image",
           },
           (error, result) => {
-            if (error) return reject(error);
-            resolve(result);
+            if (error) {
+              reject(error);
+            } else {
+              resolve(result);
+            }
           },
         );
 
-        streamifier.createReadStream(req.files[0].buffer).pipe(stream);
+        streamifier.createReadStream(req.files[0].buffer).pipe(uploadStream);
       });
 
       banner = result.secure_url;
     }
 
-    const section = await Website.findOneAndUpdate(
+    // --------------------------------------------
+    // Parse Products
+    // --------------------------------------------
+
+    let products = req.body.products || [];
+
+    if (typeof products === "string") {
+      try {
+        products = JSON.parse(products);
+      } catch (error) {
+        return res.status(400).json({
+          message: "Invalid products data",
+        });
+      }
+    }
+
+    // --------------------------------------------
+    // Parse Button One
+    // --------------------------------------------
+
+    let buttonOne = req.body.buttonOne || {};
+
+    if (typeof buttonOne === "string") {
+      try {
+        buttonOne = JSON.parse(buttonOne);
+      } catch (error) {
+        return res.status(400).json({
+          message: "Invalid buttonOne data",
+        });
+      }
+    }
+
+    // --------------------------------------------
+    // Parse Button Two
+    // --------------------------------------------
+
+    let buttonTwo = req.body.buttonTwo || {};
+
+    if (typeof buttonTwo === "string") {
+      try {
+        buttonTwo = JSON.parse(buttonTwo);
+      } catch (error) {
+        return res.status(400).json({
+          message: "Invalid buttonTwo data",
+        });
+      }
+    }
+
+    // --------------------------------------------
+    // Prepare update
+    // --------------------------------------------
+
+    const updateData = {
+      title: req.body.title || "",
+      subtitle: req.body.subtitle || "",
+      description: req.body.description || "",
+
+      buttonOne,
+      buttonTwo,
+
+      products,
+
+      banner,
+    };
+
+    // --------------------------------------------
+    // Create / Update section
+    // --------------------------------------------
+
+    const updatedSection = await Website.findOneAndUpdate(
       {
-        section: req.params.section,
+        section,
       },
       {
-        title: req.body.title,
-        subtitle: req.body.subtitle,
-        description: req.body.description,
-
-        buttonOne:
-          typeof req.body.buttonOne === "string"
-            ? JSON.parse(req.body.buttonOne)
-            : req.body.buttonOne || {},
-
-        buttonTwo:
-          typeof req.body.buttonTwo === "string"
-            ? JSON.parse(req.body.buttonTwo)
-            : req.body.buttonTwo || {},
-
-        products:
-          typeof req.body.products === "string"
-            ? JSON.parse(req.body.products)
-            : req.body.products || [],
-
-        banner,
+        $set: updateData,
       },
       {
         new: true,
         upsert: true,
+        runValidators: true,
       },
-    ).populate("products");
+    ).populate(
+      "products",
+      "name price images fabric description category collection stock featured",
+    );
 
-    res.json(section);
+    // --------------------------------------------
+    // Response
+    // --------------------------------------------
+
+    res.status(200).json({
+      message: "Website section saved successfully",
+      section: updatedSection,
+    });
   } catch (error) {
-    console.log(error);
+    console.error("Save website section error:", error);
 
     res.status(500).json({
-      message: error.message,
+      message: "Failed to save website section",
+      error: error.message,
     });
   }
 };
 
-// Delete section
+// ======================================================
+// DELETE WEBSITE SECTION
+// ======================================================
+
 export const deleteSection = async (req, res) => {
   try {
-    await Website.findOneAndDelete({
+    const deletedSection = await Website.findOneAndDelete({
       section: req.params.section,
     });
 
-    res.json({
-      message: "Deleted",
+    if (!deletedSection) {
+      return res.status(404).json({
+        message: "Website section not found",
+      });
+    }
+
+    res.status(200).json({
+      message: "Website section deleted successfully",
     });
   } catch (error) {
+    console.error("Delete website section error:", error);
+
     res.status(500).json({
-      message: error.message,
+      message: "Failed to delete website section",
+      error: error.message,
     });
   }
 };
