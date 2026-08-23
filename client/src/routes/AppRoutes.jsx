@@ -1,6 +1,9 @@
 import { Routes, Route } from "react-router-dom";
 
+// =====================================================
 // USER PAGES
+// =====================================================
+
 import Home from "../pages/users/Home";
 import Login from "../pages/auth/Login";
 import Signup from "../pages/auth/Signup";
@@ -13,42 +16,77 @@ import ProductDetails from "../pages/users/ProductDetail";
 import Profile from "../pages/users/Profile";
 import Orders from "../pages/users/Orders";
 import Wishlist from "../pages/users/Wishlist";
+import OrderDetails from "../pages/users/OrderDetails";
+import Addresses from "../pages/users/Addresses";
 
+// =====================================================
 // ADMIN PAGES
+// =====================================================
+
 import AdminLayout from "../admin/layout/AdminLayout";
 import Dashboard from "../admin/pages/Dashboard";
 import Products from "../admin/pages/Products";
 import Homepage from "../admin/pages/Homepage";
-import Orders from "../admin/pages/Orders";
+import AdminOrders from "../admin/pages/Orders";
 import Users from "../admin/pages/Users";
 import Website from "../admin/pages/Website";
-import Addresses from "../pages/users/Addresses";
+
+// =====================================================
+// APP ROUTES
+// =====================================================
 
 const AppRoutes = () => {
   return (
     <Routes>
-      {/* User Routes */}
+      {/* ================================================= */}
+      {/* USER ROUTES */}
+      {/* ================================================= */}
+
       <Route path="/" element={<Home />} />
+
       <Route path="/login" element={<Login />} />
+
       <Route path="/signup" element={<Signup />} />
+
       <Route path="/about" element={<About />} />
+
       <Route path="/collection" element={<Collection />} />
+
       <Route path="/contact" element={<Contact />} />
+
       <Route path="/cart" element={<Cart />} />
+
       <Route path="/checkout" element={<Checkout />} />
+
       <Route path="/product/:id" element={<ProductDetails />} />
+
       <Route path="/profile" element={<Profile />} />
+
       <Route path="/orders" element={<Orders />} />
+
+      <Route path="/orders/:id" element={<OrderDetails />} />
+
       <Route path="/addresses" element={<Addresses />} />
+
       <Route path="/wishlist" element={<Wishlist />} />
+
+      {/* ================================================= */}
+      {/* ADMIN ROUTES */}
+      {/* ================================================= */}
 
       <Route path="/admin" element={<AdminLayout />}>
         <Route index element={<Dashboard />} />
+
         <Route path="dashboard" element={<Dashboard />} />
+
         <Route path="website" element={<Website />} />
+
         <Route path="products" element={<Products />} />
+
         <Route path="homepage" element={<Homepage />} />
-        <Route path="orders" element={<Orders />} />
+
+        <Route path="orders" element={<AdminOrders />} />
+
         <Route path="users" element={<Users />} />
       </Route>
     </Routes>

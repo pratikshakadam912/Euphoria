@@ -1,20 +1,27 @@
 import mongoose from "mongoose";
 
+// =====================================================
+// ORDER PRODUCT
+// =====================================================
+
 const orderProductSchema = new mongoose.Schema(
   {
     productId: {
       type: String,
       required: true,
+      trim: true,
     },
 
     name: {
       type: String,
       required: true,
+      trim: true,
     },
 
     price: {
       type: Number,
       required: true,
+      min: 0,
     },
 
     quantity: {
@@ -43,18 +50,18 @@ const orderProductSchema = new mongoose.Schema(
       default: null,
     },
   },
-  { _id: false },
+  {
+    _id: false,
+  },
 );
+
+// =====================================================
+// SHIPPING ADDRESS
+// =====================================================
 
 const shippingAddressSchema = new mongoose.Schema(
   {
-    firstName: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-
-    lastName: {
+    fullName: {
       type: String,
       required: true,
       trim: true,
@@ -73,7 +80,7 @@ const shippingAddressSchema = new mongoose.Schema(
       trim: true,
     },
 
-    address: {
+    addressLine: {
       type: String,
       required: true,
       trim: true,
@@ -85,25 +92,44 @@ const shippingAddressSchema = new mongoose.Schema(
       trim: true,
     },
 
+    state: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
     postalCode: {
       type: String,
       required: true,
       trim: true,
     },
+
+    country: {
+      type: String,
+      default: "India",
+      trim: true,
+    },
   },
-  { _id: false },
+  {
+    _id: false,
+  },
 );
+
+// =====================================================
+// ORDER SCHEMA
+// =====================================================
 
 const orderSchema = new mongoose.Schema(
   {
-    // =====================================================
+    // =================================================
     // USER
-    // =====================================================
+    // =================================================
 
     userId: {
       type: String,
       required: true,
       index: true,
+      trim: true,
     },
 
     userEmail: {
@@ -113,31 +139,34 @@ const orderSchema = new mongoose.Schema(
       lowercase: true,
     },
 
-    // =====================================================
+    // =================================================
     // PRODUCTS
-    // =====================================================
+    // =================================================
 
     products: {
       type: [orderProductSchema],
+
       required: true,
+
       validate: {
-        validator: (products) => products.length > 0,
+        validator: (products) => Array.isArray(products) && products.length > 0,
+
         message: "Order must contain at least one product.",
       },
     },
 
-    // =====================================================
+    // =================================================
     // SHIPPING ADDRESS
-    // =====================================================
+    // =================================================
 
     shippingAddress: {
       type: shippingAddressSchema,
       required: true,
     },
 
-    // =====================================================
-    // PRICE
-    // =====================================================
+    // =================================================
+    // TOTAL
+    // =================================================
 
     total: {
       type: Number,
@@ -145,9 +174,9 @@ const orderSchema = new mongoose.Schema(
       min: 0,
     },
 
-    // =====================================================
+    // =================================================
     // ORDER STATUS
-    // =====================================================
+    // =================================================
 
     status: {
       type: String,
@@ -166,13 +195,15 @@ const orderSchema = new mongoose.Schema(
       index: true,
     },
 
-    // =====================================================
+    // =================================================
     // PAYMENT
-    // =====================================================
+    // =================================================
 
     paymentMethod: {
       type: String,
+
       required: true,
+
       enum: ["cod", "razorpay", "upi", "card"],
     },
 
@@ -186,9 +217,9 @@ const orderSchema = new mongoose.Schema(
       default: false,
     },
 
-    // =====================================================
+    // =================================================
     // REFUND
-    // =====================================================
+    // =================================================
 
     refundStatus: {
       type: String,

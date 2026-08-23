@@ -1,10 +1,13 @@
 import express from "express";
+import mongoose from "mongoose";
+
 import Order from "../models/Order.js";
 
 const router = express.Router();
 
 // =====================================================
 // CREATE ORDER
+// POST /api/orders/create
 // =====================================================
 
 router.post("/create", async (req, res) => {
@@ -20,9 +23,9 @@ router.post("/create", async (req, res) => {
       shippingAddress,
     } = req.body;
 
-    // -------------------------------------------------
+    // =================================================
     // VALIDATION
-    // -------------------------------------------------
+    // =================================================
 
     if (!userId) {
       return res.status(400).json({
@@ -36,7 +39,7 @@ router.post("/create", async (req, res) => {
       });
     }
 
-    if (!products || !Array.isArray(products) || products.length === 0) {
+    if (!Array.isArray(products) || products.length === 0) {
       return res.status(400).json({
         message: "Order must contain at least one product.",
       });
@@ -54,28 +57,58 @@ router.post("/create", async (req, res) => {
       });
     }
 
+    if (!["cod", "razorpay", "upi", "card"].includes(paymentMethod)) {
+      return res.status(400).json({
+        message: "Invalid payment method.",
+      });
+    }
+
     if (typeof total !== "number" || total < 0) {
       return res.status(400).json({
         message: "Valid order total is required.",
       });
     }
 
-    // -------------------------------------------------
-    // CREATE ORDER
-    // -------------------------------------------------
+    // =================================================
+    // SHIPPING ADDRESS VALIDATION
+    // =================================================
 
-    const newOrder = new Order({
-      userId,
-      userEmail,
+    const requiredAddressFields = [
+      "fullName",
+      "phone",
+      "addressLine",
+      "city",
+      "state",
+      "postalCode",
+    ];
 
-      products: products.map((item) => ({
-        productId: item.productId || item.id,
+    for (const field of requiredAddressFields) {
+      if (!shippingAddress[field]) {
+        return res.status(400).json({
+          message: `${field} is required.`,
+        });
+      }
+    }
 
-        name: item.name,
+    // =================================================
+    // FORMAT PRODUCTS
+    // =================================================
+
+    const formattedProducts = products.map((item) => {
+      const productId = item.productId || item.id;
+
+      if (!productId) {
+        throw new Error("Product ID is missing.");
+      }
+
+      return {
+        productId: String(productId),
+
+        name: String(item.name || "Product"),
 
         price: Number(item.price) || 0,
 
-        quantity: Number(item.quantity) || 1,
+        quantity: Math.max(1, Number(item.quantity) || 1),
 
         image: item.image || "",
 
@@ -84,9 +117,39 @@ router.post("/create", async (req, res) => {
         color: item.color || null,
 
         variant: item.variant || null,
-      })),
+      };
+    });
 
-      total,
+    // =================================================
+    // CREATE ORDER
+    // =================================================
+
+    const order = new Order({
+      userId: String(userId),
+
+      userEmail: String(userEmail).toLowerCase(),
+
+      products: formattedProducts,
+
+      total: Number(total),
+
+      shippingAddress: {
+        fullName: shippingAddress.fullName,
+
+        email: shippingAddress.email || userEmail,
+
+        phone: shippingAddress.phone,
+
+        addressLine: shippingAddress.addressLine,
+
+        city: shippingAddress.city,
+
+        state: shippingAddress.state,
+
+        postalCode: shippingAddress.postalCode,
+
+        country: shippingAddress.country || "India",
+      },
 
       paymentMethod,
 
@@ -94,25 +157,20 @@ router.post("/create", async (req, res) => {
 
       isPaid: typeof isPaid === "boolean" ? isPaid : paymentMethod !== "cod",
 
-      shippingAddress: {
-        firstName: shippingAddress.firstName,
-        lastName: shippingAddress.lastName,
-        email: shippingAddress.email,
-        phone: shippingAddress.phone,
-        address: shippingAddress.address,
-        city: shippingAddress.city,
-        postalCode: shippingAddress.postalCode,
-      },
-
       status: "pending",
 
       refundStatus: "none",
     });
 
-    const savedOrder = await newOrder.save();
+    const savedOrder = await order.save();
+
+    // =================================================
+    // RESPONSE
+    // =================================================
 
     return res.status(201).json({
       message: "Order created successfully.",
+
       order: savedOrder,
     });
   } catch (error) {
@@ -120,6 +178,7 @@ router.post("/create", async (req, res) => {
 
     return res.status(500).json({
       message: "Failed to create order.",
+
       error: error.message,
     });
   }
@@ -128,11 +187,17 @@ router.post("/create", async (req, res) => {
 // =====================================================
 // GET ALL ORDERS
 // ADMIN
+//
+// GET /api/orders
 // =====================================================
 
 router.get("/", async (req, res) => {
   try {
-    const orders = await Order.find().sort({ createdAt: -1 });
+    const orders = await Order.find()
+      .sort({
+        createdAt: -1,
+      })
+      .lean();
 
     return res.status(200).json(orders);
   } catch (error) {
@@ -140,6 +205,7 @@ router.get("/", async (req, res) => {
 
     return res.status(500).json({
       message: "Failed to fetch orders.",
+
       error: error.message,
     });
   }
@@ -147,17 +213,27 @@ router.get("/", async (req, res) => {
 
 // =====================================================
 // GET USER ORDERS
+//
+// GET /api/orders/user/:userId
 // =====================================================
 
 router.get("/user/:userId", async (req, res) => {
   try {
     const { userId } = req.params;
 
+    if (!userId) {
+      return res.status(400).json({
+        message: "User ID is required.",
+      });
+    }
+
     const orders = await Order.find({
       userId,
-    }).sort({
-      createdAt: -1,
-    });
+    })
+      .sort({
+        createdAt: -1,
+      })
+      .lean();
 
     return res.status(200).json(orders);
   } catch (error) {
@@ -165,6 +241,7 @@ router.get("/user/:userId", async (req, res) => {
 
     return res.status(500).json({
       message: "Failed to fetch user orders.",
+
       error: error.message,
     });
   }
@@ -172,11 +249,21 @@ router.get("/user/:userId", async (req, res) => {
 
 // =====================================================
 // GET SINGLE ORDER
+//
+// GET /api/orders/:id
 // =====================================================
 
 router.get("/:id", async (req, res) => {
   try {
-    const order = await Order.findById(req.params.id);
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        message: "Invalid order ID.",
+      });
+    }
+
+    const order = await Order.findById(id).lean();
 
     if (!order) {
       return res.status(404).json({
@@ -190,6 +277,7 @@ router.get("/:id", async (req, res) => {
 
     return res.status(500).json({
       message: "Failed to fetch order.",
+
       error: error.message,
     });
   }
@@ -198,10 +286,14 @@ router.get("/:id", async (req, res) => {
 // =====================================================
 // UPDATE ORDER STATUS
 // ADMIN
+//
+// PUT /api/orders/:id/status
 // =====================================================
 
 router.put("/:id/status", async (req, res) => {
   try {
+    const { id } = req.params;
+
     const { status } = req.body;
 
     const allowedStatuses = [
@@ -213,13 +305,27 @@ router.put("/:id/status", async (req, res) => {
       "refunded",
     ];
 
+    // =================================================
+    // VALIDATION
+    // =================================================
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        message: "Invalid order ID.",
+      });
+    }
+
     if (!allowedStatuses.includes(status)) {
       return res.status(400).json({
         message: "Invalid order status.",
       });
     }
 
-    const order = await Order.findById(req.params.id);
+    // =================================================
+    // FIND ORDER
+    // =================================================
+
+    const order = await Order.findById(id);
 
     if (!order) {
       return res.status(404).json({
@@ -227,9 +333,9 @@ router.put("/:id/status", async (req, res) => {
       });
     }
 
-    // -------------------------------------------------
-    // BASIC STATUS FLOW
-    // -------------------------------------------------
+    // =================================================
+    // STATUS FLOW
+    // =================================================
 
     if (status === "confirmed" && order.status !== "pending") {
       return res.status(400).json({
@@ -258,12 +364,23 @@ router.put("/:id/status", async (req, res) => {
       });
     }
 
+    // =================================================
+    // UPDATE
+    // =================================================
+
     order.status = status;
+
+    // COD becomes paid after delivery
+
+    if (status === "delivered" && order.paymentMethod === "cod") {
+      order.isPaid = true;
+    }
 
     await order.save();
 
     return res.status(200).json({
       message: "Order status updated successfully.",
+
       order,
     });
   } catch (error) {
@@ -271,6 +388,7 @@ router.put("/:id/status", async (req, res) => {
 
     return res.status(500).json({
       message: "Failed to update order status.",
+
       error: error.message,
     });
   }
@@ -279,17 +397,31 @@ router.put("/:id/status", async (req, res) => {
 // =====================================================
 // REQUEST REFUND
 // USER
+//
+// PUT /api/orders/:id/refund
 // =====================================================
 
 router.put("/:id/refund", async (req, res) => {
   try {
-    const order = await Order.findById(req.params.id);
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        message: "Invalid order ID.",
+      });
+    }
+
+    const order = await Order.findById(id);
 
     if (!order) {
       return res.status(404).json({
         message: "Order not found.",
       });
     }
+
+    // =================================================
+    // VALIDATION
+    // =================================================
 
     if (order.status !== "cancelled") {
       return res.status(400).json({
@@ -310,12 +442,17 @@ router.put("/:id/refund", async (req, res) => {
       });
     }
 
+    // =================================================
+    // REQUEST REFUND
+    // =================================================
+
     order.refundStatus = "requested";
 
     await order.save();
 
     return res.status(200).json({
       message: "Refund requested successfully.",
+
       order,
     });
   } catch (error) {
@@ -323,6 +460,7 @@ router.put("/:id/refund", async (req, res) => {
 
     return res.status(500).json({
       message: "Failed to request refund.",
+
       error: error.message,
     });
   }
@@ -331,13 +469,17 @@ router.put("/:id/refund", async (req, res) => {
 // =====================================================
 // UPDATE REFUND STATUS
 // ADMIN
+//
+// PUT /api/orders/:id/refund/status
 // =====================================================
 
 router.put("/:id/refund/status", async (req, res) => {
   try {
+    const { id } = req.params;
+
     const { refundStatus } = req.body;
 
-    const allowedStatuses = [
+    const allowedRefundStatuses = [
       "none",
       "requested",
       "approved",
@@ -345,19 +487,37 @@ router.put("/:id/refund/status", async (req, res) => {
       "processed",
     ];
 
-    if (!allowedStatuses.includes(refundStatus)) {
+    // =================================================
+    // VALIDATION
+    // =================================================
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        message: "Invalid order ID.",
+      });
+    }
+
+    if (!allowedRefundStatuses.includes(refundStatus)) {
       return res.status(400).json({
         message: "Invalid refund status.",
       });
     }
 
-    const order = await Order.findById(req.params.id);
+    // =================================================
+    // FIND ORDER
+    // =================================================
+
+    const order = await Order.findById(id);
 
     if (!order) {
       return res.status(404).json({
         message: "Order not found.",
       });
     }
+
+    // =================================================
+    // UPDATE REFUND
+    // =================================================
 
     order.refundStatus = refundStatus;
 
@@ -369,6 +529,7 @@ router.put("/:id/refund/status", async (req, res) => {
 
     return res.status(200).json({
       message: "Refund status updated successfully.",
+
       order,
     });
   } catch (error) {
@@ -376,6 +537,7 @@ router.put("/:id/refund/status", async (req, res) => {
 
     return res.status(500).json({
       message: "Failed to update refund status.",
+
       error: error.message,
     });
   }
