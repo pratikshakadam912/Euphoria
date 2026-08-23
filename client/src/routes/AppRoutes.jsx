@@ -12,6 +12,7 @@ import Checkout from "../pages/users/Checkout";
 import ProductDetails from "../pages/users/ProductDetail";
 import Profile from "../pages/users/Profile";
 import Orders from "../pages/users/Orders";
+import Wishlist from "../pages/users/Wishlist";
 
 // ADMIN PAGES
 import AdminLayout from "../admin/layout/AdminLayout";
@@ -39,6 +40,7 @@ const AppRoutes = () => {
       <Route path="/profile" element={<Profile />} />
       <Route path="/orders" element={<Orders />} />
       <Route path="/addresses" element={<Addresses />} />
+      <Route path="/wishlist" element={<Wishlist />} />
 
       <Route path="/admin" element={<AdminLayout />}>
         <Route index element={<Dashboard />} />

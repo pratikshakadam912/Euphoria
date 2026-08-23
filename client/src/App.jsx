@@ -1,11 +1,11 @@
-import React from 'react'
-import AppRoutes from './routes/AppRoutes'
-//re deploy//
+import React from "react";
+import AppRoutes from "./routes/AppRoutes";
+import { WishlistProvider } from "./context/WishlistContext";
 
 export default function App() {
   return (
-    <div>
+    <WishlistProvider>
       <AppRoutes />
-    </div>
-  )
+    </WishlistProvider>
+  );
 }
