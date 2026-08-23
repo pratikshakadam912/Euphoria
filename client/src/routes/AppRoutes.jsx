@@ -21,6 +21,7 @@ import Homepage from "../admin/pages/Homepage";
 import Orders from "../admin/pages/Orders";
 import Users from "../admin/pages/Users";
 import Website from "../admin/pages/Website";
+import Addresses from "../pages/users/Addresses";
 
 const AppRoutes = () => {
   return (
@@ -37,6 +38,7 @@ const AppRoutes = () => {
       <Route path="/product/:id" element={<ProductDetails />} />
       <Route path="/profile" element={<Profile />} />
       <Route path="/orders" element={<Orders />} />
+      <Route path="/addresses" element={<Addresses />} />
 
       <Route path="/admin" element={<AdminLayout />}>
         <Route index element={<Dashboard />} />
