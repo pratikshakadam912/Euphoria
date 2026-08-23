@@ -11,6 +11,7 @@ import Cart from "../pages/users/Cart";
 import Checkout from "../pages/users/Checkout";
 import ProductDetails from "../pages/users/ProductDetail";
 import Profile from "../pages/users/Profile";
+import Orders from "../pages/users/Orders";
 
 // ADMIN PAGES
 import AdminLayout from "../admin/layout/AdminLayout";
@@ -35,6 +36,7 @@ const AppRoutes = () => {
       <Route path="/checkout" element={<Checkout />} />
       <Route path="/product/:id" element={<ProductDetails />} />
       <Route path="/profile" element={<Profile />} />
+      <Route path="/orders" element={<Orders />} />
 
       <Route path="/admin" element={<AdminLayout />}>
         <Route index element={<Dashboard />} />
@@ -43,7 +45,7 @@ const AppRoutes = () => {
         <Route path="products" element={<Products />} />
         <Route path="homepage" element={<Homepage />} />
         <Route path="orders" element={<Orders />} />
-        <Route path="Users" element={<Users />} />
+        <Route path="users" element={<Users />} />
       </Route>
     </Routes>
   );

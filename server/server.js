@@ -9,6 +9,8 @@ import authRoutes from "./routes/authRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 import contactRoutes from "./routes/contactRoutes.js";
 import websiteRoutes from "./routes/websiteRoutes.js";
+import addressRoutes from "./routes/addressRoutes.js";
+import wishlistRoutes from "./routes/wishlistRoutes.js";
 
 dotenv.config();
 
@@ -31,6 +33,8 @@ app.use("/api/products", productRoutes);
 app.use("/api/users", userRoutes); // ✅ FIXED HERE
 app.use("/api/auth", authRoutes);
 app.use("/api/orders", orderRoutes);
+app.use("/api/addresses", addressRoutes);
+app.use("/api/wishlist", wishlistRoutes);
 app.use("/api/contact", contactRoutes);
 
 app.use("/api/website", websiteRoutes);
