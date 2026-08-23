@@ -17,37 +17,37 @@ const Checkout = () => {
 
   const { cart, clearCart, subtotal } = useCart();
 
-  // ==========================================
+  // =====================================================
   // USER
-  // ==========================================
+  // =====================================================
 
   const [user, setUser] = useState(null);
 
-  // ==========================================
+  // =====================================================
   // ADDRESSES
-  // ==========================================
+  // =====================================================
 
   const [addresses, setAddresses] = useState([]);
 
   const [selectedAddress, setSelectedAddress] = useState(null);
 
-  // ==========================================
+  const [showAddressForm, setShowAddressForm] = useState(false);
+
+  // =====================================================
   // PAYMENT
-  // ==========================================
+  // =====================================================
 
   const [payment, setPayment] = useState("razorpay");
 
-  // ==========================================
+  // =====================================================
   // LOADING
-  // ==========================================
+  // =====================================================
 
   const [loading, setLoading] = useState(false);
 
-  // ==========================================
-  // NEW ADDRESS
-  // ==========================================
-
-  const [showAddressForm, setShowAddressForm] = useState(false);
+  // =====================================================
+  // ADDRESS FORM
+  // =====================================================
 
   const [newAddress, setNewAddress] = useState({
     label: "home",
@@ -62,18 +62,16 @@ const Checkout = () => {
     isDefault: false,
   });
 
-  // ==========================================
+  // =====================================================
   // GET USER
-  // ==========================================
+  // =====================================================
 
   useEffect(() => {
     const savedUser = localStorage.getItem("user");
 
     if (!savedUser) {
-      alert("Please login first");
-
+      alert("Please login first.");
       navigate("/login");
-
       return;
     }
 
@@ -90,35 +88,39 @@ const Checkout = () => {
     }
   }, [navigate]);
 
-  // ==========================================
-  // FETCH ADDRESSES
-  // ==========================================
+  // =====================================================
+  // FETCH USER ADDRESSES
+  // =====================================================
 
   useEffect(() => {
     if (!user?.uid) return;
 
     const fetchAddresses = async () => {
       try {
-        const res = await fetch(`${API_URL}/api/addresses/user/${user.uid}`);
+        const response = await fetch(
+          `${API_URL}/api/addresses/user/${user.uid}`,
+        );
 
-        if (!res.ok) {
-          throw new Error("Failed to load addresses");
+        if (!response.ok) {
+          throw new Error("Failed to fetch addresses");
         }
 
-        const data = await res.json();
+        const data = await response.json();
 
-        setAddresses(data);
+        const addressList = Array.isArray(data) ? data : data.addresses || [];
 
-        // --------------------------------
-        // SELECT DEFAULT ADDRESS
-        // --------------------------------
+        setAddresses(addressList);
 
-        const defaultAddress = data.find((address) => address.isDefault);
+        // ---------------------------------------------
+        // DEFAULT ADDRESS
+        // ---------------------------------------------
+
+        const defaultAddress = addressList.find((address) => address.isDefault);
 
         if (defaultAddress) {
           setSelectedAddress(defaultAddress._id);
-        } else if (data.length > 0) {
-          setSelectedAddress(data[0]._id);
+        } else if (addressList.length > 0) {
+          setSelectedAddress(addressList[0]._id);
         }
       } catch (error) {
         console.error("Address loading error:", error);
@@ -128,39 +130,33 @@ const Checkout = () => {
     fetchAddresses();
   }, [user]);
 
-  // ==========================================
-  // TOTAL
-  // ==========================================
+  // =====================================================
+  // ADDRESS INPUT
+  // =====================================================
 
-  const total = subtotal;
+  const handleAddressChange = (event) => {
+    const { name, value } = event.target;
 
-  // ==========================================
-  // NEW ADDRESS INPUT
-  // ==========================================
-
-  const handleAddressChange = (e) => {
-    const { name, value } = e.target;
-
-    setNewAddress((prev) => ({
-      ...prev,
+    setNewAddress((previous) => ({
+      ...previous,
       [name]: value,
     }));
   };
 
-  // ==========================================
-  // SAVE NEW ADDRESS
-  // ==========================================
+  // =====================================================
+  // SAVE ADDRESS
+  // =====================================================
 
-  const handleSaveAddress = async (e) => {
-    e.preventDefault();
+  const handleSaveAddress = async (event) => {
+    event.preventDefault();
 
     if (!user?.uid) {
-      alert("Please login first");
+      alert("Please login first.");
       return;
     }
 
     try {
-      const res = await fetch(`${API_URL}/api/addresses`, {
+      const response = await fetch(`${API_URL}/api/addresses`, {
         method: "POST",
 
         headers: {
@@ -169,49 +165,38 @@ const Checkout = () => {
 
         body: JSON.stringify({
           ...newAddress,
-
           userId: user.uid,
         }),
       });
 
-      const data = await res.json();
+      const data = await response.json();
 
-      if (!res.ok) {
-        alert(data.message || "Could not save address");
-
-        return;
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to save address");
       }
 
-      // --------------------------------
-      // ADD TO ADDRESS LIST
-      // --------------------------------
+      const savedAddress = data.address || data;
 
-      const savedAddress = data.address;
-
-      setAddresses((prev) => {
+      setAddresses((previous) => {
         if (savedAddress.isDefault) {
           return [
             savedAddress,
 
-            ...prev.map((address) => ({
+            ...previous.map((address) => ({
               ...address,
               isDefault: false,
             })),
           ];
         }
 
-        return [savedAddress, ...prev];
+        return [savedAddress, ...previous];
       });
-
-      // --------------------------------
-      // SELECT NEW ADDRESS
-      // --------------------------------
 
       setSelectedAddress(savedAddress._id);
 
-      // --------------------------------
+      // ---------------------------------------------
       // RESET FORM
-      // --------------------------------
+      // ---------------------------------------------
 
       setNewAddress({
         label: "home",
@@ -227,72 +212,86 @@ const Checkout = () => {
       });
 
       setShowAddressForm(false);
+
+      alert("Address saved successfully.");
     } catch (error) {
       console.error("Save address error:", error);
 
-      alert("Something went wrong while saving address");
+      alert(error.message || "Something went wrong while saving the address.");
     }
   };
 
-  // ==========================================
-  // PLACE ORDER
-  // ==========================================
+  // =====================================================
+  // TOTAL
+  // =====================================================
+
+  const total = Number(subtotal || 0);
+
+  // =====================================================
+  // CREATE ORDER
+  // =====================================================
 
   const handlePlaceOrder = async () => {
+    if (loading) return;
+
+    // ---------------------------------------------
+    // USER CHECK
+    // ---------------------------------------------
+
     if (!user?.uid) {
-      alert("Please login first");
-
+      alert("Please login first.");
       navigate("/login");
-
       return;
     }
 
-    if (cart.length === 0) {
-      alert("Your cart is empty");
+    // ---------------------------------------------
+    // CART CHECK
+    // ---------------------------------------------
 
+    if (!cart || cart.length === 0) {
+      alert("Your cart is empty.");
       navigate("/cart");
-
       return;
     }
+
+    // ---------------------------------------------
+    // ADDRESS CHECK
+    // ---------------------------------------------
 
     if (!selectedAddress) {
-      alert("Please select a shipping address");
-
+      alert("Please select a shipping address.");
       return;
     }
 
     const address = addresses.find((item) => item._id === selectedAddress);
 
     if (!address) {
-      alert("Selected address could not be found");
-
+      alert("Selected address could not be found.");
       return;
     }
 
     try {
       setLoading(true);
 
-      // ==================================
+      // =================================================
       // PAYMENT
-      // ==================================
+      // =================================================
 
       let paymentId = null;
-
       let isPaid = false;
 
-      // ----------------------------------
+      // ---------------------------------------------
       // COD
-      // ----------------------------------
+      // ---------------------------------------------
 
       if (payment === "cod") {
         paymentId = null;
-
         isPaid = false;
       }
 
-      // ----------------------------------
+      // ---------------------------------------------
       // MOCK ONLINE PAYMENT
-      // ----------------------------------
+      // ---------------------------------------------
       else {
         alert("Processing payment...");
 
@@ -303,20 +302,20 @@ const Checkout = () => {
         isPaid = true;
       }
 
-      // ==================================
-      // FORMAT PRODUCTS
-      // ==================================
+      // =================================================
+      // FORMAT CART PRODUCTS
+      // =================================================
 
       const products = cart.map((item) => ({
-        productId: String(item.id || item._id),
+        productId: String(item.id || item._id || ""),
 
-        name: item.name,
+        name: item.name || "",
 
-        price: Number(item.price),
+        price: Number(item.price || 0),
 
         quantity: Number(item.quantity || 1),
 
-        image: item.image || "",
+        image: item.image || item.images?.[0] || "",
 
         size: item.size || null,
 
@@ -325,63 +324,102 @@ const Checkout = () => {
         variant: item.variant || null,
       }));
 
-      // ==================================
-      // CREATE ORDER
-      // ==================================
+      // =================================================
+      // SHIPPING ADDRESS SNAPSHOT
+      // =================================================
+      //
+      // IMPORTANT:
+      // We copy the address into the order.
+      //
+      // This means if the user later changes their
+      // saved address, the old order still has the
+      // original delivery address.
+      //
+      // =================================================
 
-      const res = await fetch(`${API_URL}/api/orders/create`, {
+      const shippingAddress = {
+        fullName: address.fullName || "",
+
+        email: address.email || user.email || "",
+
+        phone: address.phone || "",
+
+        addressLine: address.addressLine || "",
+
+        city: address.city || "",
+
+        state: address.state || "",
+
+        postalCode: address.postalCode || "",
+
+        country: address.country || "India",
+      };
+
+      // =================================================
+      // ORDER DATA
+      // =================================================
+
+      const orderData = {
+        userId: user.uid,
+
+        userEmail: user.email || "",
+
+        products,
+
+        total,
+
+        status: "pending",
+
+        shippingAddress,
+
+        paymentMethod: payment,
+
+        paymentId,
+
+        isPaid,
+
+        refundStatus: "none",
+      };
+
+      // =================================================
+      // CREATE ORDER
+      // =================================================
+
+      const response = await fetch(`${API_URL}/api/orders/create`, {
         method: "POST",
 
         headers: {
           "Content-Type": "application/json",
         },
 
-        body: JSON.stringify({
-          userId: user.uid,
-
-          userEmail: user.email,
-
-          products,
-
-          total,
-
-          shippingAddress: {
-            fullName: address.fullName,
-
-            email: address.email || user.email || "",
-
-            phone: address.phone,
-
-            addressLine: address.addressLine,
-
-            city: address.city,
-
-            state: address.state,
-
-            postalCode: address.postalCode,
-
-            country: address.country || "India",
-          },
-
-          paymentMethod: payment,
-
-          paymentId,
-
-          isPaid,
-        }),
+        body: JSON.stringify(orderData),
       });
 
-      const data = await res.json();
+      const data = await response.json();
 
-      if (!res.ok) {
-        throw new Error(data.message || "Order creation failed");
+      // =================================================
+      // ERROR
+      // =================================================
+
+      if (!response.ok) {
+        throw new Error(data.message || "Order creation failed.");
       }
 
-      // ==================================
-      // SUCCESS
-      // ==================================
+      // =================================================
+      // GET CREATED ORDER
+      // =================================================
+
+      const createdOrder = data.order;
+
+      // =================================================
+      // CLEAR CART
+      // =================================================
 
       clearCart();
+
+      // =================================================
+      // SUCCESS MESSAGE
+      // =================================================
 
       alert(
         payment === "cod"
@@ -389,393 +427,479 @@ const Checkout = () => {
           : "Payment successful! 🎉",
       );
 
-      // ==================================
-      // GO TO ORDERS
-      // ==================================
+      // =================================================
+      // GO TO ORDER TRACKING
+      // =================================================
 
-      navigate("/orders");
+      if (createdOrder?._id) {
+        navigate(`/orders/${createdOrder._id}`);
+      } else {
+        navigate("/orders");
+      }
     } catch (error) {
       console.error("Place order error:", error);
 
-      alert(error.message || "Something went wrong");
+      alert(error.message || "Something went wrong while placing your order.");
     } finally {
       setLoading(false);
     }
   };
 
-  return (
-    <>
-      <div className="min-h-screen pt-24 px-4 md:px-16 bg-[#f6f3ef]">
+  // =====================================================
+  // EMPTY CART
+  // =====================================================
+
+  if (!loading && (!cart || cart.length === 0)) {
+    return (
+      <>
         <Navbar />
 
-        {/* ================================= */}
-        {/* HEADER */}
-        {/* ================================= */}
+        <div className="min-h-screen bg-[#f6f3ef] flex items-center justify-center px-6">
+          <div className="text-center">
+            <h1 className="text-3xl font-light">Your cart is empty</h1>
 
-        <h1 className="text-3xl md:text-4xl font-light tracking-widest mb-10">
-          Secure Checkout
-        </h1>
-
-        <div className="grid lg:grid-cols-3 gap-10">
-          {/* ================================= */}
-          {/* LEFT */}
-          {/* ================================= */}
-
-          <div className="lg:col-span-2 space-y-8">
-            {/* ================================= */}
-            {/* SHIPPING ADDRESS */}
-            {/* ================================= */}
-
-            <div className="bg-white p-8 rounded-xl shadow-sm">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-light tracking-wide">
-                  Shipping Address
-                </h2>
-
-                <button
-                  onClick={() => setShowAddressForm(!showAddressForm)}
-                  className="text-sm underline"
-                >
-                  {showAddressForm ? "Cancel" : "+ Add Address"}
-                </button>
-              </div>
-
-              {/* ================================= */}
-              {/* SAVED ADDRESSES */}
-              {/* ================================= */}
-
-              {!showAddressForm && (
-                <div className="space-y-4">
-                  {addresses.length === 0 ? (
-                    <div className="border border-dashed rounded-lg p-6 text-center text-gray-500">
-                      No saved addresses.
-                      <br />
-                      Add an address to continue.
-                    </div>
-                  ) : (
-                    addresses.map((address) => (
-                      <div
-                        key={address._id}
-                        onClick={() => setSelectedAddress(address._id)}
-                        className={`border p-5 rounded-lg cursor-pointer transition ${
-                          selectedAddress === address._id
-                            ? "border-black bg-gray-50"
-                            : "hover:border-gray-400"
-                        }`}
-                      >
-                        <div className="flex justify-between gap-4">
-                          <div>
-                            <div className="flex items-center gap-3">
-                              <p className="font-medium capitalize">
-                                {address.label}
-                              </p>
-
-                              {address.isDefault && (
-                                <span className="text-xs bg-black text-white px-2 py-1 rounded-full">
-                                  Default
-                                </span>
-                              )}
-                            </div>
-
-                            <p className="mt-2">{address.fullName}</p>
-
-                            <p className="text-sm text-gray-500 mt-1">
-                              {address.addressLine}
-                            </p>
-
-                            <p className="text-sm text-gray-500">
-                              {address.city}, {address.state} -{" "}
-                              {address.postalCode}
-                            </p>
-
-                            <p className="text-sm text-gray-500 mt-1">
-                              {address.phone}
-                            </p>
-                          </div>
-
-                          <input
-                            type="radio"
-                            checked={selectedAddress === address._id}
-                            readOnly
-                          />
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
-              )}
-
-              {/* ================================= */}
-              {/* NEW ADDRESS FORM */}
-              {/* ================================= */}
-
-              {showAddressForm && (
-                <form
-                  onSubmit={handleSaveAddress}
-                  className="grid md:grid-cols-2 gap-5"
-                >
-                  <select
-                    name="label"
-                    value={newAddress.label}
-                    onChange={handleAddressChange}
-                    className="border p-3 rounded-md"
-                  >
-                    <option value="home">Home</option>
-
-                    <option value="work">Work</option>
-
-                    <option value="other">Other</option>
-                  </select>
-
-                  <input
-                    name="fullName"
-                    value={newAddress.fullName}
-                    onChange={handleAddressChange}
-                    required
-                    className="border p-3 rounded-md"
-                    placeholder="Full Name"
-                  />
-
-                  <input
-                    name="email"
-                    type="email"
-                    value={newAddress.email}
-                    onChange={handleAddressChange}
-                    className="border p-3 rounded-md"
-                    placeholder="Email"
-                  />
-
-                  <input
-                    name="phone"
-                    value={newAddress.phone}
-                    onChange={handleAddressChange}
-                    required
-                    className="border p-3 rounded-md"
-                    placeholder="Phone Number"
-                  />
-
-                  <input
-                    name="addressLine"
-                    value={newAddress.addressLine}
-                    onChange={handleAddressChange}
-                    required
-                    className="border p-3 rounded-md md:col-span-2"
-                    placeholder="Address"
-                  />
-
-                  <input
-                    name="city"
-                    value={newAddress.city}
-                    onChange={handleAddressChange}
-                    required
-                    className="border p-3 rounded-md"
-                    placeholder="City"
-                  />
-
-                  <input
-                    name="state"
-                    value={newAddress.state}
-                    onChange={handleAddressChange}
-                    required
-                    className="border p-3 rounded-md"
-                    placeholder="State"
-                  />
-
-                  <input
-                    name="postalCode"
-                    value={newAddress.postalCode}
-                    onChange={handleAddressChange}
-                    required
-                    className="border p-3 rounded-md"
-                    placeholder="Postal Code"
-                  />
-
-                  <button
-                    type="submit"
-                    className="md:col-span-2 py-3 bg-black text-white rounded-md"
-                  >
-                    Save Address
-                  </button>
-                </form>
-              )}
-            </div>
-
-            {/* ================================= */}
-            {/* PAYMENT */}
-            {/* ================================= */}
-
-            <div className="bg-white p-8 rounded-xl shadow-sm">
-              <h2 className="text-xl font-light mb-6 tracking-wide">
-                Payment Method
-              </h2>
-
-              <div className="space-y-4">
-                {/* RAZORPAY */}
-
-                <div
-                  onClick={() => setPayment("razorpay")}
-                  className={`flex justify-between items-center border p-4 rounded-lg cursor-pointer transition ${
-                    payment === "razorpay"
-                      ? "border-black bg-gray-50"
-                      : "hover:border-gray-400"
-                  }`}
-                >
-                  <div className="flex items-center gap-4">
-                    <SiRazorpay size={24} />
-
-                    <div>
-                      <p className="font-medium">Razorpay</p>
-
-                      <p className="text-xs text-gray-500">
-                        UPI, Cards, NetBanking
-                      </p>
-                    </div>
-                  </div>
-
-                  <input
-                    type="radio"
-                    checked={payment === "razorpay"}
-                    readOnly
-                  />
-                </div>
-
-                {/* UPI */}
-
-                <div
-                  onClick={() => setPayment("upi")}
-                  className={`flex justify-between items-center border p-4 rounded-lg cursor-pointer transition ${
-                    payment === "upi"
-                      ? "border-black bg-gray-50"
-                      : "hover:border-gray-400"
-                  }`}
-                >
-                  <div className="flex items-center gap-4">
-                    <SiGooglepay size={24} />
-
-                    <SiPaytm size={24} />
-
-                    <div>
-                      <p className="font-medium">UPI Payment</p>
-
-                      <p className="text-xs text-gray-500">
-                        Google Pay / PhonePe / Paytm
-                      </p>
-                    </div>
-                  </div>
-
-                  <input type="radio" checked={payment === "upi"} readOnly />
-                </div>
-
-                {/* CARD */}
-
-                <div
-                  onClick={() => setPayment("card")}
-                  className={`flex justify-between items-center border p-4 rounded-lg cursor-pointer transition ${
-                    payment === "card"
-                      ? "border-black bg-gray-50"
-                      : "hover:border-gray-400"
-                  }`}
-                >
-                  <div className="flex items-center gap-4">
-                    <FaCreditCard size={22} />
-
-                    <div>
-                      <p className="font-medium">Credit / Debit Card</p>
-
-                      <p className="text-xs text-gray-500">Visa, Mastercard</p>
-                    </div>
-                  </div>
-
-                  <input type="radio" checked={payment === "card"} readOnly />
-                </div>
-
-                {/* COD */}
-
-                <div
-                  onClick={() => setPayment("cod")}
-                  className={`flex justify-between items-center border p-4 rounded-lg cursor-pointer transition ${
-                    payment === "cod"
-                      ? "border-black bg-gray-50"
-                      : "hover:border-gray-400"
-                  }`}
-                >
-                  <div className="flex items-center gap-4">
-                    <MdDeliveryDining size={24} />
-
-                    <div>
-                      <p className="font-medium">Cash on Delivery</p>
-
-                      <p className="text-xs text-gray-500">
-                        Pay when product arrives
-                      </p>
-                    </div>
-                  </div>
-
-                  <input type="radio" checked={payment === "cod"} readOnly />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* ================================= */}
-          {/* ORDER SUMMARY */}
-          {/* ================================= */}
-
-          <div className="bg-white p-8 rounded-xl shadow-sm h-fit">
-            <h2 className="text-xl font-light mb-6 tracking-wide">
-              Order Summary
-            </h2>
-
-            <div className="space-y-4 mb-6">
-              {cart.map((item) => (
-                <div
-                  key={item.cartItemId}
-                  className="flex justify-between gap-4 text-gray-600"
-                >
-                  <span>
-                    {item.name}
-
-                    {" × "}
-
-                    {item.quantity}
-                  </span>
-
-                  <span>
-                    ₹{(Number(item.price) * item.quantity).toFixed(2)}
-                  </span>
-                </div>
-              ))}
-            </div>
-
-            <div className="flex justify-between text-gray-500 mb-3">
-              <span>Shipping</span>
-
-              <span>Free</span>
-            </div>
-
-            <div className="flex justify-between text-lg font-medium mb-6">
-              <span>Total</span>
-
-              <span>₹{total.toFixed(2)}</span>
-            </div>
+            <p className="text-gray-500 mt-3">
+              Add something beautiful before checking out.
+            </p>
 
             <button
-              onClick={handlePlaceOrder}
-              disabled={loading || !selectedAddress || cart.length === 0}
-              className="w-full py-3 bg-black text-white rounded-md tracking-wide hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={() => navigate("/collection")}
+              className="mt-7 px-7 py-3 bg-black text-white rounded-full"
             >
-              {loading
-                ? "Processing..."
-                : payment === "cod"
-                  ? "Place Order"
-                  : "Pay Securely"}
+              Continue Shopping
             </button>
           </div>
         </div>
+
+        <Footer />
+      </>
+    );
+  }
+
+  // =====================================================
+  // UI
+  // =====================================================
+
+  return (
+    <>
+      <div className="min-h-screen bg-[#f6f3ef]">
+        <Navbar />
+
+        <main className="pt-32 pb-20 px-4 md:px-10 lg:px-16">
+          {/* ================================================= */}
+          {/* HEADER */}
+          {/* ================================================= */}
+
+          <div className="max-w-7xl mx-auto mb-12">
+            <p className="uppercase tracking-[0.4em] text-xs text-gray-400">
+              Euphoria
+            </p>
+
+            <h1 className="text-4xl md:text-5xl font-light tracking-wide mt-3">
+              Secure Checkout
+            </h1>
+
+            <p className="text-gray-500 mt-3">Complete your order securely.</p>
+          </div>
+
+          {/* ================================================= */}
+          {/* CONTENT */}
+          {/* ================================================= */}
+
+          <div className="max-w-7xl mx-auto grid lg:grid-cols-3 gap-10">
+            {/* ================================================= */}
+            {/* LEFT */}
+            {/* ================================================= */}
+
+            <div className="lg:col-span-2 space-y-8">
+              {/* ================================================= */}
+              {/* SHIPPING ADDRESS */}
+              {/* ================================================= */}
+
+              <section className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-7">
+                  <div>
+                    <p className="uppercase tracking-[0.3em] text-xs text-gray-400">
+                      Step 1
+                    </p>
+
+                    <h2 className="text-2xl font-light mt-2">
+                      Shipping Address
+                    </h2>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setShowAddressForm(!showAddressForm)}
+                    className="px-5 py-2.5 rounded-full border border-gray-200 text-sm hover:bg-black hover:text-white hover:border-black transition"
+                  >
+                    {showAddressForm ? "Cancel" : "+ Add Address"}
+                  </button>
+                </div>
+
+                {/* ================================================= */}
+                {/* SAVED ADDRESSES */}
+                {/* ================================================= */}
+
+                {!showAddressForm && (
+                  <div className="space-y-4">
+                    {addresses.length === 0 ? (
+                      <div className="border border-dashed border-gray-300 rounded-2xl p-8 text-center">
+                        <p className="text-gray-500">
+                          You don't have a saved address yet.
+                        </p>
+
+                        <button
+                          onClick={() => setShowAddressForm(true)}
+                          className="mt-4 underline text-sm"
+                        >
+                          Add your first address
+                        </button>
+                      </div>
+                    ) : (
+                      addresses.map((address) => (
+                        <div
+                          key={address._id}
+                          onClick={() => setSelectedAddress(address._id)}
+                          className={`p-5 rounded-2xl border cursor-pointer transition-all ${
+                            selectedAddress === address._id
+                              ? "border-black bg-gray-50"
+                              : "border-gray-200 hover:border-gray-400"
+                          }`}
+                        >
+                          <div className="flex justify-between gap-5">
+                            <div>
+                              <div className="flex flex-wrap items-center gap-2">
+                                <span className="font-medium capitalize">
+                                  {address.label}
+                                </span>
+
+                                {address.isDefault && (
+                                  <span className="text-[10px] uppercase tracking-wider bg-black text-white px-2 py-1 rounded-full">
+                                    Default
+                                  </span>
+                                )}
+                              </div>
+
+                              <p className="mt-3 font-medium">
+                                {address.fullName}
+                              </p>
+
+                              <p className="text-sm text-gray-500 mt-1">
+                                {address.addressLine}
+                              </p>
+
+                              <p className="text-sm text-gray-500">
+                                {address.city}, {address.state} -{" "}
+                                {address.postalCode}
+                              </p>
+
+                              <p className="text-sm text-gray-500 mt-2">
+                                {address.phone}
+                              </p>
+                            </div>
+
+                            <input
+                              type="radio"
+                              checked={selectedAddress === address._id}
+                              readOnly
+                              className="mt-1"
+                            />
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
+
+                {/* ================================================= */}
+                {/* NEW ADDRESS */}
+                {/* ================================================= */}
+
+                {showAddressForm && (
+                  <form
+                    onSubmit={handleSaveAddress}
+                    className="grid md:grid-cols-2 gap-5"
+                  >
+                    <select
+                      name="label"
+                      value={newAddress.label}
+                      onChange={handleAddressChange}
+                      className="border border-gray-200 p-3.5 rounded-xl outline-none focus:border-black"
+                    >
+                      <option value="home">Home</option>
+
+                      <option value="work">Work</option>
+
+                      <option value="other">Other</option>
+                    </select>
+
+                    <input
+                      name="fullName"
+                      value={newAddress.fullName}
+                      onChange={handleAddressChange}
+                      required
+                      placeholder="Full Name"
+                      className="border border-gray-200 p-3.5 rounded-xl outline-none focus:border-black"
+                    />
+
+                    <input
+                      name="email"
+                      type="email"
+                      value={newAddress.email}
+                      onChange={handleAddressChange}
+                      placeholder="Email"
+                      className="border border-gray-200 p-3.5 rounded-xl outline-none focus:border-black"
+                    />
+
+                    <input
+                      name="phone"
+                      value={newAddress.phone}
+                      onChange={handleAddressChange}
+                      required
+                      placeholder="Phone Number"
+                      className="border border-gray-200 p-3.5 rounded-xl outline-none focus:border-black"
+                    />
+
+                    <input
+                      name="addressLine"
+                      value={newAddress.addressLine}
+                      onChange={handleAddressChange}
+                      required
+                      placeholder="Address"
+                      className="md:col-span-2 border border-gray-200 p-3.5 rounded-xl outline-none focus:border-black"
+                    />
+
+                    <input
+                      name="city"
+                      value={newAddress.city}
+                      onChange={handleAddressChange}
+                      required
+                      placeholder="City"
+                      className="border border-gray-200 p-3.5 rounded-xl outline-none focus:border-black"
+                    />
+
+                    <input
+                      name="state"
+                      value={newAddress.state}
+                      onChange={handleAddressChange}
+                      required
+                      placeholder="State"
+                      className="border border-gray-200 p-3.5 rounded-xl outline-none focus:border-black"
+                    />
+
+                    <input
+                      name="postalCode"
+                      value={newAddress.postalCode}
+                      onChange={handleAddressChange}
+                      required
+                      placeholder="Postal Code"
+                      className="border border-gray-200 p-3.5 rounded-xl outline-none focus:border-black"
+                    />
+
+                    <button
+                      type="submit"
+                      className="md:col-span-2 bg-black text-white py-3.5 rounded-xl hover:opacity-90 transition"
+                    >
+                      Save Address
+                    </button>
+                  </form>
+                )}
+              </section>
+
+              {/* ================================================= */}
+              {/* PAYMENT */}
+              {/* ================================================= */}
+
+              <section className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100">
+                <div className="mb-7">
+                  <p className="uppercase tracking-[0.3em] text-xs text-gray-400">
+                    Step 2
+                  </p>
+
+                  <h2 className="text-2xl font-light mt-2">Payment Method</h2>
+                </div>
+
+                <div className="space-y-4">
+                  {/* RAZORPAY */}
+
+                  <PaymentOption
+                    active={payment === "razorpay"}
+                    onClick={() => setPayment("razorpay")}
+                    icon={<SiRazorpay size={24} />}
+                    title="Razorpay"
+                    description="UPI, Cards, NetBanking"
+                  />
+
+                  {/* UPI */}
+
+                  <PaymentOption
+                    active={payment === "upi"}
+                    onClick={() => setPayment("upi")}
+                    icon={
+                      <div className="flex gap-2">
+                        <SiGooglepay size={22} />
+
+                        <SiPaytm size={22} />
+                      </div>
+                    }
+                    title="UPI Payment"
+                    description="Google Pay / PhonePe / Paytm"
+                  />
+
+                  {/* CARD */}
+
+                  <PaymentOption
+                    active={payment === "card"}
+                    onClick={() => setPayment("card")}
+                    icon={<FaCreditCard size={22} />}
+                    title="Credit / Debit Card"
+                    description="Visa, Mastercard"
+                  />
+
+                  {/* COD */}
+
+                  <PaymentOption
+                    active={payment === "cod"}
+                    onClick={() => setPayment("cod")}
+                    icon={<MdDeliveryDining size={25} />}
+                    title="Cash on Delivery"
+                    description="Pay when your order arrives"
+                  />
+                </div>
+              </section>
+            </div>
+
+            {/* ================================================= */}
+            {/* ORDER SUMMARY */}
+            {/* ================================================= */}
+
+            <aside className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100 h-fit lg:sticky lg:top-28">
+              <p className="uppercase tracking-[0.3em] text-xs text-gray-400">
+                Your Order
+              </p>
+
+              <h2 className="text-2xl font-light mt-2 mb-7">Order Summary</h2>
+
+              {/* PRODUCTS */}
+
+              <div className="space-y-5">
+                {cart.map((item) => (
+                  <div key={item.cartItemId} className="flex gap-4">
+                    <div className="w-16 h-20 rounded-xl overflow-hidden bg-gray-100 shrink-0">
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium truncate">{item.name}</p>
+
+                      <p className="text-sm text-gray-500 mt-1">
+                        Qty: {item.quantity}
+                      </p>
+
+                      {item.size && (
+                        <p className="text-xs text-gray-400 mt-1">
+                          Size: {item.size}
+                        </p>
+                      )}
+
+                      <p className="text-sm mt-2">
+                        ₹
+                        {(
+                          Number(item.price) * Number(item.quantity || 1)
+                        ).toFixed(2)}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* DIVIDER */}
+
+              <div className="border-t border-gray-100 my-7" />
+
+              {/* SHIPPING */}
+
+              <div className="flex justify-between text-gray-500">
+                <span>Shipping</span>
+
+                <span className="text-green-600">Free</span>
+              </div>
+
+              {/* TOTAL */}
+
+              <div className="flex justify-between text-xl font-medium mt-5">
+                <span>Total</span>
+
+                <span>₹{total.toFixed(2)}</span>
+              </div>
+
+              {/* BUTTON */}
+
+              <button
+                onClick={handlePlaceOrder}
+                disabled={loading || !selectedAddress || cart.length === 0}
+                className="w-full mt-7 py-4 bg-black text-white rounded-full tracking-wide hover:opacity-90 transition disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {loading
+                  ? "Processing..."
+                  : payment === "cod"
+                    ? "Place Order"
+                    : "Pay Securely"}
+              </button>
+
+              {!selectedAddress && (
+                <p className="text-xs text-red-500 text-center mt-3">
+                  Select a shipping address to continue.
+                </p>
+              )}
+
+              <p className="text-[11px] text-gray-400 text-center mt-5 leading-relaxed">
+                By placing this order, you agree to Euphoria's terms and
+                conditions.
+              </p>
+            </aside>
+          </div>
+        </main>
       </div>
 
       <Footer />
     </>
+  );
+};
+
+// =====================================================
+// PAYMENT OPTION COMPONENT
+// =====================================================
+
+const PaymentOption = ({ active, onClick, icon, title, description }) => {
+  return (
+    <div
+      onClick={onClick}
+      className={`flex items-center justify-between gap-4 p-5 rounded-2xl border cursor-pointer transition-all ${
+        active
+          ? "border-black bg-gray-50"
+          : "border-gray-200 hover:border-gray-400"
+      }`}
+    >
+      <div className="flex items-center gap-4">
+        <div className="w-10 h-10 rounded-full bg-[#f6f3ef] flex items-center justify-center shrink-0">
+          {icon}
+        </div>
+
+        <div>
+          <p className="font-medium">{title}</p>
+
+          <p className="text-xs text-gray-500 mt-1">{description}</p>
+        </div>
+      </div>
+
+      <input type="radio" checked={active} onChange={() => {}} />
+    </div>
   );
 };
 

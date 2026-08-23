@@ -8,7 +8,7 @@ import { useCart } from "../../context/CartContext";
 const ProductDetails = () => {
   const { id } = useParams();
 
-  const { cart, addToCart, decreaseQuantity } = useCart();
+  const { cart, addToCart, increaseQuantity, decreaseQuantity } = useCart();
 
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -16,22 +16,37 @@ const ProductDetails = () => {
   const [selectedImage, setSelectedImage] = useState("");
   const [selectedSize, setSelectedSize] = useState("");
 
+  // =====================================================
+  // FETCH PRODUCT
+  // =====================================================
+
   useEffect(() => {
     const fetchProduct = async () => {
       try {
+        setLoading(true);
+
         const res = await fetch(
           `https://euphoria-ooqv.onrender.com/api/products/${id}`,
         );
+
+        if (!res.ok) {
+          throw new Error("Failed to fetch product");
+        }
 
         const data = await res.json();
 
         setProduct(data);
 
-        if (data.images?.length) {
+        if (data.images?.length > 0) {
           setSelectedImage(data.images[0]);
         }
+
+        // Automatically select first size if there is only one
+        if (data.sizes?.length === 1) {
+          setSelectedSize(data.sizes[0]);
+        }
       } catch (error) {
-        console.log(error);
+        console.error("Product loading error:", error);
       } finally {
         setLoading(false);
       }
@@ -40,9 +55,86 @@ const ProductDetails = () => {
     fetchProduct();
   }, [id]);
 
-  const cartItem = cart.find((item) => item._id === product?._id);
+  // =====================================================
+  // FIND CURRENT CART ITEM
+  // =====================================================
+
+  const cartItem = cart.find(
+    (item) => item.id === product?._id && item.size === (selectedSize || null),
+  );
 
   const quantity = cartItem?.quantity || 0;
+
+  // =====================================================
+  // ADD TO CART
+  // =====================================================
+
+  const handleAddToCart = () => {
+    if (!product) return;
+
+    // Product is out of stock
+    if (Number(product.stock) <= 0) {
+      alert("This product is currently out of stock.");
+      return;
+    }
+
+    // Product has sizes but user hasn't selected one
+    if (product.sizes?.length > 0 && !selectedSize) {
+      alert("Please select a size first.");
+      return;
+    }
+
+    addToCart({
+      ...product,
+
+      // CartContext expects id
+      id: product._id,
+
+      // Selected variant
+      size: selectedSize || null,
+
+      // Use first product image
+      image: product.images?.[0] || "",
+
+      // Add one item
+      quantity: 1,
+    });
+  };
+
+  // =====================================================
+  // INCREASE QUANTITY
+  // =====================================================
+
+  const handleIncrease = () => {
+    if (!cartItem) {
+      handleAddToCart();
+      return;
+    }
+
+    // Don't allow quantity beyond stock
+    if (Number(product.stock) > 0) {
+      if (cartItem.quantity >= Number(product.stock)) {
+        alert("You have reached the available stock.");
+        return;
+      }
+    }
+
+    increaseQuantity(cartItem.cartItemId);
+  };
+
+  // =====================================================
+  // DECREASE QUANTITY
+  // =====================================================
+
+  const handleDecrease = () => {
+    if (!cartItem) return;
+
+    decreaseQuantity(cartItem.cartItemId);
+  };
+
+  // =====================================================
+  // LOADING
+  // =====================================================
 
   if (loading) {
     return (
@@ -58,13 +150,25 @@ const ProductDetails = () => {
     );
   }
 
+  // =====================================================
+  // PRODUCT NOT FOUND
+  // =====================================================
+
   if (!product) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        Product Not Found
+      <div className="min-h-screen bg-[#f8f7f5] flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-3xl font-light">Product Not Found</h1>
+
+          <p className="text-gray-500 mt-3">
+            The product you're looking for doesn't exist.
+          </p>
+        </div>
       </div>
     );
   }
+
+  const isOutOfStock = Number(product.stock) <= 0;
 
   return (
     <div className="min-h-screen bg-[#f8f7f5]">
@@ -72,14 +176,16 @@ const ProductDetails = () => {
 
       <section className="max-w-7xl mx-auto px-5 lg:px-8 pt-28 pb-20">
         <div className="grid lg:grid-cols-2 gap-10 lg:gap-20">
-          {/* LEFT SIDE */}
+          {/* =====================================================
+              LEFT SIDE
+          ===================================================== */}
 
           <div>
             {/* MAIN IMAGE */}
 
             <div className="bg-white rounded-[30px] overflow-hidden shadow-xl">
               <img
-                src={selectedImage || product.images?.[0]}
+                src={selectedImage || product.images?.[0] || ""}
                 alt={product.name}
                 loading="lazy"
                 className="
@@ -103,22 +209,23 @@ const ProductDetails = () => {
                     key={index}
                     onClick={() => setSelectedImage(img)}
                     className={`
-                        flex-shrink-0
-                        rounded-2xl
-                        overflow-hidden
-                        border-2
-                        transition-all
-                        duration-300
-                        ${
-                          selectedImage === img
-                            ? "border-black scale-105"
-                            : "border-gray-200 hover:border-black"
-                        }
+                      flex-shrink-0
+                      rounded-2xl
+                      overflow-hidden
+                      border-2
+                      transition-all
+                      duration-300
+
+                      ${
+                        selectedImage === img
+                          ? "border-black scale-105"
+                          : "border-gray-200 hover:border-black"
+                      }
                     `}
                   >
                     <img
                       src={img}
-                      alt={product.name}
+                      alt={`${product.name} ${index + 1}`}
                       loading="lazy"
                       className="
                         w-20
@@ -138,7 +245,9 @@ const ProductDetails = () => {
             </div>
           </div>
 
-          {/* RIGHT SIDE */}
+          {/* =====================================================
+              RIGHT SIDE
+          ===================================================== */}
 
           <div className="pt-2 lg:pt-8">
             {/* COLLECTION */}
@@ -160,8 +269,19 @@ const ProductDetails = () => {
                 ₹{product.price}
               </h2>
 
-              <span className="bg-black text-white text-xs tracking-[3px] px-4 py-2 rounded-full">
-                READY TO SHIP
+              <span
+                className={`
+                  text-white
+                  text-xs
+                  tracking-[3px]
+                  px-4
+                  py-2
+                  rounded-full
+
+                  ${isOutOfStock ? "bg-red-500" : "bg-black"}
+                `}
+              >
+                {isOutOfStock ? "OUT OF STOCK" : "READY TO SHIP"}
               </span>
             </div>
 
@@ -195,85 +315,152 @@ const ProductDetails = () => {
               </div>
             </div>
 
-            {/* SIZE */}
+            {/* =====================================================
+                SIZE
+            ===================================================== */}
 
-            <div className="mt-12">
-              <div className="flex justify-between items-center mb-5">
-                <h3 className="uppercase tracking-[4px] text-xs text-gray-500">
-                  Select Size
-                </h3>
+            {product.sizes?.length > 0 && (
+              <div className="mt-12">
+                <div className="flex justify-between items-center mb-5">
+                  <h3 className="uppercase tracking-[4px] text-xs text-gray-500">
+                    Select Size
+                  </h3>
 
-                <button className="text-sm text-gray-500 hover:text-black transition">
-                  Size Guide
-                </button>
-              </div>
-
-              <div className="flex flex-wrap gap-3">
-                {product.sizes?.map((size) => (
                   <button
-                    key={size}
-                    onClick={() => setSelectedSize(size)}
-                    className={`
-                      w-14
-                      h-14
-                      rounded-full
-                      border
-                      transition-all
-                      duration-300
-                      font-medium
-                      ${
-                        selectedSize === size
-                          ? "bg-black text-white border-black"
-                          : "bg-white border-gray-300 hover:border-black"
-                      }
-                  `}
+                    type="button"
+                    className="text-sm text-gray-500 hover:text-black transition"
                   >
-                    {size}
+                    Size Guide
                   </button>
-                ))}
-              </div>
-            </div>
+                </div>
 
-            {/* CART */}
+                <div className="flex flex-wrap gap-3">
+                  {product.sizes.map((size) => (
+                    <button
+                      key={size}
+                      type="button"
+                      onClick={() => setSelectedSize(size)}
+                      className={`
+                        w-14
+                        h-14
+                        rounded-full
+                        border
+                        transition-all
+                        duration-300
+                        font-medium
+
+                        ${
+                          selectedSize === size
+                            ? "bg-black text-white border-black"
+                            : "bg-white border-gray-300 hover:border-black"
+                        }
+                      `}
+                    >
+                      {size}
+                    </button>
+                  ))}
+                </div>
+
+                {!selectedSize && (
+                  <p className="text-xs text-gray-400 mt-3">
+                    Please select your size before adding this item to cart.
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* =====================================================
+                CART
+            ===================================================== */}
 
             <div className="mt-12">
-              {quantity > 0 ? (
+              {isOutOfStock ? (
+                <button
+                  disabled
+                  className="
+                    w-full
+                    h-16
+                    rounded-full
+                    bg-gray-300
+                    text-gray-500
+                    flex
+                    items-center
+                    justify-center
+                    gap-3
+                    tracking-[2px]
+                    cursor-not-allowed
+                  "
+                >
+                  OUT OF STOCK
+                </button>
+              ) : quantity > 0 ? (
                 <div className="h-16 rounded-full bg-black text-white flex items-center justify-center gap-8 shadow-xl">
+                  {/* DECREASE */}
+
                   <button
-                    onClick={() => decreaseQuantity(product._id)}
-                    className="w-11 h-11 rounded-full bg-white text-black flex items-center justify-center hover:scale-110 transition"
+                    type="button"
+                    onClick={handleDecrease}
+                    className="
+                      w-11
+                      h-11
+                      rounded-full
+                      bg-white
+                      text-black
+                      flex
+                      items-center
+                      justify-center
+                      hover:scale-110
+                      transition
+                    "
                   >
                     <Minus size={18} />
                   </button>
 
+                  {/* QUANTITY */}
+
                   <span className="text-xl font-semibold">{quantity}</span>
 
+                  {/* INCREASE */}
+
                   <button
-                    onClick={() => addToCart(product)}
-                    className="w-11 h-11 rounded-full bg-white text-black flex items-center justify-center hover:scale-110 transition"
+                    type="button"
+                    onClick={handleIncrease}
+                    className="
+                      w-11
+                      h-11
+                      rounded-full
+                      bg-white
+                      text-black
+                      flex
+                      items-center
+                      justify-center
+                      hover:scale-110
+                      transition
+                    "
                   >
                     <Plus size={18} />
                   </button>
                 </div>
               ) : (
                 <button
-                  onClick={() => addToCart(product)}
+                  type="button"
+                  onClick={handleAddToCart}
                   className="
-                  w-full
-                  h-16
-                  rounded-full
-                  bg-black
-                  text-white
-                  flex
-                  items-center
-                  justify-center
-                  gap-3
-                  tracking-[2px]
-                  hover:bg-neutral-900
-                  transition-all
-                  duration-300
-                  shadow-lg
-                "
+                    w-full
+                    h-16
+                    rounded-full
+                    bg-black
+                    text-white
+                    flex
+                    items-center
+                    justify-center
+                    gap-3
+                    tracking-[2px]
+                    hover:bg-neutral-900
+                    transition-all
+                    duration-300
+                    shadow-lg
+                  "
                 >
                   <ShoppingBag size={20} />
                   ADD TO CART
@@ -281,15 +468,20 @@ const ProductDetails = () => {
               )}
             </div>
 
-            {/* EXTRA INFORMATION */}
+            {/* =====================================================
+                EXTRA INFORMATION
+            ===================================================== */}
 
             <div className="mt-12 space-y-4">
+              {/* SHIPPING */}
+
               <div className="bg-white rounded-3xl p-5 border border-gray-100 flex justify-between items-center">
                 <div className="flex items-center gap-3">
                   <Truck size={20} className="text-gray-700" />
 
                   <div>
                     <p className="font-medium">Free Shipping</p>
+
                     <p className="text-sm text-gray-500">
                       On all prepaid orders
                     </p>
@@ -299,12 +491,15 @@ const ProductDetails = () => {
                 <span className="text-green-600 font-medium">Available</span>
               </div>
 
+              {/* RETURNS */}
+
               <div className="bg-white rounded-3xl p-5 border border-gray-100 flex justify-between items-center">
                 <div className="flex items-center gap-3">
                   <ShieldCheck size={20} className="text-gray-700" />
 
                   <div>
                     <p className="font-medium">Easy Returns</p>
+
                     <p className="text-sm text-gray-500">7 Day Return Policy</p>
                   </div>
                 </div>
@@ -313,40 +508,49 @@ const ProductDetails = () => {
               </div>
             </div>
 
-            {/* PRODUCT DETAILS */}
+            {/* =====================================================
+                PRODUCT DETAILS
+            ===================================================== */}
 
             <div className="mt-12 border-t border-gray-200 pt-8 space-y-5">
-              <div className="flex justify-between">
+              <div className="flex justify-between gap-6">
                 <span className="text-gray-500">Category</span>
 
-                <span className="capitalize font-medium">
-                  {product.category}
+                <span className="capitalize font-medium text-right">
+                  {product.category || "Fashion"}
                 </span>
               </div>
 
-              <div className="flex justify-between">
+              <div className="flex justify-between gap-6">
                 <span className="text-gray-500">Collection</span>
 
-                <span className="capitalize font-medium">
-                  {product.collection}
+                <span className="capitalize font-medium text-right">
+                  {product.collection || "Euphoria"}
                 </span>
               </div>
 
-              <div className="flex justify-between">
+              <div className="flex justify-between gap-6">
                 <span className="text-gray-500">Fabric</span>
 
-                <span className="font-medium">{product.fabric}</span>
+                <span className="font-medium text-right">
+                  {product.fabric || "Premium Fabric"}
+                </span>
               </div>
 
-              <div className="flex justify-between">
+              <div className="flex justify-between gap-6">
                 <span className="text-gray-500">Stock</span>
 
                 <span
-                  className={`font-medium ${
-                    product.stock > 0 ? "text-green-600" : "text-red-500"
-                  }`}
+                  className={`
+                    font-medium
+                    ${
+                      Number(product.stock) > 0
+                        ? "text-green-600"
+                        : "text-red-500"
+                    }
+                  `}
                 >
-                  {product.stock > 0
+                  {Number(product.stock) > 0
                     ? `${product.stock} Available`
                     : "Out of Stock"}
                 </span>
