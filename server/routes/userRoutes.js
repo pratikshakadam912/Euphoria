@@ -4,6 +4,116 @@ import User from "../models/User.js";
 const router = express.Router();
 
 // =====================================================
+// GET ALL USERS
+// GET /api/users
+// =====================================================
+
+router.get("/", async (req, res) => {
+  try {
+    const users = await User.find()
+      .select("-password")
+      .sort({ createdAt: -1 })
+      .lean();
+
+    return res.status(200).json(users);
+  } catch (error) {
+    console.error("Get all users error:", error);
+
+    return res.status(500).json({
+      message: "Failed to fetch users.",
+      error: error.message,
+    });
+  }
+});
+
+// =====================================================
+// SAVE USER
+// POST /api/users/save
+// =====================================================
+//
+// Used when Firebase creates/logs in a user.
+// Creates the MongoDB user if they don't already exist.
+// =====================================================
+
+router.post("/save", async (req, res) => {
+  try {
+    const { uid, name, email } = req.body;
+
+    if (!uid) {
+      return res.status(400).json({
+        message: "User UID is required.",
+      });
+    }
+
+    if (!email) {
+      return res.status(400).json({
+        message: "User email is required.",
+      });
+    }
+
+    const normalizedEmail = String(email).trim().toLowerCase();
+
+    // -------------------------------------------------
+    // FIND EXISTING USER
+    // -------------------------------------------------
+
+    let user = await User.findOne({
+      $or: [{ uid: String(uid) }, { email: normalizedEmail }],
+    });
+
+    // -------------------------------------------------
+    // UPDATE EXISTING USER
+    // -------------------------------------------------
+
+    if (user) {
+      let changed = false;
+
+      if (name && name.trim() && user.name !== name.trim()) {
+        user.name = name.trim();
+        changed = true;
+      }
+
+      if (user.email !== normalizedEmail) {
+        user.email = normalizedEmail;
+        changed = true;
+      }
+
+      if (changed) {
+        await user.save();
+      }
+
+      return res.status(200).json({
+        message: "User already exists.",
+        user,
+      });
+    }
+
+    // -------------------------------------------------
+    // CREATE NEW USER
+    // -------------------------------------------------
+
+    user = await User.create({
+      uid: String(uid),
+      name: name ? name.trim() : "",
+      email: normalizedEmail,
+      role: "user",
+    });
+
+    return res.status(201).json({
+      message: "User saved successfully.",
+      user,
+    });
+  } catch (error) {
+    console.error("Save user error:", error);
+
+    return res.status(500).json({
+      message: "Failed to save user.",
+      error: error.message,
+    });
+  }
+});
+
+// =====================================================
 // SIGNUP
 // POST /api/users/signup
 // =====================================================
@@ -12,7 +122,6 @@ router.post("/signup", async (req, res) => {
   try {
     const { uid, name, email, password } = req.body;
 
-    // UID is required because User schema requires it
     if (!uid) {
       return res.status(400).json({
         message: "User UID is required.",
@@ -31,10 +140,6 @@ router.post("/signup", async (req, res) => {
       });
     }
 
-    // -------------------------------------------------
-    // CHECK EXISTING USER
-    // -------------------------------------------------
-
     const existingUser = await User.findOne({
       $or: [{ uid: String(uid) }, { email: String(email).toLowerCase() }],
     });
@@ -44,10 +149,6 @@ router.post("/signup", async (req, res) => {
         message: "User already exists.",
       });
     }
-
-    // -------------------------------------------------
-    // CREATE USER
-    // -------------------------------------------------
 
     const newUser = new User({
       uid: String(uid),
@@ -76,10 +177,6 @@ router.post("/signup", async (req, res) => {
 // LOGIN / GET USER
 // POST /api/users/login
 // =====================================================
-//
-// Firebase should handle password authentication.
-// This endpoint only gets/creates the MongoDB user record.
-// =====================================================
 
 router.post("/login", async (req, res) => {
   try {
@@ -94,10 +191,6 @@ router.post("/login", async (req, res) => {
     let user = await User.findOne({
       uid: String(uid),
     });
-
-    // -------------------------------------------------
-    // USER DOES NOT EXIST IN MONGODB
-    // -------------------------------------------------
 
     if (!user) {
       user = await User.create({
