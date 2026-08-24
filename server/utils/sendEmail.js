@@ -11,7 +11,7 @@ const sendEmail = async (name, email, subject, message) => {
     });
 
     const info = await transporter.sendMail({
-      from: `"Euphoria Contact" <${process.env.EMAIL_USER}>`,
+      from: `"Euphoria Contact Form" <${process.env.EMAIL_USER}>`,
       to: process.env.EMAIL_USER,
       replyTo: email,
       subject: `New Contact Form Message - ${subject}`,
@@ -46,7 +46,8 @@ const sendEmail = async (name, email, subject, message) => {
 
     return info;
   } catch (error) {
-    console.error("Email sending error:", error);
+    console.error("EMAIL ERROR:", error);
+
     throw error;
   }
 };
