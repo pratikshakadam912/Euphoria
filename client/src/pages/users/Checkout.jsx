@@ -13,10 +13,6 @@ const API_URL = "https://euphoria-ooqv.onrender.com";
 
 const RAZORPAY_SCRIPT = "https://checkout.razorpay.com/v1/checkout.js";
 
-// =====================================================
-// LOAD RAZORPAY CHECKOUT SCRIPT
-// =====================================================
-
 const loadRazorpay = () => {
   return new Promise((resolve) => {
     // Already loaded
@@ -40,15 +36,7 @@ const Checkout = () => {
 
   const { cart, clearCart, subtotal } = useCart();
 
-  // =====================================================
-  // USER
-  // =====================================================
-
   const [user, setUser] = useState(null);
-
-  // =====================================================
-  // ADDRESSES
-  // =====================================================
 
   const [addresses, setAddresses] = useState([]);
 
@@ -56,21 +44,11 @@ const Checkout = () => {
 
   const [showAddressForm, setShowAddressForm] = useState(false);
 
-  // =====================================================
-  // PAYMENT
-  // =====================================================
-
   const [payment, setPayment] = useState("razorpay");
-
-  // =====================================================
-  // LOADING
-  // =====================================================
 
   const [loading, setLoading] = useState(false);
 
-  // =====================================================
   // ADDRESS FORM
-  // =====================================================
 
   const [newAddress, setNewAddress] = useState({
     label: "home",
@@ -85,9 +63,7 @@ const Checkout = () => {
     isDefault: false,
   });
 
-  // =====================================================
   // GET USER
-  // =====================================================
 
   useEffect(() => {
     const savedUser = localStorage.getItem("user");
@@ -111,9 +87,7 @@ const Checkout = () => {
     }
   }, [navigate]);
 
-  // =====================================================
   // FETCH USER ADDRESSES
-  // =====================================================
 
   useEffect(() => {
     if (!user?.uid) return;
@@ -134,9 +108,7 @@ const Checkout = () => {
 
         setAddresses(addressList);
 
-        // ---------------------------------------------
         // DEFAULT ADDRESS
-        // ---------------------------------------------
 
         const defaultAddress = addressList.find((address) => address.isDefault);
 
@@ -153,9 +125,7 @@ const Checkout = () => {
     fetchAddresses();
   }, [user]);
 
-  // =====================================================
   // ADDRESS INPUT
-  // =====================================================
 
   const handleAddressChange = (event) => {
     const { name, value } = event.target;
@@ -165,10 +135,6 @@ const Checkout = () => {
       [name]: value,
     }));
   };
-
-  // =====================================================
-  // SAVE ADDRESS
-  // =====================================================
 
   const handleSaveAddress = async (event) => {
     event.preventDefault();
@@ -217,10 +183,6 @@ const Checkout = () => {
 
       setSelectedAddress(savedAddress._id);
 
-      // ---------------------------------------------
-      // RESET FORM
-      // ---------------------------------------------
-
       setNewAddress({
         label: "home",
         fullName: "",
@@ -244,15 +206,7 @@ const Checkout = () => {
     }
   };
 
-  // =====================================================
-  // TOTAL
-  // =====================================================
-
   const total = Number(subtotal || 0);
-
-  // =====================================================
-  // BUILD ORDER PRODUCTS
-  // =====================================================
 
   const buildProducts = () => {
     return cart.map((item) => ({
@@ -274,10 +228,6 @@ const Checkout = () => {
     }));
   };
 
-  // =====================================================
-  // BUILD SHIPPING ADDRESS
-  // =====================================================
-
   const buildShippingAddress = (address) => {
     return {
       fullName: address.fullName || "",
@@ -297,10 +247,6 @@ const Checkout = () => {
       country: address.country || "India",
     };
   };
-
-  // =====================================================
-  // CREATE COD ORDER
-  // =====================================================
 
   const createCODOrder = async (products, shippingAddress) => {
     const orderData = {
@@ -342,15 +288,7 @@ const Checkout = () => {
     return data.order;
   };
 
-  // =====================================================
-  // CREATE RAZORPAY PAYMENT
-  // =====================================================
-
   const startRazorpayPayment = async (products, shippingAddress) => {
-    // ---------------------------------------------
-    // LOAD RAZORPAY
-    // ---------------------------------------------
-
     const razorpayLoaded = await loadRazorpay();
 
     if (!razorpayLoaded) {
@@ -358,10 +296,6 @@ const Checkout = () => {
         "Razorpay failed to load. Please check your internet connection and try again.",
       );
     }
-
-    // ---------------------------------------------
-    // CREATE RAZORPAY ORDER ON BACKEND
-    // ---------------------------------------------
 
     const createPaymentResponse = await fetch(
       `${API_URL}/api/payment/create-order`,

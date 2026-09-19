@@ -11,6 +11,7 @@ import contactRoutes from "./routes/contactRoutes.js";
 import websiteRoutes from "./routes/websiteRoutes.js";
 import addressRoutes from "./routes/addressRoutes.js";
 import wishlistRoutes from "./routes/wishlistRoutes.js";
+import paymentRoutes from "./routes/paymentRoutes.js";
 
 dotenv.config();
 
@@ -38,6 +39,7 @@ app.use("/api/wishlist", wishlistRoutes);
 app.use("/api/contact", contactRoutes);
 
 app.use("/api/website", websiteRoutes);
+app.use("/api/payment", paymentRoutes);
 
 // ✅ TEST ROUTE
 app.get("/", (req, res) => {
