@@ -4,6 +4,10 @@ const CartContext = createContext();
 
 const CART_STORAGE_KEY = "cart";
 
+// ======================================================
+// CREATE UNIQUE CART ITEM ID
+// ======================================================
+
 const createCartItemId = (product) => {
   const productId = product.id || product._id;
   const size = product.size || "no-size";
@@ -13,7 +17,15 @@ const createCartItemId = (product) => {
   return `${productId}-${size}-${color}-${variant}`;
 };
 
+// ======================================================
+// CART PROVIDER
+// ======================================================
+
 export const CartProvider = ({ children }) => {
+  // ======================================================
+  // LOAD CART FROM LOCAL STORAGE
+  // ======================================================
+
   const [cart, setCart] = useState(() => {
     try {
       const savedCart = localStorage.getItem(CART_STORAGE_KEY);
@@ -66,12 +78,15 @@ export const CartProvider = ({ children }) => {
         variant,
       });
 
+      // Check if exact same product + size + color + variant exists
       const existingItem = currentCart.find(
         (item) => item.cartItemId === cartItemId,
       );
 
-      // If same product + same variant already exists,
-      // increase quantity instead of creating another item.
+      // ==================================================
+      // EXISTING ITEM → INCREASE QUANTITY
+      // ==================================================
+
       if (existingItem) {
         return currentCart.map((item) =>
           item.cartItemId === cartItemId
@@ -83,7 +98,10 @@ export const CartProvider = ({ children }) => {
         );
       }
 
-      // New cart item
+      // ==================================================
+      // NEW ITEM
+      // ==================================================
+
       return [
         ...currentCart,
         {
@@ -156,13 +174,17 @@ export const CartProvider = ({ children }) => {
   };
 
   // ======================================================
-  // CART TOTALS
+  // TOTAL ITEMS
   // ======================================================
 
   const totalItems = cart.reduce(
     (total, item) => total + Number(item.quantity || 0),
     0,
   );
+
+  // ======================================================
+  // SUBTOTAL
+  // ======================================================
 
   const subtotal = cart.reduce(
     (total, item) =>
@@ -191,5 +213,9 @@ export const CartProvider = ({ children }) => {
     </CartContext.Provider>
   );
 };
+
+// ======================================================
+// USE CART
+// ======================================================
 
 export const useCart = () => useContext(CartContext);
