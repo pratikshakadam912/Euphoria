@@ -1,8 +1,21 @@
 import { createContext, useContext, useEffect, useState } from "react";
 
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "../firebase/firebaseConfig";
+
 const CartContext = createContext();
 
-const CART_STORAGE_KEY = "cart";
+// ======================================================
+// CART STORAGE KEY
+// ======================================================
+
+const getCartStorageKey = (user) => {
+  if (user?.uid) {
+    return `cart_${user.uid}`;
+  }
+
+  return "cart_guest";
+};
 
 // ======================================================
 // CREATE UNIQUE CART ITEM ID
@@ -22,42 +35,75 @@ const createCartItemId = (product) => {
 // ======================================================
 
 export const CartProvider = ({ children }) => {
+  const [user, setUser] = useState(undefined);
+
+  const [cart, setCart] = useState([]);
+
   // ======================================================
-  // LOAD CART FROM LOCAL STORAGE
+  // LISTEN TO FIREBASE AUTH
   // ======================================================
 
-  const [cart, setCart] = useState(() => {
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // ======================================================
+  // LOAD CORRECT CART WHEN USER CHANGES
+  // ======================================================
+
+  useEffect(() => {
+    // Firebase has not finished checking authentication yet
+    if (user === undefined) {
+      return;
+    }
+
     try {
-      const savedCart = localStorage.getItem(CART_STORAGE_KEY);
+      const storageKey = getCartStorageKey(user);
+
+      const savedCart = localStorage.getItem(storageKey);
 
       if (!savedCart) {
-        return [];
+        setCart([]);
+        return;
       }
 
       const parsedCart = JSON.parse(savedCart);
 
       if (!Array.isArray(parsedCart)) {
-        return [];
+        setCart([]);
+        return;
       }
 
-      return parsedCart;
+      setCart(parsedCart);
     } catch (error) {
       console.error("Cart loading error:", error);
-      return [];
+      setCart([]);
     }
-  });
+  }, [user]);
 
   // ======================================================
-  // SAVE CART TO LOCAL STORAGE
+  // SAVE CURRENT USER'S CART
   // ======================================================
 
   useEffect(() => {
+    // Don't save anything until Firebase knows
+    // whether a user is logged in.
+    if (user === undefined) {
+      return;
+    }
+
     try {
-      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
+      const storageKey = getCartStorageKey(user);
+
+      localStorage.setItem(storageKey, JSON.stringify(cart));
     } catch (error) {
       console.error("Cart saving error:", error);
     }
-  }, [cart]);
+  }, [cart, user]);
 
   // ======================================================
   // ADD TO CART
@@ -78,13 +124,13 @@ export const CartProvider = ({ children }) => {
         variant,
       });
 
-      // Check if exact same product + size + color + variant exists
+      // Check if exact same product/variant exists
       const existingItem = currentCart.find(
         (item) => item.cartItemId === cartItemId,
       );
 
       // ==================================================
-      // EXISTING ITEM → INCREASE QUANTITY
+      // EXISTING ITEM
       // ==================================================
 
       if (existingItem) {
@@ -106,13 +152,21 @@ export const CartProvider = ({ children }) => {
         ...currentCart,
         {
           cartItemId,
+
           id: productId,
+
           name: product.name,
+
           price: Number(product.price) || 0,
+
           image: product.image || product.images?.[0] || "",
+
           size,
+
           color,
+
           variant,
+
           quantity: Number(product.quantity) || 1,
         },
       ];
