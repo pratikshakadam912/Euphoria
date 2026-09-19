@@ -1,9 +1,20 @@
 import express from "express";
 import mongoose from "mongoose";
+import crypto from "crypto";
+import Razorpay from "razorpay";
 
 import Order from "../models/Order.js";
 
 const router = express.Router();
+
+// =====================================================
+// RAZORPAY
+// =====================================================
+
+const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_KEY_SECRET,
+});
 
 // =====================================================
 // CONSTANTS
@@ -53,7 +64,6 @@ const formatProducts = (products) => {
     }
 
     const price = Number(item.price);
-
     const quantity = Number(item.quantity);
 
     if (!Number.isFinite(price) || price < 0) {
@@ -107,8 +117,12 @@ router.post("/create", async (req, res) => {
       products,
       total,
       paymentMethod,
+
+      // Razorpay details
+      razorpayOrderId,
       paymentId,
-      isPaid,
+      razorpaySignature,
+
       shippingAddress,
     } = req.body;
 
@@ -197,13 +211,6 @@ router.post("/create", async (req, res) => {
 
     const calculatedTotal = calculateProductsTotal(formattedProducts);
 
-    /*
-      Frontend sends total as well.
-
-      We compare it with the server-calculated total
-      to prevent accidental/malicious mismatches.
-    */
-
     const frontendTotal = Number(total);
 
     if (!Number.isFinite(frontendTotal) || frontendTotal < 0) {
@@ -212,7 +219,7 @@ router.post("/create", async (req, res) => {
       });
     }
 
-    // Small tolerance for floating-point calculations.
+    // Small tolerance for floating-point calculations
     if (Math.abs(frontendTotal - calculatedTotal) > 0.01) {
       return res.status(400).json({
         message: "Order total does not match product prices.",
@@ -224,21 +231,103 @@ router.post("/create", async (req, res) => {
     // =================================================
 
     let finalIsPaid = false;
+    let finalPaymentId = null;
+    let finalRazorpayOrderId = null;
+
+    // =================================================
+    // COD
+    // =================================================
 
     if (paymentMethod === "cod") {
       finalIsPaid = false;
-    } else {
-      /*
-        Current frontend uses mock online payment.
+      finalPaymentId = null;
+      finalRazorpayOrderId = null;
+    }
 
-        Therefore we accept the frontend payment result
-        for now.
+    // =================================================
+    // ONLINE PAYMENT
+    // =================================================
+    else {
+      // Razorpay details are required
+      if (!razorpayOrderId || !paymentId || !razorpaySignature) {
+        return res.status(400).json({
+          message: "Razorpay payment details are required.",
+        });
+      }
 
-        Replace this with Razorpay verification before
-        production.
-      */
+      // =================================================
+      // VERIFY RAZORPAY SIGNATURE
+      // =================================================
 
-      finalIsPaid = typeof isPaid === "boolean" ? isPaid : false;
+      const generatedSignature = crypto
+        .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+        .update(`${razorpayOrderId}|${paymentId}`)
+        .digest("hex");
+
+      if (generatedSignature !== razorpaySignature) {
+        return res.status(400).json({
+          message: "Razorpay payment verification failed.",
+        });
+      }
+
+      // =================================================
+      // FETCH RAZORPAY ORDER
+      // =================================================
+
+      let razorpayOrder;
+
+      try {
+        razorpayOrder = await razorpay.orders.fetch(razorpayOrderId);
+      } catch (error) {
+        console.error("Razorpay order fetch error:", error);
+
+        return res.status(400).json({
+          message: "Unable to verify Razorpay order.",
+        });
+      }
+
+      // =================================================
+      // VERIFY CURRENCY
+      // =================================================
+
+      if (razorpayOrder.currency !== "INR") {
+        return res.status(400).json({
+          message: "Invalid Razorpay payment currency.",
+        });
+      }
+
+      // =================================================
+      // VERIFY AMOUNT
+      // =================================================
+
+      const expectedAmount = Math.round(calculatedTotal * 100);
+
+      if (Number(razorpayOrder.amount) !== expectedAmount) {
+        return res.status(400).json({
+          message: "Razorpay payment amount does not match order total.",
+        });
+      }
+
+      // =================================================
+      // VERIFY PAYMENT STATUS
+      // =================================================
+
+      if (
+        razorpayOrder.status !== "paid" &&
+        razorpayOrder.status !== "attempted"
+      ) {
+        return res.status(400).json({
+          message: "Razorpay order has not been paid.",
+        });
+      }
+
+      // =================================================
+      // PAYMENT VERIFIED
+      // =================================================
+
+      finalIsPaid = true;
+      finalPaymentId = paymentId;
+      finalRazorpayOrderId = razorpayOrderId;
     }
 
     // =================================================
@@ -278,8 +367,13 @@ router.post("/create", async (req, res) => {
 
       paymentMethod,
 
-      paymentId: paymentId || null,
+      // Razorpay order ID
+      razorpayOrderId: finalRazorpayOrderId,
 
+      // Razorpay payment ID
+      paymentId: finalPaymentId,
+
+      // Only true after backend verification
       isPaid: finalIsPaid,
 
       refundStatus: "none",
@@ -301,7 +395,6 @@ router.post("/create", async (req, res) => {
 
     return res.status(500).json({
       message: "Failed to create order.",
-
       error: error.message,
     });
   }
@@ -362,7 +455,7 @@ router.get("/user/:userId", async (req, res) => {
     console.error("Get user orders error:", error);
 
     return res.status(500).json({
-      message: "Failed to fetch user orders.",
+      message: "Failed to fetch orders.",
       error: error.message,
     });
   }
@@ -372,9 +465,6 @@ router.get("/user/:userId", async (req, res) => {
 // GET SINGLE ORDER
 //
 // GET /api/orders/:id
-//
-// Optional frontend ownership check:
-// ?userId=USER_ID
 // =====================================================
 
 router.get("/:id", async (req, res) => {
@@ -503,7 +593,6 @@ router.put("/:id/status", async (req, res) => {
     order.status = status;
 
     // COD becomes paid after delivery
-
     if (status === "delivered" && order.paymentMethod === "cod") {
       order.isPaid = true;
     }

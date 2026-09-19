@@ -6,11 +6,34 @@ import { useCart } from "../../context/CartContext";
 import Navbar from "../../components/common/Navbar";
 import Footer from "../../components/common/Footer";
 
-import { FaCreditCard } from "react-icons/fa";
-import { SiRazorpay, SiGooglepay, SiPaytm } from "react-icons/si";
+import { SiRazorpay } from "react-icons/si";
 import { MdDeliveryDining } from "react-icons/md";
 
 const API_URL = "https://euphoria-ooqv.onrender.com";
+
+const RAZORPAY_SCRIPT = "https://checkout.razorpay.com/v1/checkout.js";
+
+// =====================================================
+// LOAD RAZORPAY CHECKOUT SCRIPT
+// =====================================================
+
+const loadRazorpay = () => {
+  return new Promise((resolve) => {
+    // Already loaded
+    if (window.Razorpay) {
+      resolve(true);
+      return;
+    }
+
+    const script = document.createElement("script");
+
+    script.src = RAZORPAY_SCRIPT;
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+
+    document.body.appendChild(script);
+  });
+};
 
 const Checkout = () => {
   const navigate = useNavigate();
@@ -228,7 +251,287 @@ const Checkout = () => {
   const total = Number(subtotal || 0);
 
   // =====================================================
-  // CREATE ORDER
+  // BUILD ORDER PRODUCTS
+  // =====================================================
+
+  const buildProducts = () => {
+    return cart.map((item) => ({
+      productId: String(item.id || item._id || ""),
+
+      name: item.name || "",
+
+      price: Number(item.price || 0),
+
+      quantity: Number(item.quantity || 1),
+
+      image: item.image || item.images?.[0] || "",
+
+      size: item.size || null,
+
+      color: item.color || null,
+
+      variant: item.variant || null,
+    }));
+  };
+
+  // =====================================================
+  // BUILD SHIPPING ADDRESS
+  // =====================================================
+
+  const buildShippingAddress = (address) => {
+    return {
+      fullName: address.fullName || "",
+
+      email: address.email || user?.email || "",
+
+      phone: address.phone || "",
+
+      addressLine: address.addressLine || "",
+
+      city: address.city || "",
+
+      state: address.state || "",
+
+      postalCode: address.postalCode || "",
+
+      country: address.country || "India",
+    };
+  };
+
+  // =====================================================
+  // CREATE COD ORDER
+  // =====================================================
+
+  const createCODOrder = async (products, shippingAddress) => {
+    const orderData = {
+      userId: user.uid,
+
+      userEmail: user.email || "",
+
+      products,
+
+      total,
+
+      status: "pending",
+
+      shippingAddress,
+
+      paymentMethod: "cod",
+
+      paymentId: null,
+
+      razorpayOrderId: null,
+    };
+
+    const response = await fetch(`${API_URL}/api/orders/create`, {
+      method: "POST",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+
+      body: JSON.stringify(orderData),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Order creation failed.");
+    }
+
+    return data.order;
+  };
+
+  // =====================================================
+  // CREATE RAZORPAY PAYMENT
+  // =====================================================
+
+  const startRazorpayPayment = async (products, shippingAddress) => {
+    // ---------------------------------------------
+    // LOAD RAZORPAY
+    // ---------------------------------------------
+
+    const razorpayLoaded = await loadRazorpay();
+
+    if (!razorpayLoaded) {
+      throw new Error(
+        "Razorpay failed to load. Please check your internet connection and try again.",
+      );
+    }
+
+    // ---------------------------------------------
+    // CREATE RAZORPAY ORDER ON BACKEND
+    // ---------------------------------------------
+
+    const createPaymentResponse = await fetch(
+      `${API_URL}/api/payment/create-order`,
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json",
+        },
+
+        body: JSON.stringify({
+          amount: total,
+
+          receipt: `euphoria_${user.uid}_${Date.now()}`,
+        }),
+      },
+    );
+
+    const paymentData = await createPaymentResponse.json();
+
+    if (!createPaymentResponse.ok) {
+      throw new Error(
+        paymentData.message || "Failed to create Razorpay order.",
+      );
+    }
+
+    const razorpayOrder = paymentData.order;
+
+    const razorpayKey = paymentData.keyId;
+
+    if (!razorpayOrder?.id) {
+      throw new Error("Invalid Razorpay order response.");
+    }
+
+    if (!razorpayKey) {
+      throw new Error("Razorpay Key ID is missing.");
+    }
+
+    // ---------------------------------------------
+    // OPEN RAZORPAY CHECKOUT
+    // ---------------------------------------------
+
+    return new Promise((resolve, reject) => {
+      let paymentHandled = false;
+
+      const options = {
+        key: razorpayKey,
+
+        amount: razorpayOrder.amount,
+
+        currency: razorpayOrder.currency || "INR",
+
+        name: "Euphoria",
+
+        description: "Euphoria Fashion Order",
+
+        order_id: razorpayOrder.id,
+
+        prefill: {
+          name: shippingAddress.fullName || "",
+
+          email: shippingAddress.email || user.email || "",
+
+          contact: shippingAddress.phone || "",
+        },
+
+        notes: {
+          userId: user.uid,
+        },
+
+        theme: {
+          color: "#000000",
+        },
+
+        handler: async (response) => {
+          if (paymentHandled) return;
+
+          paymentHandled = true;
+
+          try {
+            // -----------------------------------------
+            // CREATE EUPHORIA ORDER
+            //
+            // Backend verifies Razorpay signature
+            // before marking the order as paid.
+            // -----------------------------------------
+
+            const orderData = {
+              userId: user.uid,
+
+              userEmail: user.email || "",
+
+              products,
+
+              total,
+
+              status: "pending",
+
+              shippingAddress,
+
+              paymentMethod: "razorpay",
+
+              razorpayOrderId: response.razorpay_order_id,
+
+              paymentId: response.razorpay_payment_id,
+
+              razorpaySignature: response.razorpay_signature,
+            };
+
+            const orderResponse = await fetch(`${API_URL}/api/orders/create`, {
+              method: "POST",
+
+              headers: {
+                "Content-Type": "application/json",
+              },
+
+              body: JSON.stringify(orderData),
+            });
+
+            const orderDataResponse = await orderResponse.json();
+
+            if (!orderResponse.ok) {
+              throw new Error(
+                orderDataResponse.message || "Payment verification failed.",
+              );
+            }
+
+            resolve(orderDataResponse.order);
+          } catch (error) {
+            reject(error);
+          }
+        },
+
+        modal: {
+          ondismiss: () => {
+            if (paymentHandled) return;
+
+            paymentHandled = true;
+
+            reject(new Error("Payment was cancelled."));
+          },
+        },
+      };
+
+      // ---------------------------------------------
+      // PAYMENT FAILED
+      // ---------------------------------------------
+
+      const razorpayCheckout = new window.Razorpay(options);
+
+      razorpayCheckout.on("payment.failed", (response) => {
+        if (paymentHandled) return;
+
+        paymentHandled = true;
+
+        console.error("Razorpay payment failed:", response.error);
+
+        reject(
+          new Error(
+            response.error?.description || "Payment failed. Please try again.",
+          ),
+        );
+      });
+
+      razorpayCheckout.open();
+    });
+  };
+
+  // =====================================================
+  // PLACE ORDER
   // =====================================================
 
   const handlePlaceOrder = async () => {
@@ -274,158 +577,45 @@ const Checkout = () => {
       setLoading(true);
 
       // =================================================
-      // PAYMENT
+      // BUILD ORDER DATA
       // =================================================
 
-      let paymentId = null;
-      let isPaid = false;
+      const products = buildProducts();
 
-      // ---------------------------------------------
+      const shippingAddress = buildShippingAddress(address);
+
+      let createdOrder = null;
+
+      // =================================================
       // COD
-      // ---------------------------------------------
+      // =================================================
 
       if (payment === "cod") {
-        paymentId = null;
-        isPaid = false;
+        createdOrder = await createCODOrder(products, shippingAddress);
+
+        // ---------------------------------------------
+        // SUCCESS
+        // ---------------------------------------------
+
+        clearCart();
+
+        alert("Order placed successfully! 📦");
       }
 
-      // ---------------------------------------------
-      // MOCK ONLINE PAYMENT
-      // ---------------------------------------------
+      // =================================================
+      // RAZORPAY
+      // =================================================
       else {
-        alert("Processing payment...");
+        createdOrder = await startRazorpayPayment(products, shippingAddress);
 
-        await new Promise((resolve) => setTimeout(resolve, 1500));
+        // ---------------------------------------------
+        // SUCCESS
+        // ---------------------------------------------
 
-        paymentId = "PAY_" + Date.now();
+        clearCart();
 
-        isPaid = true;
+        alert("Payment successful! 🎉");
       }
-
-      // =================================================
-      // FORMAT CART PRODUCTS
-      // =================================================
-
-      const products = cart.map((item) => ({
-        productId: String(item.id || item._id || ""),
-
-        name: item.name || "",
-
-        price: Number(item.price || 0),
-
-        quantity: Number(item.quantity || 1),
-
-        image: item.image || item.images?.[0] || "",
-
-        size: item.size || null,
-
-        color: item.color || null,
-
-        variant: item.variant || null,
-      }));
-
-      // =================================================
-      // SHIPPING ADDRESS SNAPSHOT
-      // =================================================
-      //
-      // IMPORTANT:
-      // We copy the address into the order.
-      //
-      // This means if the user later changes their
-      // saved address, the old order still has the
-      // original delivery address.
-      //
-      // =================================================
-
-      const shippingAddress = {
-        fullName: address.fullName || "",
-
-        email: address.email || user.email || "",
-
-        phone: address.phone || "",
-
-        addressLine: address.addressLine || "",
-
-        city: address.city || "",
-
-        state: address.state || "",
-
-        postalCode: address.postalCode || "",
-
-        country: address.country || "India",
-      };
-
-      // =================================================
-      // ORDER DATA
-      // =================================================
-
-      const orderData = {
-        userId: user.uid,
-
-        userEmail: user.email || "",
-
-        products,
-
-        total,
-
-        status: "pending",
-
-        shippingAddress,
-
-        paymentMethod: payment,
-
-        paymentId,
-
-        isPaid,
-
-        refundStatus: "none",
-      };
-
-      // =================================================
-      // CREATE ORDER
-      // =================================================
-
-      const response = await fetch(`${API_URL}/api/orders/create`, {
-        method: "POST",
-
-        headers: {
-          "Content-Type": "application/json",
-        },
-
-        body: JSON.stringify(orderData),
-      });
-
-      const data = await response.json();
-
-      // =================================================
-      // ERROR
-      // =================================================
-
-      if (!response.ok) {
-        throw new Error(data.message || "Order creation failed.");
-      }
-
-      // =================================================
-      // GET CREATED ORDER
-      // =================================================
-
-      const createdOrder = data.order;
-
-      // =================================================
-      // CLEAR CART
-      // =================================================
-
-      clearCart();
-
-      // =================================================
-      // SUCCESS MESSAGE
-      // =================================================
-
-      alert(
-        payment === "cod"
-          ? "Order placed successfully! 📦"
-          : "Payment successful! 🎉",
-      );
 
       // =================================================
       // GO TO ORDER TRACKING
@@ -729,32 +919,6 @@ const Checkout = () => {
                     icon={<SiRazorpay size={24} />}
                     title="Razorpay"
                     description="UPI, Cards, NetBanking"
-                  />
-
-                  {/* UPI */}
-
-                  <PaymentOption
-                    active={payment === "upi"}
-                    onClick={() => setPayment("upi")}
-                    icon={
-                      <div className="flex gap-2">
-                        <SiGooglepay size={22} />
-
-                        <SiPaytm size={22} />
-                      </div>
-                    }
-                    title="UPI Payment"
-                    description="Google Pay / PhonePe / Paytm"
-                  />
-
-                  {/* CARD */}
-
-                  <PaymentOption
-                    active={payment === "card"}
-                    onClick={() => setPayment("card")}
-                    icon={<FaCreditCard size={22} />}
-                    title="Credit / Debit Card"
-                    description="Visa, Mastercard"
                   />
 
                   {/* COD */}
