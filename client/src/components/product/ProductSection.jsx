@@ -21,8 +21,9 @@ export default function ProductSection({ curatedData }) {
             {curatedData?.subtitle || "Euphoria Collection"}
           </p>
 
+          {/* FIXED HOME PAGE HEADING */}
           <h2 className="mt-4 text-5xl md:text-6xl font-light text-black">
-            {curatedData?.title || "Curated Essentials"}
+            Curated Essentials
           </h2>
         </div>
 
@@ -65,7 +66,7 @@ export default function ProductSection({ curatedData }) {
                 "
               />
 
-              {/* NAME + PRICE */}
+              {/* NAME + PRICE ON HOVER */}
 
               <div
                 className="
@@ -127,7 +128,7 @@ export default function ProductSection({ curatedData }) {
                   "
                 />
 
-                {/* NAME + PRICE */}
+                {/* NAME + PRICE ON HOVER */}
 
                 <div
                   className="
@@ -186,7 +187,7 @@ export default function ProductSection({ curatedData }) {
                   "
                 />
 
-                {/* NAME + PRICE */}
+                {/* NAME + PRICE ON HOVER */}
 
                 <div
                   className="
@@ -231,6 +232,8 @@ export default function ProductSection({ curatedData }) {
                   group-hover:scale-105
                 "
               />
+
+              {/* EXISTING DARK OVERLAY */}
 
               <div className="absolute inset-0 bg-black/20" />
 
