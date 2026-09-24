@@ -45,30 +45,45 @@ export default function ProductSection({ curatedData }) {
                   w-full
                   h-[700px]
                   object-cover
-                  transition
+                  transition-transform
                   duration-700
                   group-hover:scale-105
                 "
               />
 
+              {/* HOVER OVERLAY */}
+
               <div
                 className="
                   absolute
                   inset-0
-                  bg-black/10
+                  bg-black/30
                   opacity-0
                   group-hover:opacity-100
-                  transition
+                  transition-opacity
                   duration-500
                 "
               />
 
-              <div className="absolute bottom-8 left-8">
-                <h3 className="text-white text-3xl font-light">
-                  {products[0]?.name}
-                </h3>
+              {/* NAME + PRICE */}
 
-                <p className="text-white/80 mt-2">₹{products[0]?.price}</p>
+              <div
+                className="
+                  absolute
+                  bottom-8
+                  left-8
+                  text-white
+                  opacity-0
+                  translate-y-5
+                  group-hover:opacity-100
+                  group-hover:translate-y-0
+                  transition-all
+                  duration-500
+                "
+              >
+                <h3 className="text-3xl font-light">{products[0]?.name}</h3>
+
+                <p className="mt-2 text-white/80">₹{products[0]?.price}</p>
               </div>
             </div>
           </motion.div>
@@ -76,7 +91,7 @@ export default function ProductSection({ curatedData }) {
           {/* ================= RIGHT COLUMN ================= */}
 
           <div className="md:col-span-5 flex flex-col gap-6">
-            {/* PRODUCT 2 */}
+            {/* ================= PRODUCT 2 ================= */}
 
             <motion.div
               whileHover={{ y: -8 }}
@@ -92,34 +107,50 @@ export default function ProductSection({ curatedData }) {
                     w-full
                     h-[340px]
                     object-cover
-                    transition
+                    transition-transform
                     duration-700
                     group-hover:scale-105
                   "
                 />
 
+                {/* HOVER OVERLAY */}
+
                 <div
                   className="
                     absolute
                     inset-0
-                    bg-black/10
+                    bg-black/30
                     opacity-0
                     group-hover:opacity-100
-                    transition
+                    transition-opacity
+                    duration-500
                   "
                 />
 
-                <div className="absolute bottom-6 left-6">
-                  <h3 className="text-white text-xl font-light">
-                    {products[1]?.name}
-                  </h3>
+                {/* NAME + PRICE */}
+
+                <div
+                  className="
+                    absolute
+                    bottom-6
+                    left-6
+                    text-white
+                    opacity-0
+                    translate-y-4
+                    group-hover:opacity-100
+                    group-hover:translate-y-0
+                    transition-all
+                    duration-500
+                  "
+                >
+                  <h3 className="text-xl font-light">{products[1]?.name}</h3>
 
                   <p className="text-white/80 mt-1">₹{products[1]?.price}</p>
                 </div>
               </div>
             </motion.div>
 
-            {/* PRODUCT 3 */}
+            {/* ================= PRODUCT 3 ================= */}
 
             <motion.div
               whileHover={{ y: -8 }}
@@ -135,27 +166,43 @@ export default function ProductSection({ curatedData }) {
                     w-full
                     h-[340px]
                     object-cover
-                    transition
+                    transition-transform
                     duration-700
                     group-hover:scale-105
                   "
                 />
 
+                {/* HOVER OVERLAY */}
+
                 <div
                   className="
                     absolute
                     inset-0
-                    bg-black/10
+                    bg-black/30
                     opacity-0
                     group-hover:opacity-100
-                    transition
+                    transition-opacity
+                    duration-500
                   "
                 />
 
-                <div className="absolute bottom-6 left-6">
-                  <h3 className="text-white text-xl font-light">
-                    {products[2]?.name}
-                  </h3>
+                {/* NAME + PRICE */}
+
+                <div
+                  className="
+                    absolute
+                    bottom-6
+                    left-6
+                    text-white
+                    opacity-0
+                    translate-y-4
+                    group-hover:opacity-100
+                    group-hover:translate-y-0
+                    transition-all
+                    duration-500
+                  "
+                >
+                  <h3 className="text-xl font-light">{products[2]?.name}</h3>
 
                   <p className="text-white/80 mt-1">₹{products[2]?.price}</p>
                 </div>
@@ -179,7 +226,7 @@ export default function ProductSection({ curatedData }) {
                   w-full
                   h-[400px]
                   object-cover
-                  transition
+                  transition-transform
                   duration-700
                   group-hover:scale-105
                 "
@@ -197,7 +244,22 @@ export default function ProductSection({ curatedData }) {
                     {products[3]?.name}
                   </h2>
 
-                  <p className="mt-3 text-lg">₹{products[3]?.price}</p>
+                  {/* PRICE ONLY ON HOVER */}
+
+                  <p
+                    className="
+                      mt-3
+                      text-lg
+                      opacity-0
+                      translate-y-3
+                      group-hover:opacity-100
+                      group-hover:translate-y-0
+                      transition-all
+                      duration-500
+                    "
+                  >
+                    ₹{products[3]?.price}
+                  </p>
                 </div>
               </div>
             </div>
