@@ -56,27 +56,45 @@ const EuphoriaEdit = ({ editData }) => {
                   w-full
                   object-cover
                   group-hover:scale-110
-                  transition
+                  transition-transform
                   duration-700
                 "
               />
+
+              {/* HOVER OVERLAY */}
 
               <div
                 className="
                   absolute
                   inset-0
-                  bg-black/20
+                  bg-black/35
                   opacity-0
                   group-hover:opacity-100
-                  transition
+                  transition-opacity
+                  duration-500
+                  flex
+                  items-end
+                  p-8
                 "
-              />
-            </div>
+              >
+                <div
+                  className="
+                    text-white
+                    translate-y-5
+                    opacity-0
+                    group-hover:translate-y-0
+                    group-hover:opacity-100
+                    transition-all
+                    duration-500
+                  "
+                >
+                  <h3 className="text-2xl font-light">{products[0]?.name}</h3>
 
-            <div className="mt-6">
-              <h3 className="text-xl font-semibold">{products[0]?.name}</h3>
-
-              <p className="text-gray-500 mt-1">₹{products[0]?.price}</p>
+                  <p className="mt-2 text-sm tracking-wider">
+                    ₹{products[0]?.price}
+                  </p>
+                </div>
+              </div>
             </div>
           </motion.div>
 
@@ -101,23 +119,50 @@ const EuphoriaEdit = ({ editData }) => {
                   w-full
                   object-cover
                   group-hover:scale-105
-                  transition
+                  transition-transform
                   duration-700
                 "
               />
 
-              {/* TEXT OVERLAY */}
+              {/* HOVER OVERLAY */}
 
-              <div className="absolute bottom-8 left-8 text-white">
-                <p className="text-xs uppercase tracking-widest mb-2">
-                  Featured Product
-                </p>
+              <div
+                className="
+                  absolute
+                  inset-0
+                  bg-black/35
+                  opacity-0
+                  group-hover:opacity-100
+                  transition-opacity
+                  duration-500
+                  flex
+                  items-end
+                  p-10
+                "
+              >
+                <div
+                  className="
+                    text-white
+                    translate-y-5
+                    opacity-0
+                    group-hover:translate-y-0
+                    group-hover:opacity-100
+                    transition-all
+                    duration-500
+                  "
+                >
+                  <p className="text-xs uppercase tracking-[0.3em] mb-3">
+                    Featured Product
+                  </p>
 
-                <h3 className="text-2xl font-light italic">
-                  {products[1]?.name}
-                </h3>
+                  <h3 className="text-3xl font-light italic">
+                    {products[1]?.name}
+                  </h3>
 
-                <p className="mt-2">₹{products[1]?.price}</p>
+                  <p className="mt-3 text-sm tracking-wider">
+                    ₹{products[1]?.price}
+                  </p>
+                </div>
               </div>
             </div>
           </motion.div>
@@ -143,27 +188,45 @@ const EuphoriaEdit = ({ editData }) => {
                   w-full
                   object-cover
                   group-hover:scale-110
-                  transition
+                  transition-transform
                   duration-700
                 "
               />
+
+              {/* HOVER OVERLAY */}
 
               <div
                 className="
                   absolute
                   inset-0
-                  bg-black/20
+                  bg-black/35
                   opacity-0
                   group-hover:opacity-100
-                  transition
+                  transition-opacity
+                  duration-500
+                  flex
+                  items-end
+                  p-8
                 "
-              />
-            </div>
+              >
+                <div
+                  className="
+                    text-white
+                    translate-y-5
+                    opacity-0
+                    group-hover:translate-y-0
+                    group-hover:opacity-100
+                    transition-all
+                    duration-500
+                  "
+                >
+                  <h3 className="text-2xl font-light">{products[2]?.name}</h3>
 
-            <div className="mt-6">
-              <h3 className="text-xl font-semibold">{products[2]?.name}</h3>
-
-              <p className="text-gray-500 mt-1">₹{products[2]?.price}</p>
+                  <p className="mt-2 text-sm tracking-wider">
+                    ₹{products[2]?.price}
+                  </p>
+                </div>
+              </div>
             </div>
           </motion.div>
         </div>
