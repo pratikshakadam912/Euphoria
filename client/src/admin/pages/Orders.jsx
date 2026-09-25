@@ -89,6 +89,22 @@ const Orders = () => {
   };
 
   // =====================================================
+  // CANCEL ORDER
+  // =====================================================
+
+  const handleCancelOrder = (id) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to cancel this order?",
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    updateStatus(id, "cancelled");
+  };
+
+  // =====================================================
   // STATUS COLOR
   // =====================================================
 
@@ -192,50 +208,80 @@ const Orders = () => {
     const isUpdating = updatingId === order._id;
 
     // ================================================
-    // PENDING → CONFIRMED
+    // PENDING → CONFIRMED / CANCELLED
     // ================================================
 
     if (order.status === "pending") {
       return (
-        <button
-          disabled={isUpdating}
-          onClick={() => updateStatus(order._id, "confirmed")}
-          className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
-        >
-          {isUpdating ? "Updating..." : "Confirm"}
-        </button>
+        <div className="flex flex-wrap gap-2">
+          <button
+            disabled={isUpdating}
+            onClick={() => updateStatus(order._id, "confirmed")}
+            className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+          >
+            {isUpdating ? "Updating..." : "Confirm"}
+          </button>
+
+          <button
+            disabled={isUpdating}
+            onClick={() => handleCancelOrder(order._id)}
+            className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+          >
+            {isUpdating ? "Updating..." : "Cancel"}
+          </button>
+        </div>
       );
     }
 
     // ================================================
-    // CONFIRMED → SHIPPED
+    // CONFIRMED → SHIPPED / CANCELLED
     // ================================================
 
     if (order.status === "confirmed") {
       return (
-        <button
-          disabled={isUpdating}
-          onClick={() => updateStatus(order._id, "shipped")}
-          className="px-4 py-2 rounded-lg bg-purple-600 text-white hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
-        >
-          {isUpdating ? "Updating..." : "Ship"}
-        </button>
+        <div className="flex flex-wrap gap-2">
+          <button
+            disabled={isUpdating}
+            onClick={() => updateStatus(order._id, "shipped")}
+            className="px-4 py-2 rounded-lg bg-purple-600 text-white hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+          >
+            {isUpdating ? "Updating..." : "Ship"}
+          </button>
+
+          <button
+            disabled={isUpdating}
+            onClick={() => handleCancelOrder(order._id)}
+            className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+          >
+            {isUpdating ? "Updating..." : "Cancel"}
+          </button>
+        </div>
       );
     }
 
     // ================================================
-    // SHIPPED → DELIVERED
+    // SHIPPED → DELIVERED / CANCELLED
     // ================================================
 
     if (order.status === "shipped") {
       return (
-        <button
-          disabled={isUpdating}
-          onClick={() => updateStatus(order._id, "delivered")}
-          className="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
-        >
-          {isUpdating ? "Updating..." : "Deliver"}
-        </button>
+        <div className="flex flex-wrap gap-2">
+          <button
+            disabled={isUpdating}
+            onClick={() => updateStatus(order._id, "delivered")}
+            className="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+          >
+            {isUpdating ? "Updating..." : "Deliver"}
+          </button>
+
+          <button
+            disabled={isUpdating}
+            onClick={() => handleCancelOrder(order._id)}
+            className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+          >
+            {isUpdating ? "Updating..." : "Cancel"}
+          </button>
+        </div>
       );
     }
 
