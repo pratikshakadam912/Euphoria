@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 
 const WishlistContext = createContext();
 
-const API_URL = "https://euphoria-ooqv.onrender.com";
+const API_URL = "https://euphoria-b2rn.vercel.app";
 
 export const WishlistProvider = ({ children }) => {
   const [wishlist, setWishlist] = useState([]);

@@ -17,7 +17,7 @@ const CollectionGrid = ({ selectedCategory = "all" }) => {
     const fetchProducts = async () => {
       try {
         const res = await fetch(
-          "https://euphoria-ooqv.onrender.com/api/products",
+          "https://euphoria-b2rn.vercel.app/api/products",
         );
 
         const data = await res.json();

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { FaSave, FaImage } from "react-icons/fa";
 
-const API = "https://euphoria-ooqv.onrender.com/api";
+const API = "https://euphoria-b2rn.vercel.app/api";
 
 export default function Website() {
   const [loading, setLoading] = useState(true);

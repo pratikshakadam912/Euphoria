@@ -15,10 +15,9 @@ import paymentRoutes from "./routes/paymentRoutes.js";
 
 dotenv.config();
 
-// ✅ CREATE APP
 const app = express();
 
-// ✅ CORS (FIXED for frontend connection)
+// CORS
 app.use(
   cors({
     origin: "https://euphoria-nine-swart.vercel.app",
@@ -26,35 +25,79 @@ app.use(
   }),
 );
 
-// ✅ MIDDLEWARE
+// Middleware
 app.use(express.json());
 
-// ✅ ROUTES
+// Health check (doesn't require database connection)
+app.get("/", (req, res) => {
+  res.send("Euphoria Server Working");
+});
+
+// Reuse MongoDB connection across requests
+let cached = globalThis.mongoose;
+
+if (!cached) {
+  cached = globalThis.mongoose = {
+    conn: null,
+    promise: null,
+  };
+}
+
+async function connectDB(req, res, next) {
+  if (mongoose.connection.readyState === 1) {
+    return next();
+  }
+
+  if (!process.env.MONGO_URI) {
+    return res.status(500).json({
+      message: "MongoDB connection string is missing",
+    });
+  }
+
+  try {
+    if (!cached.promise) {
+      cached.promise = mongoose
+        .connect(process.env.MONGO_URI)
+        .then(() => mongoose)
+        .catch((error) => {
+          cached.promise = null;
+          throw error;
+        });
+    }
+
+    cached.conn = await cached.promise;
+    next();
+  } catch (error) {
+    console.error("MongoDB connection error:", error);
+
+    res.status(500).json({
+      message: "Database connection failed",
+    });
+  }
+}
+
+// Connect database before API requests
+app.use("/api", connectDB);
+
+// API routes
 app.use("/api/products", productRoutes);
-app.use("/api/users", userRoutes); // ✅ FIXED HERE
+app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/addresses", addressRoutes);
 app.use("/api/wishlist", wishlistRoutes);
 app.use("/api/contact", contactRoutes);
-
 app.use("/api/website", websiteRoutes);
 app.use("/api/payment", paymentRoutes);
 
-// ✅ TEST ROUTE
-app.get("/", (req, res) => {
-  res.send("Server Working");
-});
+// Export app for Vercel
+export default app;
 
-// ✅ DATABASE CONNECTION
-mongoose
-  .connect(process.env.MONGO_URI)
-  .then(() => console.log("MongoDB Connected"))
-  .catch((err) => console.log(err));
+// Run local/Render server only outside Vercel
+if (process.env.VERCEL !== "1") {
+  const PORT = process.env.PORT || 5000;
 
-// ✅ SERVER (FIXED FOR RENDER)
-const PORT = process.env.PORT || 5000;
-
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}

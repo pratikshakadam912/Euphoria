@@ -13,7 +13,7 @@ import {
   FaTimesCircle,
 } from "react-icons/fa";
 
-const API_URL = "https://euphoria-ooqv.onrender.com/api";
+const API_URL = "https://euphoria-b2rn.vercel.app/api";
 
 const Dashboard = () => {
   const [products, setProducts] = useState([]);

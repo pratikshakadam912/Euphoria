@@ -11,7 +11,7 @@ import {
   FiShoppingBag,
 } from "react-icons/fi";
 
-const API_URL = "https://euphoria-ooqv.onrender.com";
+const API_URL = "https://euphoria-b2rn.vercel.app";
 
 const Orders = () => {
   const navigate = useNavigate();

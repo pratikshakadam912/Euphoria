@@ -9,7 +9,7 @@ import Footer from "../../components/common/Footer";
 import { SiRazorpay } from "react-icons/si";
 import { MdDeliveryDining } from "react-icons/md";
 
-const API_URL = "https://euphoria-ooqv.onrender.com";
+const API_URL = "https://euphoria-b2rn.vercel.app";
 
 const RAZORPAY_SCRIPT = "https://checkout.razorpay.com/v1/checkout.js";
 

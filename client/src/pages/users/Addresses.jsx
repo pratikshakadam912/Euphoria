@@ -13,7 +13,7 @@ import {
   FiCheck,
 } from "react-icons/fi";
 
-const API_URL = "https://euphoria-ooqv.onrender.com";
+const API_URL = "https://euphoria-b2rn.vercel.app";
 
 const emptyAddress = {
   label: "home",

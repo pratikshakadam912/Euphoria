@@ -1,4 +1,4 @@
-const API_URL = "https://euphoria-ooqv.onrender.com/api";
+const API_URL = "https://euphoria-b2rn.vercel.app/api";
 
 export const fetchWebsite = async () => {
   const res = await fetch(`${API_URL}/website`);

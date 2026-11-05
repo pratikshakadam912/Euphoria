@@ -34,9 +34,7 @@ const Product = () => {
 
   const fetchProducts = async () => {
     try {
-      const res = await fetch(
-        "https://euphoria-ooqv.onrender.com/api/products",
-      );
+      const res = await fetch("https://euphoria-b2rn.vercel.app/api/products");
 
       const data = await res.json();
 
@@ -139,13 +137,10 @@ const Product = () => {
         data.append("images", img);
       });
 
-      const res = await fetch(
-        "https://euphoria-ooqv.onrender.com/api/products",
-        {
-          method: "POST",
-          body: data,
-        },
-      );
+      const res = await fetch("https://euphoria-b2rn.vercel.app/api/products", {
+        method: "POST",
+        body: data,
+      });
 
       if (!res.ok) {
         throw new Error("Failed to Add Product");
@@ -184,7 +179,7 @@ const Product = () => {
   const deleteProduct = async (id) => {
     if (!window.confirm("Delete this product?")) return;
 
-    await fetch(`https://euphoria-ooqv.onrender.com/api/products/${id}`, {
+    await fetch(`https://euphoria-b2rn.vercel.app/api/products/${id}`, {
       method: "DELETE",
     });
 

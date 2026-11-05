@@ -26,7 +26,7 @@ const ProductDetails = () => {
         setLoading(true);
 
         const res = await fetch(
-          `https://euphoria-ooqv.onrender.com/api/products/${id}`,
+          `https://euphoria-b2rn.vercel.app/api/products/${id}`,
         );
 
         if (!res.ok) {

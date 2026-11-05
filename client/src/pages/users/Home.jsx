@@ -14,9 +14,7 @@ export default function Home() {
   useEffect(() => {
     const fetchWebsite = async () => {
       try {
-        const res = await fetch(
-          "https://euphoria-ooqv.onrender.com/api/website",
-        );
+        const res = await fetch("https://euphoria-b2rn.vercel.app/api/website");
 
         if (!res.ok) {
           throw new Error("Failed to load website data");

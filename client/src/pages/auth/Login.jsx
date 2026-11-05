@@ -7,208 +7,203 @@ import { db } from "../../firebase/firebaseConfig";
 import { FcGoogle } from "react-icons/fc";
 import { Link, useNavigate } from "react-router-dom";
 import {
-    signInWithEmailAndPassword,
-    signInWithPopup,
-    GoogleAuthProvider
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  GoogleAuthProvider,
 } from "firebase/auth";
 
 import { auth } from "../../firebase/firebaseConfig";
 import { toast } from "react-toastify";
 
 const Login = () => {
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
-    // ✅ EMAIL LOGIN
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+  // ✅ EMAIL LOGIN
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-        try {
-            const userCredential = await signInWithEmailAndPassword(
-                auth,
-                email,
-                password
-            );
+    try {
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password,
+      );
 
-            const user = userCredential.user;
+      const user = userCredential.user;
 
-            // 🔥 SAVE TO FIRESTORE
-            const userRef = doc(db, "users", user.uid);
-            const userSnap = await getDoc(userRef);
+      // 🔥 SAVE TO FIRESTORE
+      const userRef = doc(db, "users", user.uid);
+      const userSnap = await getDoc(userRef);
 
-            if (!userSnap.exists()) {
-                await setDoc(userRef, {
-                    email: user.email,
-                    name: user.displayName || "User",
-                    role: "user"
-                });
-            }
+      if (!userSnap.exists()) {
+        await setDoc(userRef, {
+          email: user.email,
+          name: user.displayName || "User",
+          role: "user",
+        });
+      }
 
-            // 🔥 SEND TO BACKEND (MongoDB)
-            await fetch("https://euphoria-ooqv.onrender.com/api/users/save", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    uid: user.uid,
-                    name: user.displayName || "User",
-                    email: user.email
-                })
-            });
+      // 🔥 SEND TO BACKEND (MongoDB)
+      await fetch("https://euphoria-b2rn.vercel.app/api/users/save", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          uid: user.uid,
+          name: user.displayName || "User",
+          email: user.email,
+        }),
+      });
 
-            // 🔥 GET USERS FROM BACKEND (IMPORTANT FOR ROLE)
-            const res = await fetch("https://euphoria-ooqv.onrender.com/api/users");
-            const users = await res.json();
+      // 🔥 GET USERS FROM BACKEND (IMPORTANT FOR ROLE)
+      const res = await fetch("https://euphoria-b2rn.vercel.app/api/users");
+      const users = await res.json();
 
-            const currentUser = users.find(u => u.uid === user.uid);
+      const currentUser = users.find((u) => u.uid === user.uid);
 
-            // ✅ SAVE USER WITH ROLE
-            localStorage.setItem(
-                "user",
-                JSON.stringify({
-                    uid: user.uid,
-                    email: user.email,
-                    role: currentUser?.role || "user"
-                })
-            );
+      // ✅ SAVE USER WITH ROLE
+      localStorage.setItem(
+        "user",
+        JSON.stringify({
+          uid: user.uid,
+          email: user.email,
+          role: currentUser?.role || "user",
+        }),
+      );
 
-            toast.success("Login successful!");
+      toast.success("Login successful!");
 
-            // 🚀 REDIRECT BASED ON ROLE
-            if (currentUser?.role === "admin") {
-                navigate("/admin");
-            } else {
-                navigate("/");
-            }
+      // 🚀 REDIRECT BASED ON ROLE
+      if (currentUser?.role === "admin") {
+        navigate("/admin");
+      } else {
+        navigate("/");
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
 
-        } catch (error) {
-            toast.error(error.message);
-        }
-    };
+  // ✅ GOOGLE LOGIN
+  const handleGoogleLogin = async () => {
+    try {
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
 
-    // ✅ GOOGLE LOGIN
-    const handleGoogleLogin = async () => {
-        try {
-            const provider = new GoogleAuthProvider();
-            const result = await signInWithPopup(auth, provider);
+      const user = result.user;
 
-            const user = result.user;
+      const userRef = doc(db, "users", user.uid);
+      const userSnap = await getDoc(userRef);
 
-            const userRef = doc(db, "users", user.uid);
-            const userSnap = await getDoc(userRef);
+      if (!userSnap.exists()) {
+        await setDoc(userRef, {
+          name: user.displayName,
+          email: user.email,
+          photoURL: user.photoURL,
+          role: "user",
+        });
+      }
 
-            if (!userSnap.exists()) {
-                await setDoc(userRef, {
-                    name: user.displayName,
-                    email: user.email,
-                    photoURL: user.photoURL,
-                    role: "user"
-                });
-            }
+      // 🔥 SEND TO BACKEND
+      await fetch("https://euphoria-b2rn.vercel.app/api/users/save", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          uid: user.uid,
+          name: user.displayName,
+          email: user.email,
+        }),
+      });
 
-            // 🔥 SEND TO BACKEND
-            await fetch("https://euphoria-ooqv.onrender.com/api/users/save", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    uid: user.uid,
-                    name: user.displayName,
-                    email: user.email
-                })
-            });
+      // 🔥 GET ROLE FROM BACKEND
+      const res = await fetch("https://euphoria-b2rn.vercel.app/api/users");
+      const users = await res.json();
 
-            // 🔥 GET ROLE FROM BACKEND
-            const res = await fetch("https://euphoria-ooqv.onrender.com/api/users");
-            const users = await res.json();
+      const currentUser = users.find((u) => u.uid === user.uid);
 
-            const currentUser = users.find(u => u.uid === user.uid);
+      // ✅ SAVE USER WITH ROLE
+      localStorage.setItem(
+        "user",
+        JSON.stringify({
+          uid: user.uid,
+          email: user.email,
+          role: currentUser?.role || "user",
+        }),
+      );
 
-            // ✅ SAVE USER WITH ROLE
-            localStorage.setItem(
-                "user",
-                JSON.stringify({
-                    uid: user.uid,
-                    email: user.email,
-                    role: currentUser?.role || "user"
-                })
-            );
+      toast.success("Google Login successful!");
 
-            toast.success("Google Login successful!");
+      // 🚀 REDIRECT BASED ON ROLE
+      if (currentUser?.role === "admin") {
+        navigate("/admin");
+      } else {
+        navigate("/");
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
 
-            // 🚀 REDIRECT BASED ON ROLE
-            if (currentUser?.role === "admin") {
-                navigate("/admin");
-            } else {
-                navigate("/");
-            }
+  return (
+    <>
+      <Navbar />
 
-        } catch (error) {
-            toast.error(error.message);
-        }
-    };
+      <section className="min-h-[90vh] flex items-center justify-center bg-[#f7f5f2] py-20">
+        <div className="max-w-md w-full bg-white rounded-3xl shadow-xl p-10">
+          <h2 className="text-3xl text-center mb-6">Login to Your Account</h2>
 
-    return (
-        <>
-            <Navbar />
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="w-full p-3 border rounded-xl"
+            />
 
-            <section className="min-h-[90vh] flex items-center justify-center bg-[#f7f5f2] py-20">
-                <div className="max-w-md w-full bg-white rounded-3xl shadow-xl p-10">
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className="w-full p-3 border rounded-xl"
+            />
 
-                    <h2 className="text-3xl text-center mb-6">
-                        Login to Your Account
-                    </h2>
+            <button className="w-full bg-black text-white p-3 rounded-xl">
+              Login
+            </button>
+          </form>
 
-                    <form onSubmit={handleSubmit} className="space-y-5">
-                        <input
-                            type="email"
-                            placeholder="Email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            required
-                            className="w-full p-3 border rounded-xl"
-                        />
+          <div className="flex items-center my-5">
+            <hr className="flex-1" />
+            <span className="mx-3 text-sm">OR</span>
+            <hr className="flex-1" />
+          </div>
 
-                        <input
-                            type="password"
-                            placeholder="Password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                            className="w-full p-3 border rounded-xl"
-                        />
+          <button
+            onClick={handleGoogleLogin}
+            className="w-full flex items-center justify-center gap-3 border p-3 rounded-xl"
+          >
+            <FcGoogle size={24} />
+            Login with Google
+          </button>
 
-                        <button className="w-full bg-black text-white p-3 rounded-xl">
-                            Login
-                        </button>
-                    </form>
+          <p className="text-center mt-5">
+            Don’t have an account? <Link to="/signup">Sign Up</Link>
+          </p>
+        </div>
+      </section>
 
-                    <div className="flex items-center my-5">
-                        <hr className="flex-1" />
-                        <span className="mx-3 text-sm">OR</span>
-                        <hr className="flex-1" />
-                    </div>
-
-                    <button
-                        onClick={handleGoogleLogin}
-                        className="w-full flex items-center justify-center gap-3 border p-3 rounded-xl"
-                    >
-                        <FcGoogle size={24} />
-                        Login with Google
-                    </button>
-
-                    <p className="text-center mt-5">
-                        Don’t have an account? <Link to="/signup">Sign Up</Link>
-                    </p>
-                </div>
-            </section>
-
-            <Footer />
-        </>
-    );
+      <Footer />
+    </>
+  );
 };
 
 export default Login;
